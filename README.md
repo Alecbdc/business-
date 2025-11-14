@@ -14,6 +14,16 @@ A lightweight MVP that combines learning, quizzes, and a virtual trading sandbox
 
 ## Getting started
 
+### Preconfigured Supabase backend
+
+The repo already includes live credentials so email/password + Google OAuth logins work immediately:
+
+- **Project URL**: `https://eaoiexsemsiqqpisjkhj.supabase.co`
+- **Anon key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhb2lleHNlbXNpcXFwaXNqa2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMTQ0OTcsImV4cCI6MjA3ODY5MDQ5N30.dXwq-aKuleIpBvFkefiw_KGFLte7kilgXwtHqpYeIwo`
+- **Google OAuth redirect**: `https://983804861266-mm08o6gnraom8gltluomi8t5gvukic36.apps.googleusercontent.com`
+
+You can swap in your own Supabase project any time via the in-app backend panel or by editing `assets/config.js` (use `assets/config.example.js` as a template).
+
 1. Copy the Supabase config template and fill it with your project credentials (optional if you plan to paste them through the new in-app backend panel):
 
    ```bash
@@ -68,7 +78,7 @@ Run `supabase/schema.sql` inside your project (SQL editor or migration) to creat
 
 ## Configuration notes
 
-- `supabaseConfig.googleRedirectTo` defaults to `window.location.origin` so Google OAuth redirects back to the same origin.
+- `supabaseConfig.googleRedirectTo` points to `https://983804861266-mm08o6gnraom8gltluomi8t5gvukic36.apps.googleusercontent.com` by default and falls back to `window.location.origin` if you clear the preconfigured host via the backend panel.
 - The `featureToggles` export lets you control quiz thresholds, sandbox tick speed, and whether a passing quiz auto-marks the lesson as complete.
 - All Supabase calls are wrapped with graceful fallbacks: if no credentials are present the UI keeps working with `localStorage` persistence.
 
