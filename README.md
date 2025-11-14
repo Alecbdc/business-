@@ -5,12 +5,19 @@ A lightweight MVP that combines learning, quizzes, and a virtual trading sandbox
 ## Features
 
 - **Authentication**: email + password signup/login, Google OAuth trigger, user profiles stored in Supabase.
-- **Video lessons**: curated course list, inline video player, lesson completion tracking.
-- **Quizzes**: multiple-choice quizzes, score calculation, optional auto-complete of lessons after a passing score.
-- **Fake trading sandbox**: BTC/ETH prices update with a random walk, users start with €10k, can buy/sell, and the portfolio value is persisted.
+- **Video lessons**: 15 curated classes across three courses with inline video player and completion tracking.
+- **Quizzes**: topic-based arenas with a 20-question bank, score calculation, and optional auto-complete of linked lessons after a passing score.
+- **Fake trading sandbox**: €10k starting balance, random-walk prices, and 60+ tradable assets (BTC, ETH, USDT, XRP, SOL, etc.) with persisted portfolio value.
+- **Gamified progression**: XP ranks, streak tracking, quest board, and badges that react to your learning and trading activity.
 - **Dashboard**: shows completed lessons, quiz history, sandbox KPIs, and a profile summary.
 - **Tailwind UI**: modern dark-mode interface powered by the CDN build of TailwindCSS so no build tooling is required.
 - **Backend status panel**: paste Supabase credentials at runtime (stored in the browser) or fall back to the fully offline demo mode instantly.
+
+## Sandbox asset universe
+
+The sandbox includes the full list requested for review so you can simulate trading across majors, stablecoins, and newer narratives without touching a real exchange:
+
+`BTC`, `ETH`, `USDT`, `XRP`, `BNB`, `SOL`, `USDC`, `TRX`, `DOGE`, `ADA`, `WBTC`, `LINK`, `BCH`, `USDS`, `ZEC`, `XLM`, `USDE`, `LTC`, `XMR`, `HBAR`, `AVAX`, `SUI`, `SHIB`, `TON`, `DOT`, `DAI`, `UNI`, `CRO`, `M`, `WLFI`, `MNT`, `PYUSD`, `NEAR`, `ICP`, `TAO`, `USD1`, `AAVE`, `ETC`, `PEPE`, `APT`, `ASTER`, `ENA`, `XAUT`, `PUMP`, `JITOSOL`, `ONDO`, `POL`, `WLD`, `FIL`, `TRUMP`, `ALGO`, `PAXG`, `ATOM`, `ARB`, `QNT`, `KAS`, `SKY`, `USDG`, `RENDER`, `FLR`.
 
 ## Getting started
 
