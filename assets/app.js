@@ -59,11 +59,13 @@ const state = {
 
 const elements = {};
 
-function $(id) {
-  if (!elements[id]) {
-    elements[id] = document.getElementById(id);
+function $(selector) {
+  if (!selector) return null;
+  const key = selector.startsWith('#') ? selector.slice(1) : selector;
+  if (!elements[key]) {
+    elements[key] = document.getElementById(key);
   }
-  return elements[id];
+  return elements[key];
 }
 
 function setProfileName(value) {
