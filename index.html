@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aether Academy</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,aspect-ratio,typography"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              midnight: {
+                900: '#050815',
+                800: '#0f172a',
+                700: '#1e293b'
+              }
+            }
+          }
+        }
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body class="bg-midnight-900 text-slate-100 min-h-screen">
+    <div class="absolute inset-0 gradient-brand opacity-30 blur-[140px]"></div>
+    <div id="view-auth" class="relative z-10 px-6 py-16 flex items-center justify-center min-h-screen">
+      <div class="max-w-5xl w-full grid gap-10 lg:grid-cols-2">
+        <section class="card-glass rounded-3xl p-8 space-y-6">
+          <p class="badge inline-flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Immersive academy
+          </p>
+          <h1 class="text-4xl font-semibold">Master crypto with lessons, quizzes, and a trading lab.</h1>
+          <p class="text-slate-300 text-lg">
+            Sign in to sync your profile with Supabase or jump into the fully functional demo to explore the
+            experience. Progress, quiz scores, and sandbox trades all persist once you authenticate.
+          </p>
+          <ul class="space-y-3 text-sm text-slate-300">
+            <li class="flex items-start gap-3">
+              <span class="mt-1 w-2 h-2 rounded-full bg-sky-400"></span>
+              Email & Google auth with Supabase profiles
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-1 w-2 h-2 rounded-full bg-indigo-400"></span>
+              Video curriculum with quizzes and completion tracking
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-1 w-2 h-2 rounded-full bg-emerald-400"></span>
+              Fake-trading sandbox with live price simulation
+            </li>
+          </ul>
+        </section>
+        <section class="card-glass rounded-3xl p-8 space-y-6">
+          <div>
+            <p class="text-sm text-slate-400 uppercase tracking-[0.3em]">Log in</p>
+            <h2 class="text-2xl font-semibold mt-2">Access your academy workspace</h2>
+          </div>
+          <button
+            id="google-auth"
+            class="w-full py-3 rounded-2xl bg-white/10 hover:bg-white/20 transition text-sm font-semibold"
+          >
+            Continue with Google
+          </button>
+          <div class="grid gap-6 md:grid-cols-2">
+            <form id="signup-form" class="space-y-3">
+              <div>
+                <label for="signup-name">Full name</label>
+                <input
+                  id="signup-name"
+                  type="text"
+                  placeholder="Satoshi Nakamoto"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                  required
+                />
+              </div>
+              <div>
+                <label for="signup-email">Email</label>
+                <input
+                  id="signup-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                  required
+                />
+              </div>
+              <div>
+                <label for="signup-password">Password</label>
+                <input
+                  id="signup-password"
+                  type="password"
+                  minlength="8"
+                  placeholder="••••••••"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                  required
+                />
+              </div>
+              <button type="submit" class="w-full py-2 rounded-2xl bg-white/15 hover:bg-white/30 text-sm font-semibold">
+                Sign up
+              </button>
+            </form>
+            <form id="login-form" class="space-y-3">
+              <div>
+                <label for="login-email">Email</label>
+                <input
+                  id="login-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                  required
+                />
+              </div>
+              <div>
+                <label for="login-password">Password</label>
+                <input
+                  id="login-password"
+                  type="password"
+                  placeholder="••••••••"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                  required
+                />
+              </div>
+              <button type="submit" class="w-full py-2 rounded-2xl bg-white/15 hover:bg-white/30 text-sm font-semibold">
+                Login
+              </button>
+            </form>
+          </div>
+          <button
+            id="enter-demo"
+            class="w-full py-3 rounded-2xl border border-dashed border-white/30 text-sm font-semibold text-slate-200 hover:border-white/60"
+          >
+            Explore demo workspace
+          </button>
+          <p id="demo-hint" class="text-sm text-slate-400 text-center hidden">
+            Tip: without Supabase credentials the full workspace opens in a read-only demo so you can click through every view immediately. Use the backend panel below to paste real Supabase keys when you're ready.
+          </p>
+          <div class="rounded-3xl border border-white/10 p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <p class="text-sm text-slate-400">Backend status</p>
+              <span id="backend-status" class="badge bg-amber-500/20 text-amber-100">Demo mode</span>
+            </div>
+            <details class="space-y-3" open>
+              <summary class="flex items-center justify-between text-sm font-semibold text-white">
+                Supabase credentials
+                <span class="text-xs text-slate-400">Stored locally</span>
+              </summary>
+              <p class="text-xs text-slate-400">
+                Paste your Supabase project URL and anon key. The values stay in this browser only so you can deploy the demo anywhere.
+              </p>
+              <div>
+                <label for="supabase-url-input">Project URL</label>
+                <input
+                  id="supabase-url-input"
+                  type="url"
+                  placeholder="https://your-project.supabase.co"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                />
+              </div>
+              <div>
+                <label for="supabase-key-input">Anon key</label>
+                <input
+                  id="supabase-key-input"
+                  type="password"
+                  placeholder="public-anon-key"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                />
+              </div>
+              <div>
+                <label for="supabase-redirect-input">Google OAuth redirect (optional)</label>
+                <input
+                  id="supabase-redirect-input"
+                  type="url"
+                  placeholder="https://localhost:4173"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                />
+              </div>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  id="backend-save"
+                  class="w-full py-2 rounded-2xl bg-sky-500/80 hover:bg-sky-400 text-slate-950 text-sm font-semibold"
+                >
+                  Save & reload
+                </button>
+                <button
+                  type="button"
+                  id="backend-reset"
+                  class="w-full py-2 rounded-2xl border border-white/20 text-sm font-semibold text-slate-200 hover:border-white/50"
+                >
+                  Use demo mode
+                </button>
+              </div>
+            </details>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div id="app-shell" class="hidden relative z-10 max-w-6xl mx-auto py-10 px-6">
+      <div class="flex flex-col lg:flex-row gap-8">
+        <aside class="card-glass rounded-3xl p-6 w-full lg:w-64 space-y-6">
+          <div>
+            <p class="text-sm text-slate-400">Aether Academy</p>
+            <h2 data-profile-name class="text-2xl font-semibold mt-2">Guest</h2>
+            <p class="text-sm text-slate-400">Progress syncs automatically when you're signed in.</p>
+          </div>
+          <nav class="flex flex-col gap-2">
+            <button class="nav-link" data-view="dashboard">Dashboard</button>
+            <button class="nav-link" data-view="curriculum">Curriculum</button>
+            <button class="nav-link" data-view="sandbox">Sandbox</button>
+          </nav>
+          <button id="logout-btn" class="w-full py-2 rounded-2xl border border-white/10 text-sm font-semibold hidden">
+            Logout
+          </button>
+          <p class="text-xs text-slate-400">
+            Lessons, quizzes, and fake-trading all live in their own dedicated workspaces for focus.
+          </p>
+        </aside>
+        <div class="flex-1 space-y-10">
+          <section id="view-dashboard" class="app-view space-y-8">
+            <div class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+              <div class="card-glass rounded-3xl p-8 space-y-6">
+                <div>
+                  <p class="text-sm text-slate-400">Welcome back</p>
+                  <h2 class="text-3xl font-semibold" data-profile-name>Guest</h2>
+                  <p class="text-slate-400">See a snapshot of everything happening in your academy.</p>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-3">
+                  <div class="rounded-2xl bg-white/5 p-4">
+                    <p class="text-sm text-slate-400">Lessons complete</p>
+                    <p id="dashboard-lessons" class="text-3xl font-semibold mt-2">0</p>
+                  </div>
+                  <div class="rounded-2xl bg-white/5 p-4">
+                    <p class="text-sm text-slate-400">Avg quiz score</p>
+                    <p id="dashboard-quiz" class="text-3xl font-semibold mt-2">0%</p>
+                  </div>
+                  <div class="rounded-2xl bg-white/5 p-4">
+                    <p class="text-sm text-slate-400">Sandbox value</p>
+                    <p id="dashboard-sandbox" class="text-3xl font-semibold mt-2">€0</p>
+                  </div>
+                </div>
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <button data-view-target="curriculum" class="rounded-2xl border border-white/10 py-4 px-4 text-left hover:border-white/40">
+                    <p class="text-sm text-slate-400">Curriculum</p>
+                    <p class="text-lg font-semibold">Review lessons & quizzes</p>
+                  </button>
+                  <button data-view-target="sandbox" class="rounded-2xl border border-white/10 py-4 px-4 text-left hover:border-white/40">
+                    <p class="text-sm text-slate-400">Sandbox</p>
+                    <p class="text-lg font-semibold">Jump into fake trading</p>
+                  </button>
+                </div>
+              </div>
+              <div class="card-glass rounded-3xl p-8 space-y-6">
+                <div>
+                  <p class="text-sm text-slate-400">Quiz log</p>
+                  <p class="text-lg font-semibold">Latest attempts</p>
+                </div>
+                <div id="quiz-log" class="scroll-area space-y-2 text-sm"></div>
+              </div>
+            </div>
+            <div class="card-glass rounded-3xl p-8">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <p class="text-sm text-slate-400">Learning streak</p>
+                  <h3 class="text-xl font-semibold">Lesson progress</h3>
+                </div>
+              </div>
+              <div id="dashboard-progress" class="scroll-area space-y-3"></div>
+            </div>
+          </section>
+
+          <section id="view-curriculum" class="app-view hidden space-y-8">
+            <div class="card-glass rounded-3xl p-8" id="curriculum-progress"></div>
+            <div class="grid gap-6 lg:grid-cols-2">
+              <div class="card-glass rounded-3xl p-8 space-y-6" id="curriculum-videos">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-slate-400">Courses</p>
+                    <h3 class="text-2xl font-semibold">Video lessons</h3>
+                  </div>
+                  <button id="refresh-courses" class="text-sm text-slate-400 hover:text-white">Refresh</button>
+                </div>
+                <div id="course-list" class="space-y-3"></div>
+                <div id="lesson-detail" class="space-y-4"></div>
+                <button
+                  id="complete-lesson-btn"
+                  class="w-full py-3 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-950 font-semibold"
+                >
+                  Mark lesson complete
+                </button>
+              </div>
+              <div class="card-glass rounded-3xl p-8 space-y-6" id="curriculum-quizzes">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-slate-400">Knowledge check</p>
+                    <h3 class="text-2xl font-semibold">Lesson quiz</h3>
+                  </div>
+                  <p id="quiz-score-chip" class="badge hidden">Score</p>
+                </div>
+                <p id="quiz-threshold" class="text-xs text-slate-400"></p>
+                <form id="quiz-form" class="space-y-6"></form>
+                <button
+                  id="submit-quiz"
+                  class="mt-4 w-full py-3 rounded-2xl bg-sky-500/80 hover:bg-sky-400 text-slate-950 font-semibold"
+                >
+                  Submit quiz
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section id="view-sandbox" class="app-view hidden space-y-8">
+            <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+              <div class="card-glass rounded-3xl p-8 space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <p class="text-sm text-slate-400">Portfolio value</p>
+                    <p id="sandbox-portfolio-value" class="text-3xl font-semibold">€0</p>
+                  </div>
+                  <div class="text-sm text-slate-400 text-right">
+                    <p>Cash balance</p>
+                    <p id="sandbox-balance" class="text-xl text-emerald-300 font-semibold">€0</p>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-sm text-slate-400">Total performance</p>
+                  <canvas id="portfolio-chart" class="w-full h-48 mt-3"></canvas>
+                </div>
+                <div>
+                  <p class="text-sm text-slate-400 mb-2">Holdings</p>
+                  <div id="sandbox-holdings" class="space-y-3 text-sm"></div>
+                </div>
+                <div>
+                  <p class="text-sm text-slate-400 mb-2">Trade history</p>
+                  <div id="sandbox-history" class="scroll-area space-y-2 text-xs"></div>
+                </div>
+              </div>
+              <div class="space-y-6">
+                <div class="card-glass rounded-3xl p-8 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-slate-400">Market</p>
+                      <h3 class="text-xl font-semibold">Available crypto</h3>
+                    </div>
+                  </div>
+                  <div id="sandbox-prices" class="space-y-3"></div>
+                  <div>
+                    <p class="text-sm text-slate-400">Asset trend</p>
+                    <canvas id="asset-chart" class="w-full h-48 mt-3"></canvas>
+                  </div>
+                </div>
+                <div class="card-glass rounded-3xl p-6">
+                  <div class="grid gap-6 md:grid-cols-2">
+                    <form id="buy-form" class="space-y-3">
+                      <p class="text-sm text-slate-400">Buy crypto</p>
+                      <select id="buy-asset" class="w-full rounded-2xl border border-white/10 px-4 py-2">
+                        <option value="BTC">BTC</option>
+                        <option value="ETH">ETH</option>
+                      </select>
+                      <input
+                        id="buy-amount"
+                        type="number"
+                        min="10"
+                        step="10"
+                        placeholder="Amount in €"
+                        class="w-full rounded-2xl border border-white/10 px-4 py-2"
+                        required
+                      />
+                      <button type="submit" class="w-full py-2 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-950 font-semibold">
+                        Buy
+                      </button>
+                    </form>
+                    <form id="sell-form" class="space-y-3">
+                      <p class="text-sm text-slate-400">Sell crypto</p>
+                      <select id="sell-asset" class="w-full rounded-2xl border border-white/10 px-4 py-2">
+                        <option value="BTC">BTC</option>
+                        <option value="ETH">ETH</option>
+                      </select>
+                      <input
+                        id="sell-amount"
+                        type="number"
+                        min="0.0001"
+                        step="0.0001"
+                        placeholder="Units to sell"
+                        class="w-full rounded-2xl border border-white/10 px-4 py-2"
+                        required
+                      />
+                      <button type="submit" class="w-full py-2 rounded-2xl bg-rose-500/80 hover:bg-rose-400 text-slate-950 font-semibold">
+                        Sell
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="card-glass rounded-2xl p-4 text-sm text-white/90 bg-slate-900/90"></div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"
+      integrity="sha384-QlMBDlSx2k7uwh28ykVfoWHzKz7dxyzKDn5XxhxL7sRKqzZo4PMBVXsfS5aXoaZF"
+      crossorigin="anonymous"
+    ></script>
+    <script type="module" src="assets/app.js"></script>
+  </body>
+</html>
