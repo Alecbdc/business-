@@ -391,7 +391,10 @@ function renderQuizTopics() {
   if (!quizTopics.some((topic) => topic.id === state.selectedQuizTopicId)) {
     state.selectedQuizTopicId = quizTopics[0]?.id ?? null;
   }
-  $('#quiz-topic-count')?.textContent = `${totalQuizQuestions} total questions`;
+const quizTopicCountEl = $('#quiz-topic-count');
+if (quizTopicCountEl) {
+  quizTopicCountEl.textContent = `${totalQuizQuestions} total questions`;
+}
   list.innerHTML = quizTopics
     .map((topic) => {
       const score = state.topicScores[topic.id];
