@@ -241,6 +241,14 @@ export const sandboxBulletins = [
     sentiment: 'bullish',
     assets: ['BTC', 'ETH', 'WBTC'],
     impact: 'Macro easing may expand risk appetite for majors.',
+    projection:
+      'If the "Centrally Planned Bank" follows through with a dovish glidepath, majors could carry a 50-120 bps weekly bid.',
+    articleBody: [
+      'The Wall Street Jester reports that the "Europhoria Bureau of Statistics" printed a cooler CPI, catching desks leaning hawkish.',
+      'Officials at the imaginary "Centrally Planned Bank" hinted to reporters from The Economistical that a gentler dot plot is now on the table.',
+      'Veteran macro watcher Tonald Drump, speaking from his gilded podcast bunker, joked that cheaper euros usually make "digital duckets" more interesting.',
+      'Historically, softer inflation has lowered yields and lifted risk appetite, which translated into firmer bids for BTC, WBTC, and ETH in the month that followed.'
+    ],
     drift: 0.008
   },
   {
@@ -251,6 +259,13 @@ export const sandboxBulletins = [
     sentiment: 'bullish',
     assets: ['ETH', 'ARB', 'MNT', 'POL'],
     impact: 'Scaling catalysts tend to lift ETH beta trades.',
+    projection: 'Fee holidays from rollups have historically juiced L2 tokens 8-15% intraday before normalizing.',
+    articleBody: [
+      'Rollup engineers at "Optimystic Labs" and "Zero-Knowledge Gazette" leaked a weekend gas rebate program to the satirical Economist cousin, The Economost.',
+      'Users on DEX venue "CroissantSwap" reported 3x volume as arbitrage bots wearing monocles raced to capture cheap blockspace.',
+      'A research note from brokerage "Giga Sachs" suggests ETH correlation beta usually spikes when scaling stories hit the tape.',
+      'Traders watching ARB, MNT, and POL expect the effect to mirror prior fee holidays that briefly pulled L2 tokens into double-digit green before settling back.'
+    ],
     drift: 0.01
   },
   {
@@ -261,6 +276,13 @@ export const sandboxBulletins = [
     sentiment: 'bullish',
     assets: ['USDT', 'USDC', 'DAI', 'PYUSD', 'USDS', 'USD1'],
     impact: 'Rising stable balances often precede market rotations.',
+    projection: 'Desk surveys from "StableBros LLP" show a 60% probability that fresh minting fuels a BTC/ETH rotation within a week.',
+    articleBody: [
+      'The Wall Street Jest relays filings from the fictional "Department of Digital Bucks" showing a surge in tethered-liquidity issuance.',
+      'Analysts at satirical ratings shop "Moodsys" told The Economost that new PYUSD and USDC flows resemble the pre-rally builds of early 2024.',
+      'A syndicate trader known only as Vladimir Protein quipped that the stable spigot is "aimed right at risk assets" once the macro clouds clear.',
+      'Historically, elevated mint activity has preceded rotations out of stables into majors, with spillover into alt baskets if momentum holds.'
+    ],
     drift: 0.006
   },
   {
@@ -271,6 +293,13 @@ export const sandboxBulletins = [
     sentiment: 'bearish',
     assets: ['SUI', 'AVAX', 'NEAR'],
     impact: 'Infra hiccups can pressure riskier L1 valuations.',
+    projection: 'A half-hour halt typically dents frontier L1s 5-8% intraday before clawbacks if uptime returns.',
+    articleBody: [
+      'Reporters from the Wall Street Jest were alerted when the fictional "Super Ultra Internet" chain paused block production overnight.',
+      'Core dev collective "Silicon Slalom" rushed a patch that validators installed in under 30 minutes, according to briefings shared with The Economost.',
+      'Traders compared the moment to past hiccups on Avalanche and Near-ish protocols, which saw liquidity step away until reliability metrics normalized.',
+      'Risk officers at hedge fund "Citronella" warned that repeated wobbles can widen spreads on SUI, AVAX, and NEAR until uptime cred rebuilds.'
+    ],
     drift: -0.012
   },
   {
@@ -281,6 +310,13 @@ export const sandboxBulletins = [
     sentiment: 'bullish',
     assets: ['BTC', 'WBTC'],
     impact: 'Institutional demand may firm support zones.',
+    projection: 'Flows resemble the 2024 spring streak that carried BTC +9% over five sessions.',
+    articleBody: [
+      'Filing trackers at the Wall Street Jest spotted three consecutive days of inflows into the fictional "Really Big Bitcoin Trust".',
+      'Custodian "State Steer" confirmed wrapped balances rising in tandem, easing concerns about structural discounts.',
+      'Options desks at "Morgan Stan-d Up" flagged a creeping call skew reminiscent of the early-year melt-up.',
+      'If the pattern holds, BTC and WBTC could firm up key support zones as allocators drip-feed capital back into the wrapper trade.'
+    ],
     drift: 0.014
   },
   {
@@ -291,6 +327,13 @@ export const sandboxBulletins = [
     sentiment: 'bearish',
     assets: ['XMR', 'ZEC'],
     impact: 'Policy headwinds could widen spreads and damp volume.',
+    projection: 'Similar hearings in 2020 clipped privacy names 10-18% before gradual recoveries.',
+    articleBody: [
+      'Capitol beat writers for the Wall Street Jest say Senator Shelly Blockchains introduced a draft that treats mixers as "clandestine coin laundromats."',
+      'Lobbyists for "Zettle Cash" and "Monerail" met behind closed doors with staffers but emerged visibly uneasy, according to The Economost.',
+      'Compliance czar Vladimir Protein reminded viewers on late-night financial satire that liquidity usually fragments before policies even land.',
+      'Historically, hearings like these prompt OTC desks to widen spreads on XMR and ZEC, dragging spot prices until clarity returns.'
+    ],
     drift: -0.018
   },
   {
@@ -301,6 +344,13 @@ export const sandboxBulletins = [
     sentiment: 'cautious',
     assets: ['AAVE', 'ETH', 'DAI'],
     impact: 'Short-term volatility expected across DeFi blue chips.',
+    projection: 'Past oracle snafus trimmed DeFi majors 4-9% in the first trading session.',
+    articleBody: [
+      'The Wall Street Jest obtained a memo from lending venue "Aviary" confirming an oracle misread on wrapped alpaca futures.',
+      'Risk assessors at satirical insurer "LemonHedge" told The Economost that claim queues remain short but inflows are paused.',
+      'DeFi historian Tonald Drump noted that similar glitches in 2021 and 2022 pushed users into ETH and DAI until code patches were audited.',
+      'If the patch holds, spreads on AAVE and peers typically normalize within the week, but leverage resets can amplify near-term chop.'
+    ],
     drift: -0.01
   },
   {
@@ -311,6 +361,13 @@ export const sandboxBulletins = [
     sentiment: 'speculative',
     assets: ['PEPE', 'PUMP', 'M'],
     impact: 'High beta could spill into alt baskets if mania holds.',
+    projection: 'Prior meme surges added 20-40% in days before retracing a chunk as liquidity dried.',
+    articleBody: [
+      'Influencers on the satirical platform "X-ish" posted frog memes at a clip not seen since the Spring of Stonks, the Wall Street Jest reports.',
+      'Futures desks at "RobinHonk" showed widening funding as traders bid for PEPE, PUMP, and simply the letter M, hoping to front-run the herd.',
+      'Sociologist Vladimir Protein joked that meme seasons end when his aunt asks about green frogs again.',
+      'Historically, these rotations bleed into alt baskets briefly before sharp reversals, rewarding disciplined scaling out over blind leverage.'
+    ],
     drift: 0.02
   },
   {
@@ -321,6 +378,13 @@ export const sandboxBulletins = [
     sentiment: 'bullish',
     assets: ['FIL', 'ICP', 'TAO'],
     impact: 'Narrative lift for AI-aligned infra assets.',
+    projection: 'Comparable AI-storage tie-ups in 2023 lifted sector tokens 6-14% over a fortnight.',
+    articleBody: [
+      'Private memos seen by The Economost show "DeepLeans" (sister to DeepMindful) cutting a pilot with decentralized storage vault "FileCabinet".',
+      'Executives at compute collective "OpenAIsh" framed it as a way to tame GPU scarcity while preserving verifiable data flows.',
+      'Brokerage "Goldsocks" told the Wall Street Jest that TAO, FIL, and ICP typically catch a narrative bid whenever AI labs flirt with on-chain infra.',
+      'If history rhymes, the hype phase can sustain a modest grind higher unless the integration stumbles in production.'
+    ],
     drift: 0.012
   },
   {
@@ -331,6 +395,13 @@ export const sandboxBulletins = [
     sentiment: 'bullish',
     assets: ['PYUSD', 'USDC', 'USDT'],
     impact: 'Payments traction can tighten stablecoin spreads.',
+    projection: 'Card-displacement pilots last year lifted PYUSD pairs 2-4% on usage headlines.',
+    articleBody: [
+      'Checkout upstart "PayFriend" (a playful cousin of a famous payments firm) quietly expanded its PYUSD and USDC rails to three new regions.',
+      'Internal decks reviewed by the Wall Street Jest show executives bragging about lower fraud and fees versus legacy swipe networks nicknamed "Visibly" and "Masteroof."',
+      'Economost columnist Sasha Ledger said merchants like the move because settlement arrives in minutes rather than days.',
+      'If consumer stickiness materializes, spreads on PYUSD and USDC typically tighten as market-makers price in steadier velocity.'
+    ],
     drift: 0.007
   },
   {
@@ -341,6 +412,13 @@ export const sandboxBulletins = [
     sentiment: 'cautious',
     assets: ['BTC', 'WBTC'],
     impact: 'Extra sell pressure may weigh on spot bids.',
+    projection: 'Difficulty spikes of this size previously dragged BTC 3-6% as hedges rolled on.',
+    articleBody: [
+      'The Economost compiled data showing hashrate rising even as coinbase rewards shrink, a combo that squeezes the fictional miner "Hashy McHashface Inc."',
+      "Treasurers at MegaMine, chaired by Tonald Drump's college roommate, told the Wall Street Jest they are hedging output two months forward.",
+      'Such hedges can add incremental BTC supply to spot books, widening spreads until difficulty adjusts.',
+      'Past cycles show miners easing sell pressure once energy costs stabilize and hashrate rebalances, giving BTC room to breathe.'
+    ],
     drift: -0.006
   },
   {
@@ -351,6 +429,13 @@ export const sandboxBulletins = [
     sentiment: 'bullish',
     assets: ['UNI', 'CRO'],
     impact: 'Protocol revenue could re-rate governance tokens.',
+    projection: 'Past fee-switch debates nudged governance tokens 7-12% on anticipation alone.',
+    articleBody: [
+      'Community scribes on the Wall Street Jest forum report that "YouNiswapped" DAO will finally vote on a fee switch long whispered about.',
+      'Liquidity whales on aggregator "Croissant River" told The Economost they are modeling new incentives if stakers receive a slice of volume.',
+      'Governance historian Vladimir Protein reminded readers that the last time a similar toggle was discussed, governance tokens front-ran the outcome before settling into fundamentals.',
+      'If the vote passes, UNI and CRO could enjoy a temporary re-rate as fee cash flows get priced in.'
+    ],
     drift: 0.008
   },
   {
@@ -361,6 +446,13 @@ export const sandboxBulletins = [
     sentiment: 'speculative',
     assets: ['ARB', 'POL', 'MNT'],
     impact: 'Engagement surges but may unwind after snapshot.',
+    projection: 'Hype-fueled quests historically juiced activity but retraced 5-10% after snapshots.',
+    articleBody: [
+      'Block explorers spotted a curious "epoch bonus" flag in validator code, igniting an airdrop frenzy chronicled by the Wall Street Jest.',
+      'Task boards on platform "FarmVille 3.0" showed queues of users spamming bridges to collect points on ARB, POL, and MNT.',
+      'Analysts at boutique shop "Tokenomics & Sons" told The Economost that gas spikes and TVL bumps often vanish post-snapshot.',
+      'Disciplined farmers may rotate early, remembering how prior rumors in 2023 left latecomers holding illiquid allocations.'
+    ],
     drift: 0.009
   },
   {
@@ -371,6 +463,13 @@ export const sandboxBulletins = [
     sentiment: 'bearish',
     assets: ['ATOM', 'NEAR', 'QNT'],
     impact: 'Choppy price action likely until clarity returns.',
+    projection: 'Treasury squabbles often shave 4-7% from governance tokens until decisions finalize.',
+    articleBody: [
+      'Validator personalities "Cosmo Kramer" and "Quantavius Finch" aired grievances on X-ish about treasury grants for billboards.',
+      'The Wall Street Jest liveblogged the spat, noting that half the council walked out of a video call hosted by the Economost.',
+      'Stakeholders remember similar brawls in 2022 that temporarily halved liquidity incentives before compromise.',
+      'Until a proposal passes, ATOM, NEAR, and QNT holders may endure chop as market-makers widen quotes to price governance fog.'
+    ],
     drift: -0.009
   },
   {
@@ -381,6 +480,13 @@ export const sandboxBulletins = [
     sentiment: 'bullish',
     assets: ['BTC', 'WBTC', 'LTC', 'ETC'],
     impact: 'Lower opex can reduce forced selling risk.',
+    projection: 'When natgas eased 4% last quarter, POW baskets climbed 5-9% over the week.',
+    articleBody: [
+      'Commodity desks at the Wall Street Jest flag a 4% slide in natural gas, a welcome breather for proof-of-work miners.',
+      'Executives from "LiteMining Co." and "Classic Hash LLC" told The Economost that cheaper energy buys them runway after the halving.',
+      'Tonald Drump, ever the pundit, declared on his variety show that "cheaper juice means fewer forced dumps" from miners.',
+      'Historically, easing input costs reduce urgency to sell block rewards, allowing BTC, WBTC, LTC, and ETC to stabilize.'
+    ],
     drift: 0.005
   },
   {
@@ -391,6 +497,13 @@ export const sandboxBulletins = [
     sentiment: 'bullish',
     assets: ['BTC', 'WBTC', 'ETH'],
     impact: 'Historical election jolts have ignited major crypto rallies.',
+    projection: 'A 2016-style shock previously launched BTC ~120% in the ensuing quarter.',
+    articleBody: [
+      'The Wall Street Jest dubs the victor "Tonald Drump" after a surprise wave of ballots shifted overnight counts.',
+      'Macro strategists at "JP Morganic" argue that political whiplash sends allocators hunting for non-sovereign hedges.',
+      'Vladimir Protein reminded viewers on The Economost live stream that Bitcoin rocketed after the last surprise win in similar fashion.',
+      'If history echoes, BTC, WBTC, and ETH could attract safe-haven curiosity even as traditional indices churn.'
+    ],
     drift: 0.028
   },
   {
@@ -401,6 +514,13 @@ export const sandboxBulletins = [
     sentiment: 'bearish',
     assets: ['BTC', 'ETH', 'SOL', 'AVAX', 'XAUT', 'PAXG'],
     impact: 'Flight-to-safety moves historically clipped crypto by mid-single digits in hours.',
+    projection: 'Comparable 2024 headlines shaved 4-9% off alts during the first 24 hours.',
+    articleBody: [
+      'Satirical correspondents for the Wall Street Jest reported an overnight strike dubbed "Operation Discomfort" rattling regional markets.',
+      'Energy traders fled to gold proxies like XAUT and PAXG, while crypto desks tightened risk, The Economost observed.',
+      'Geo-politico commentator Vladimir Protein drew parallels to 2020 flare-ups that sparked immediate risk-off moves in SOL and AVAX.',
+      'Until headlines cool, flight-to-safety flows may pressure BTC and ETH while lifting metal trackers.'
+    ],
     drift: -0.026
   },
   {
@@ -411,6 +531,13 @@ export const sandboxBulletins = [
     sentiment: 'bearish',
     assets: ['SOL', 'ADA', 'DOT', 'NEAR', 'USDT', 'USDC', 'DAI'],
     impact: 'Risk-off rotations have previously dragged alts while lifting stables.',
+    projection: 'Trade volleys in 2018 smacked high-beta alts 8-15% while stables held firm.',
+    articleBody: [
+      'Finance ministers from the fictional "United Tariffdom" slapped duties on silicon imports, reviving growth jitters documented by the Wall Street Jest.',
+      'Manufacturers like "AdaCore Devices" and "Dot Matrix Labs" warned of margin compression and delayed roadmaps.',
+      'Economost editors compared the moment to 2018, when tariffs pushed investors toward stables while chopping alt valuations.',
+      'If the volley escalates, traders may de-risk SOL, ADA, DOT, and NEAR while parking in USDT, USDC, and DAI.'
+    ],
     drift: -0.018
   },
   {
@@ -423,9 +550,10 @@ export const sandboxBulletins = [
     impact: 'New wrapped flows could broaden institutional participation beyond BTC.',
     projection: 'When BTC ETFs cleared, ETH outperformed by ~12% in the following month as correlation beta rose.',
     articleBody: [
-      'A conditional approval tees up the first U.S. ETH spot ETF pending final disclosures.',
-      'Institutions now have a compliance-friendly channel to own ETH exposure.',
-      'Traders expect staking narratives and L2 ecosystems to catch sympathetic bids.'
+      'Filings at the satirical "Securities and Occasionally Futures Commission" show a conditional nod for the first U.S. ETH spot ETF.',
+      'Mega-issuer "BlackPebble" and rival "Vangaardian" jockeyed for ticker rights while custodian "State Steer" rehearsed cold-storage talking points.',
+      'Sources told the Wall Street Jest that allocator interest mirrors the early-days BTC wrapper frenzy, with buy-side desks modeling staking-plus-beta baskets.',
+      'L2 cheerleaders from "ArbiTronix" and "Mount Mantle" expect sympathetic inflows if ETH correlation beta rises the way BTC ETFs unlocked fresh demand.'
     ],
     drift: 0.022
   },
@@ -437,6 +565,13 @@ export const sandboxBulletins = [
     sentiment: 'bearish',
     assets: ['XMR', 'ZEC', 'ATOM', 'ARB'],
     impact: 'Past crackdowns sparked sharp privacy coin drawdowns and wider de-risking.',
+    projection: 'During the 2020 sting, XMR and ZEC slid 15-25% before liquidity slowly returned.',
+    articleBody: [
+      'Interpol-esque agents from the fictional "Bureau of Coin Scrutiny" announced synchronized arrests of mixer operators across four cities, the Wall Street Jest learned.',
+      'Chain sleuths at startup "CipherTonic" told The Economost that bridges and DEX pools briefly froze as LPs yanked liquidity from privacy routes.',
+      'Commentator Vladimir Protein noted that even neutral chains like Atomica and ArbiTronix saw spreads widen in prior crackdowns as traders de-risked broadly.',
+      'If officials push for stricter travel rules, market depth on XMR and ZEC could take weeks to rebuild, dragging correlated alts in the process.'
+    ],
     drift: -0.024
   },
   {
@@ -448,9 +583,10 @@ export const sandboxBulletins = [
     impact: 'Issuance shock historically sets floors before medium-term rallies.',
     projection: 'Past halvings saw chop then multi-month rallies of 50-300% as supply tightened.',
     articleBody: [
-      'The latest Bitcoin halving reduced block rewards on schedule with clean network performance.',
-      'Issuance shocks frequently precede consolidation before upside as supply-demand resets.',
-      'Miner behavior bears watching as difficulty retargets and hashpower reallocates.'
+      'Node operators toasted another four-year ritual as the halving executed without drama, according to the Wall Street Jest.',
+      'Engineers from "Blocksmiths Guild" joked to The Economost that the code treated issuance like a subscription that just got downgraded.',
+      'Miner consortium "Hashy McHashface" plans to recalibrate rigs, while macro pundit Tonald Drump framed the cut as "digital austerity with a meme budget."',
+      'Past supply shocks have sparked consolidation before multi-month rallies as scarcity narratives return to headlines.'
     ],
     drift: 0.018
   },
@@ -463,9 +599,10 @@ export const sandboxBulletins = [
     impact: 'Flight-to-quality can lift BTC alongside gold proxies.',
     projection: 'During March 2023 bank stress, BTC rallied ~40% in weeks while gold climbed.',
     articleBody: [
-      'Liquidity cracks at regional banks are rekindling the digital gold conversation.',
-      'Investors often pivot to BTC and precious-metal proxies when banking jitters rise.',
-      'Watch stablecoin premiums and exchange inflows for confirmation of the rotation.'
+      'Two mid-size lenders nicknamed "Silicon Sallies" and "Signature-ish" disclosed liquidity gaps, according to filings shared with the Wall Street Jest.',
+      'Depositors shuffled funds toward money-market clones while chatter about "digital gold" resurfaced on prime-time shows hosted by Tonald Drump.',
+      'Gold bugs at "Burrito Hathaway" reminded The Economost that BTC and metal trackers often catch safe-haven bids together when bank wobbles hit.',
+      'Traders watch for stablecoin premiums and exchange inflows as signals that the rotation into BTC, WBTC, XAUT, and PAXG has started anew.'
     ],
     drift: 0.02
   },
@@ -478,9 +615,10 @@ export const sandboxBulletins = [
     impact: 'Liquidity shocks can widen spreads and spark brief sell-offs before recovery.',
     projection: 'Past exchange pauses triggered 5-15% dips that retraced once operations resumed.',
     articleBody: [
-      'A leading exchange paused withdrawals overnight after detecting suspicious movements.',
-      'Traders are rerouting flows, which can thin books and increase slippage.',
-      'Historically, markets stabilize after transparency updates and withdrawals resume.'
+      'Mega venue "Coinbarn" hit the kill switch on withdrawals after spotting a rogue multisig transaction, spokespeople confirmed to the Wall Street Jest.',
+      'Rival exchange "Binawnce" offered to help triage while market-makers at "SamuraiX" rerouted flow, thinning books and widening spreads.',
+      'Tonald Drump mused on late-night TV that shutting the exits tends to spook tourists but seasoned traders watch incident reports for clarity.',
+      'Prior pauses at other venues reversed once transparency returned, but BTC, ETH, and SOL often dip 5-15% in the fog before liquidity normalizes.'
     ],
     drift: -0.021
   },
@@ -493,9 +631,10 @@ export const sandboxBulletins = [
     impact: 'Upgrade clarity can attract speculative positioning into the fork.',
     projection: 'When Solana locked in past upgrades, SOL rallied 15-30% into the fork window.',
     articleBody: [
-      'Core contributors have agreed on a calendar date for a performance-focused fork.',
-      'Upgrade certainty typically lowers roadmap risk premia and invites pre-event positioning.',
-      'Perps funding and spot demand tend to rise as traders chase the catalyst.'
+      'Developers on chain "Solonga" met on a livestream hosted by The Economost to stamp a calendar date for their throughput fork.',
+      'Lead maintainer Ada Lovelace-But-Different said the upgrade should double TPS if validators on "Avalunche" and "Nearish" follow suit.',
+      'Roadmap certainty trims the risk premium that kept some funds sidelined, notes brokerage "Credit Swish" in a memo shared with the Wall Street Jest.',
+      'Perps funding and spot demand often rise into such catalysts as traders position ahead of the fork announcement.'
     ],
     drift: 0.013
   },
@@ -508,9 +647,10 @@ export const sandboxBulletins = [
     impact: 'Narrative revivals can spark short-lived rotations into metaverse and identity plays.',
     projection: 'Past brand activations created 10-30% pops that faded without sustained user growth.',
     articleBody: [
-      'A household brand is rebooting its metaverse strategy with cross-chain loyalty rewards.',
-      'Identity and NFT plays often see speculative bursts on partnership news.',
-      'Durability depends on real user traction; watch daily actives to gauge staying power.'
+      'Retail titan "WaltShop" teased a fresh metaverse rollout featuring pixelated loyalty cards, according to internal decks leaked to the Wall Street Jest.',
+      'Partners include identity chain "Worldy ID" and NFT rail "PolyGander," both promising goggles-free experiences and cartoon avatars.',
+      'The Economost reminded readers that last year\'s metaverse mania fizzled when daily active shoppers plateaued, leaving token charts looking like ski slopes.',
+      'Speculators in M, WLD, and POL may chase the headline, but durability depends on whether customers actually show up to scan their imaginary receipts.'
     ],
     drift: 0.011
   },
@@ -523,11 +663,60 @@ export const sandboxBulletins = [
     impact: 'Resolved governance risk can tighten spreads and lift sentiment.',
     projection: 'Governance wins often claw back prior drawdowns within a week as uncertainty clears.',
     articleBody: [
-      'A contentious vote concluded with a mandate to fund a security council and audits.',
-      'The outcome reduces tail risk and can lure sidelined capital back to the ecosystem.',
-      'Delegates expect spreads to normalize as confidence returns.'
+      'Delegates on chain "ArbiTronix" emerged from a marathon call with a slim majority backing funds for a new security council, the Wall Street Jest reports.',
+      'Audit firm "CertiKinda" will oversee the program while treasurer Ada Ledgerlight promised transparent expense dashboards.',
+      'Pundit Vladimir Protein told The Economost that tail risks shrink when governance squabbles resolve, inviting sidelined liquidity back.',
+      'With clarity restored, spreads on ARB, ATOM, and QNT often tighten as market-makers rebuild depth.'
     ],
     drift: 0.009
+  },
+  {
+    id: 'treasury-buy',
+    title: 'Software titan adds BTC to balance sheet redux',
+    summary: 'MacroStratagem repeats its 2021 playbook, tucking another $500M in BTC onto its books.',
+    sentiment: 'bullish',
+    assets: ['BTC', 'WBTC', 'ETH'],
+    impact: 'Corporate treasury bids can signal renewed institutional confidence.',
+    projection: 'The last time MacroStratagem bought size, BTC climbed ~25% over the next month.',
+    articleBody: [
+      'CEO Sailor Moonwalk of MacroStratagem announced a fresh $500M BTC purchase on a webcast peppered with space-boat metaphors, the Wall Street Jest recaps.',
+      'Auditors at "Pricewhopper Coopers" signed off on the treasury tilt while board member Tonald Drump live-tweeted rocket emojis.',
+      'Competitors at "MicroSquishy" whispered about copycat programs, hinting that corporate FOMO could reignite.',
+      'In 2021, similar treasury moves helped spark a multi-week climb as tradfi desks framed BTC as a balance-sheet hedge.'
+    ],
+    drift: 0.017
+  },
+  {
+    id: 'policy-freeze',
+    title: 'Central bank pauses hikes amid growth jitters',
+    summary: 'The Federal Reservish signals a prolonged hold, echoing the 2019 pivot that boosted risk assets.',
+    sentiment: 'bullish',
+    assets: ['BTC', 'ETH', 'SOL', 'AVAX'],
+    impact: 'Lower rate expectations can loosen liquidity for risk trades.',
+    projection: 'The 2019 pivot preceded a 30-60% grind higher across majors over the subsequent quarter.',
+    articleBody: [
+      'Chair Jay Powpow of the Federal Reservish told reporters at the Wall Street Jest that growth clouds justify a rate pause and a slower balance-sheet runoff.',
+      'Bond desks at "Goldsocks" and "Credit Swish" immediately priced in cut odds, easing financial conditions for speculative assets.',
+      'Crypto strategists at the Economost noted that every softening cycle since 2013 has eventually nudged BTC and ETH higher, with spillover into fast L1s like SOL and AVAX.',
+      'If the hold sticks, risk takers may redeploy sidelined cash toward higher-beta coins while watching inflation prints closely.'
+    ],
+    drift: 0.012
+  },
+  {
+    id: 'crackdown-asia',
+    title: 'Eastland announces another exchange ban, markets shrug',
+    summary: 'Regulators in Eastland issue a fresh ban on retail crypto trading, echoing a decade of rinse-and-repeat headlines.',
+    sentiment: 'cautious',
+    assets: ['BTC', 'ETH', 'TRX', 'NEAR'],
+    impact: 'Initial dips often fade as traders route through friendlier hubs.',
+    projection: 'Past bans knocked majors 3-8% intraday before liquidity migrated offshore.',
+    articleBody: [
+      'The Ministry of Harmonious Blockchains in Eastland declared retail trading verboten yet again, state outlet The Daily Panda reported before being paywalled.',
+      'Veterans rolled their eyes; Tonald Drump joked on live TV that the ban has been renewed more times than his reality show.',
+      'OTC desks at "Huobi-Wannabe" and "OKAlmost" told the Economost that flow simply hops borders whenever the decree returns.',
+      'Historically, the knee-jerk dip reverses as traders adapt, leaving BTC, ETH, TRX, and NEAR to reclaim ground within days.'
+    ],
+    drift: -0.007
   }
 ];
 
