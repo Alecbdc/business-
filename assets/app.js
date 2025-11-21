@@ -1,4 +1,4 @@
-import { courses, defaultSandboxState, initialPrices, quizTopics } from './data.js';
+import { courses, defaultSandboxState, initialPrices, quizTopics, sandboxBulletins } from './data.js';
 import {
   supabaseConfig,
   featureToggles,
@@ -9,13 +9,82 @@ import {
 } from './config.js';
 
 const cacheKey = 'aether-cache-v2';
-const historyLimit = 60;
+const historyLimit = 1200;
 const assetSymbols = Object.keys(initialPrices);
 const totalQuizQuestions = quizTopics.reduce((acc, topic) => acc + topic.questions.length, 0);
 const passingScoreThreshold = Number(featureToggles.passingScore ?? 70);
 const autoCompleteAfterQuiz = featureToggles.autoMarkCompleteAfterQuiz !== false;
+const timeframeOptions = [
+  { key: '1D', label: '1D', ms: 1000 * 60 * 60 * 24 },
+  { key: '3D', label: '3D', ms: 1000 * 60 * 60 * 24 * 3 },
+  { key: '5D', label: '5D', ms: 1000 * 60 * 60 * 24 * 5 },
+  { key: '1M', label: '1M', ms: 1000 * 60 * 60 * 24 * 30 },
+  { key: '3M', label: '3M', ms: 1000 * 60 * 60 * 24 * 90 },
+  { key: '6M', label: '6M', ms: 1000 * 60 * 60 * 24 * 180 },
+  { key: 'YTD', label: 'YTD', ms: null },
+  { key: '12M', label: '12M', ms: 1000 * 60 * 60 * 24 * 365 },
+  { key: '3Y', label: '3Y', ms: 1000 * 60 * 60 * 24 * 365 * 3 },
+  { key: '5Y', label: '5Y', ms: 1000 * 60 * 60 * 24 * 365 * 5 },
+  { key: '10Y', label: '10Y', ms: 1000 * 60 * 60 * 24 * 365 * 10 },
+  { key: 'ALL', label: 'All', ms: null }
+];
+const defaultTimeframe = '3M';
+const bulletinRefreshMs = featureToggles.newsRefreshMs ?? 1000 * 60 * 60 * 2;
+const maxBulletins = 6;
 
 const isSupabaseConfigured = hasSupabaseCredentials();
+
+function randomizePrice(price, drift = 0) {
+  const delta = (Math.random() - 0.5) * 0.04 + drift;
+  return Math.max(0, price * (1 + delta));
+}
+
+function seededRandom(seed) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+function generateHistorySeries(anchorPrice) {
+  const now = Date.now();
+  const yearsMs = 1000 * 60 * 60 * 24 * 365 * 10;
+  const basePoints = 520;
+  const baseStep = yearsMs / basePoints;
+  const series = [];
+  let value = anchorPrice * 0.65;
+  for (let i = 0; i <= basePoints; i++) {
+    const ts = now - yearsMs + i * baseStep;
+    value = randomizePrice(value);
+    series.push({ ts, value: Number(value.toFixed(4)) });
+  }
+  const densePoints = 168; // hourly over last 7 days
+  const denseSpan = 1000 * 60 * 60 * 24 * 7;
+  const denseStart = now - denseSpan;
+  value = series[series.length - 1]?.value ?? anchorPrice;
+  for (let i = 0; i <= densePoints; i++) {
+    const ts = denseStart + (i / densePoints) * denseSpan;
+    value = randomizePrice(value);
+    series.push({ ts, value: Number(value.toFixed(4)) });
+  }
+  return series.slice(-historyLimit);
+}
+
+function seedPriceHistoryMap(priceMap) {
+  return Object.entries(priceMap).reduce((acc, [symbol, price]) => {
+    acc[symbol] = generateHistorySeries(price);
+    return acc;
+  }, {});
+}
+
+function seedPortfolioSeries(anchorValue = defaultSandboxState.balance) {
+  const series = generateHistorySeries(anchorValue);
+  return series.map((entry) => ({ ...entry, value: Math.max(entry.value, 0) }));
+}
+
+const seededPriceHistory = seedPriceHistoryMap(initialPrices);
+const latestSeededPrices = Object.fromEntries(
+  Object.entries(seededPriceHistory).map(([symbol, series]) => [symbol, series[series.length - 1]?.value ?? 0])
+);
+const seededPortfolioHistory = seedPortfolioSeries();
 
 const deepClone = (value) =>
   typeof structuredClone === 'function' ? structuredClone(value) : JSON.parse(JSON.stringify(value));
@@ -54,10 +123,13 @@ const state = {
     holdings: normalizeHoldings(defaultSandboxState.holdings),
     history: defaultSandboxState.history ?? []
   },
-  prices: { ...initialPrices },
-  priceHistory: Object.fromEntries(Object.entries(initialPrices).map(([symbol, value]) => [symbol, [value]])),
-  portfolioHistory: [defaultSandboxState.balance],
-  activeAsset: assetSymbols[0] ?? 'BTC'
+  prices: { ...latestSeededPrices },
+  priceHistory: seededPriceHistory,
+  portfolioHistory: seededPortfolioHistory,
+  chartTimeframes: { portfolio: defaultTimeframe, asset: defaultTimeframe },
+  chartZoom: { portfolio: 1, asset: 1 },
+  activeAsset: assetSymbols[0] ?? 'BTC',
+  bulletin: { bucket: null, items: [] }
 };
 
 const elements = {};
@@ -137,11 +209,11 @@ function persistCache() {
 }
 
 function resetHistorySnapshots() {
-  state.priceHistory = Object.entries(state.prices).reduce((acc, [symbol, value]) => {
-    acc[symbol] = [value];
-    return acc;
-  }, {});
-  state.portfolioHistory = [calculatePortfolioValue()];
+  state.priceHistory = seedPriceHistoryMap(state.prices);
+  state.prices = Object.fromEntries(
+    Object.entries(state.priceHistory).map(([symbol, series]) => [symbol, series[series.length - 1]?.value ?? 0])
+  );
+  state.portfolioHistory = seedPortfolioSeries(calculatePortfolioValue());
 }
 
 function formatCurrency(value) {
@@ -156,6 +228,54 @@ function calculatePortfolioValue() {
     Number(state.sandbox.balance) +
     Object.entries(state.sandbox.holdings).reduce((total, [symbol, units]) => total + units * state.prices[symbol], 0)
   );
+}
+
+function currentBulletinBucket() {
+  return Math.floor(Date.now() / bulletinRefreshMs);
+}
+
+function formatRelativeTime(ts) {
+  const diffHours = Math.max(0, Math.round((Date.now() - ts) / (1000 * 60 * 60)));
+  if (diffHours < 24) return `${Math.max(1, diffHours)}h ago`;
+  const diffDays = Math.round(diffHours / 24);
+  if (diffDays < 30) return `${diffDays}d ago`;
+  const diffMonths = Math.round(diffDays / 30);
+  return `${diffMonths}mo ago`;
+}
+
+function refreshBulletins() {
+  const bucket = currentBulletinBucket();
+  if (state.bulletin.bucket === bucket && state.bulletin.items.length) return;
+  const pool = sandboxBulletins.slice();
+  const items = [];
+  const count = Math.min(maxBulletins, pool.length);
+  for (let i = 0; i < count; i++) {
+    const idx = Math.floor(seededRandom(bucket + i) * pool.length);
+    const base = pool.splice(idx, 1)[0];
+    const hourOffset = Math.floor(seededRandom(bucket * (i + 2)) * 6);
+    const ts = Date.now() - hourOffset * 60 * 60 * 1000;
+    items.push({ ...base, ts });
+  }
+  state.bulletin = { bucket, items };
+}
+
+function buildBulletinDriftMap() {
+  const impacts = {};
+  const items = state.bulletin.items ?? [];
+  items.forEach((item, idx) => {
+    const drift = item.drift ?? 0;
+    if (!drift) return;
+    const softened = drift * (1 - idx * 0.1);
+    item.assets?.forEach((symbol) => {
+      impacts[symbol] = (impacts[symbol] ?? 0) + softened;
+    });
+    if (!item.assets?.length) {
+      assetSymbols.forEach((symbol) => {
+        impacts[symbol] = (impacts[symbol] ?? 0) + softened * 0.6;
+      });
+    }
+  });
+  return impacts;
 }
 
 function findLesson(lessonId) {
@@ -602,7 +722,20 @@ function renderDashboard() {
   renderQuestBoard();
 }
 
-function drawLineChart(canvas, values, color) {
+function filterSeriesByTimeframe(series = [], timeframeKey = defaultTimeframe) {
+  if (!series.length) return [];
+  const selected = timeframeOptions.find((opt) => opt.key === timeframeKey) ?? timeframeOptions[0];
+  if (selected.key === 'ALL') return series;
+  if (selected.key === 'YTD') {
+    const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime();
+    return series.filter((point) => point.ts >= startOfYear);
+  }
+  if (!selected.ms) return series;
+  const cutoff = Date.now() - selected.ms;
+  return series.filter((point) => point.ts >= cutoff);
+}
+
+function drawLineChart(canvas, series, color, zoom = 1, inspector) {
   if (!canvas) return;
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
@@ -611,18 +744,23 @@ function drawLineChart(canvas, values, color) {
   canvas.width = width * dpr;
   canvas.height = height * dpr;
   const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, width, height);
-  const points = values.length ? values : [0];
-  const min = Math.min(...points);
-  const max = Math.max(...points);
+  const points = series.length ? series : [{ value: 0, ts: Date.now() }];
+  const values = points.map((p) => p.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
   const range = max - min || 1;
+  const center = points[points.length - 1]?.value ?? 0;
+  const zoomRange = zoom > 1 ? Math.max(range / zoom, range * 0.15) : range;
+  const zoomMin = zoom > 1 ? center - zoomRange / 2 : min;
+  const zoomMax = zoom > 1 ? center + zoomRange / 2 : max;
   ctx.lineWidth = 3;
   ctx.strokeStyle = color;
   ctx.beginPath();
-  points.forEach((value, idx) => {
+  points.forEach((point, idx) => {
     const x = (idx / (points.length - 1 || 1)) * width;
-    const y = height - ((value - min) / range) * height;
+    const y = height - ((point.value - zoomMin) / (zoomMax - zoomMin || 1)) * height;
     if (idx === 0) {
       ctx.moveTo(x, y);
     } else {
@@ -630,11 +768,150 @@ function drawLineChart(canvas, values, color) {
     }
   });
   ctx.stroke();
+  if (inspector) {
+    const latest = points[points.length - 1];
+    inspector.textContent = latest
+      ? `${new Date(latest.ts).toLocaleString()} • ${formatCurrency(latest.value)}`
+      : 'No data';
+  }
+}
+
+function bindChartHover(canvas, series, inspector) {
+  if (!canvas || !inspector) return;
+  if (!series.length) {
+    inspector.textContent = 'No data';
+    return;
+  }
+  canvas.onmousemove = (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+    const idx = Math.min(series.length - 1, Math.round(ratio * (series.length - 1)));
+    const point = series[idx];
+    inspector.textContent = `${new Date(point.ts).toLocaleString()} • ${formatCurrency(point.value)}`;
+  };
+  canvas.onmouseleave = () => {
+    const latest = series[series.length - 1];
+    inspector.textContent = latest
+      ? `${new Date(latest.ts).toLocaleString()} • ${formatCurrency(latest.value)}`
+      : 'No data';
+  };
+}
+
+function updateTimeframeSelection(chartKey) {
+  document.querySelectorAll(`[data-chart="${chartKey}"][data-timeframe]`).forEach((btn) => {
+    const isActive = btn.dataset.timeframe === state.chartTimeframes[chartKey];
+    btn.classList.toggle('bg-white/10', isActive);
+    btn.classList.toggle('border-white/40', isActive);
+  });
+}
+
+function bindTimeframeControls(containerId, chartKey) {
+  const container = $(`#${containerId}`);
+  if (!container) return;
+  container.innerHTML = timeframeOptions
+    .map(
+      (option) => `
+        <button
+          type="button"
+          class="px-3 py-1 rounded-full border border-white/15 text-xs text-slate-200 hover:border-white/40"
+          data-chart="${chartKey}"
+          data-timeframe="${option.key}"
+        >
+          ${option.label}
+        </button>
+      `
+    )
+    .join('');
+  container.querySelectorAll('button[data-timeframe]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.chartTimeframes[chartKey] = btn.dataset.timeframe;
+      updateTimeframeSelection(chartKey);
+      renderSandboxCharts();
+    });
+  });
+  updateTimeframeSelection(chartKey);
+}
+
+function bindZoomControls(containerId, chartKey) {
+  const container = $(`#${containerId}`);
+  if (!container) return;
+  const adjustZoom = (delta) => {
+    const next = Math.min(6, Math.max(1, state.chartZoom[chartKey] + delta));
+    state.chartZoom[chartKey] = next;
+    renderSandboxCharts();
+  };
+  container.querySelectorAll('[data-zoom]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.zoom;
+      if (mode === 'in') adjustZoom(0.5);
+      if (mode === 'out') adjustZoom(-0.5);
+      if (mode === 'reset') {
+        state.chartZoom[chartKey] = 1;
+        renderSandboxCharts();
+      }
+    });
+  });
+}
+
+function initChartControls() {
+  bindTimeframeControls('portfolio-timeframe-controls', 'portfolio');
+  bindTimeframeControls('asset-timeframe-controls', 'asset');
+  bindZoomControls('portfolio-zoom-controls', 'portfolio');
+  bindZoomControls('asset-zoom-controls', 'asset');
 }
 
 function renderSandboxCharts() {
-  drawLineChart($('#portfolio-chart'), state.portfolioHistory, '#34d399');
-  drawLineChart($('#asset-chart'), state.priceHistory[state.activeAsset] ?? [], '#60a5fa');
+  const portfolioSeries = filterSeriesByTimeframe(state.portfolioHistory, state.chartTimeframes.portfolio);
+  drawLineChart($('#portfolio-chart'), portfolioSeries, '#34d399', state.chartZoom.portfolio, $('#portfolio-inspect'));
+  bindChartHover($('#portfolio-chart'), portfolioSeries, $('#portfolio-inspect'));
+
+  const assetSeries = filterSeriesByTimeframe(state.priceHistory[state.activeAsset] ?? [], state.chartTimeframes.asset);
+  drawLineChart($('#asset-chart'), assetSeries, '#60a5fa', state.chartZoom.asset, $('#asset-inspect'));
+  bindChartHover($('#asset-chart'), assetSeries, $('#asset-inspect'));
+}
+
+function renderBulletinBoard() {
+  const container = $('#sandbox-bulletin');
+  if (!container) return;
+  refreshBulletins();
+  const refreshLabel = $('#bulletin-refresh-label');
+  if (refreshLabel) {
+    const hours = Math.round(bulletinRefreshMs / (1000 * 60 * 60));
+    refreshLabel.textContent = `Auto-updates ~${hours}h`;
+  }
+  const items = state.bulletin.items ?? [];
+  container.innerHTML =
+    items
+      .map((item) => {
+        const toneClass =
+          item.sentiment === 'bullish'
+            ? 'bg-emerald-500/20 text-emerald-100'
+            : item.sentiment === 'bearish'
+            ? 'bg-rose-500/20 text-rose-100'
+            : item.sentiment === 'speculative'
+            ? 'bg-amber-500/20 text-amber-100'
+            : 'bg-sky-500/20 text-sky-100';
+        const focusAssets = item.assets?.slice(0, 5).join(', ') ?? 'Market-wide';
+        const driftLabel = item.drift
+          ? `${item.drift > 0 ? '↗︎ +' : '↘︎ '}${(item.drift * 100).toFixed(1)}% tilt`
+          : 'Neutral drift';
+        return `
+          <article class="rounded-2xl border border-white/10 bg-white/5 p-3 space-y-2">
+            <div class="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-slate-400">
+              <span class="badge ${toneClass}">${item.sentiment}</span>
+              <span>${formatRelativeTime(item.ts)}</span>
+            </div>
+            <p class="text-sm font-semibold">${item.title}</p>
+            <p class="text-xs text-slate-300 leading-relaxed">${item.summary}</p>
+            <div class="flex flex-wrap gap-2 text-[11px] text-slate-300">
+              <span class="mini-badge">Focus: ${focusAssets}</span>
+              <span class="mini-badge">Cue: ${item.impact}</span>
+              <span class="mini-badge">Bias: ${driftLabel}</span>
+            </div>
+          </article>
+        `;
+      })
+      .join('') || '<p class="text-slate-400 text-sm">Bulletins will refresh shortly.</p>';
 }
 
 function renderSandbox() {
@@ -671,11 +948,13 @@ function renderSandbox() {
     .join('');
   historyContainer.innerHTML = historyMarkup || '<p class="text-slate-400 text-sm">No trades yet</p>';
 
+  renderBulletinBoard();
+
   const activeAsset = state.prices[state.activeAsset] != null ? state.activeAsset : assetSymbols[0];
   state.activeAsset = activeAsset;
   const activeHistory = state.priceHistory[activeAsset] ?? [];
   const activePrice = state.prices[activeAsset];
-  const activePrev = activeHistory.length > 1 ? activeHistory[activeHistory.length - 2] : activePrice;
+  const activePrev = activeHistory.length > 1 ? activeHistory[activeHistory.length - 2]?.value : activePrice;
   const activeChange = activePrev ? ((activePrice - activePrev) / activePrev) * 100 : 0;
   const activeUnits = state.sandbox.holdings[activeAsset] ?? 0;
   const activeValueShare = portfolioValue ? (activeUnits * activePrice / portfolioValue) * 100 : 0;
@@ -695,7 +974,7 @@ function renderSandbox() {
     pricesContainer.innerHTML = Object.entries(state.prices)
       .map(([symbol, price]) => {
         const history = state.priceHistory[symbol] ?? [];
-        const prev = history.length > 1 ? history[history.length - 2] : price;
+        const prev = history.length > 1 ? history[history.length - 2]?.value : price;
         const changePct = prev ? ((price - prev) / prev) * 100 : 0;
         return `
           <button data-asset="${symbol}" class="w-full flex items-center justify-between border rounded-2xl px-4 py-3 ${
@@ -880,27 +1159,24 @@ async function handleQuizSubmit(event) {
   showToast(toastMsg, passed ? 'success' : 'info');
 }
 
-function randomizePrice(price) {
-  const delta = (Math.random() - 0.5) * 0.04;
-  return Math.max(0, price * (1 + delta));
-}
-
 function recordPriceSnapshot() {
   Object.keys(state.prices).forEach((symbol) => {
     if (!state.priceHistory[symbol]) state.priceHistory[symbol] = [];
-    state.priceHistory[symbol].push(state.prices[symbol]);
+    state.priceHistory[symbol].push({ ts: Date.now(), value: state.prices[symbol] });
     state.priceHistory[symbol] = state.priceHistory[symbol].slice(-historyLimit);
   });
 }
 
 function recordPortfolioSnapshot() {
-  state.portfolioHistory.push(calculatePortfolioValue());
+  state.portfolioHistory.push({ ts: Date.now(), value: calculatePortfolioValue() });
   state.portfolioHistory = state.portfolioHistory.slice(-historyLimit);
 }
 
 function tickPrices() {
+  const driftMap = buildBulletinDriftMap();
   Object.keys(state.prices).forEach((symbol) => {
-    state.prices[symbol] = randomizePrice(state.prices[symbol]);
+    const drift = driftMap[symbol] ?? 0;
+    state.prices[symbol] = randomizePrice(state.prices[symbol], drift);
   });
   recordPriceSnapshot();
   recordPortfolioSnapshot();
@@ -1254,6 +1530,7 @@ function init() {
   renderQuiz();
   renderQuizThresholdHint();
   renderAssetSelects();
+  initChartControls();
   renderSandbox();
   renderDashboard();
   bindEvents();
