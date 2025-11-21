@@ -14,6 +14,7 @@ const assetSymbols = Object.keys(initialPrices);
 const totalQuizQuestions = quizTopics.reduce((acc, topic) => acc + topic.questions.length, 0);
 const passingScoreThreshold = Number(featureToggles.passingScore ?? 70);
 const autoCompleteAfterQuiz = featureToggles.autoMarkCompleteAfterQuiz !== false;
+const maxVisibleAssets = 12;
 const timeframeOptions = [
   { key: '1D', label: '1D', ms: 1000 * 60 * 60 * 24 },
   { key: '3D', label: '3D', ms: 1000 * 60 * 60 * 24 * 3 },
@@ -131,7 +132,8 @@ const state = {
   chartZoom: { portfolio: 1, asset: 1 },
   activeAsset: assetSymbols[0] ?? 'BTC',
   bulletin: { bucket: null, items: [] },
-  activeBulletinArticleId: null
+  activeBulletinArticleId: null,
+  ui: { showAllAssets: false }
 };
 
 const elements = {};
@@ -1044,7 +1046,9 @@ function renderSandbox() {
   $('#active-asset-share').textContent = `${activeValueShare.toFixed(2)}%`;
   const pricesContainer = $('#sandbox-prices');
   if (pricesContainer) {
-    pricesContainer.innerHTML = Object.entries(state.prices)
+    const entries = Object.entries(state.prices);
+    const visibleEntries = (state.ui?.showAllAssets ? entries : entries.slice(0, maxVisibleAssets)) || entries;
+    pricesContainer.innerHTML = visibleEntries
       .map(([symbol, price]) => {
         const history = state.priceHistory[symbol] ?? [];
         const prev = history.length > 1 ? history[history.length - 2]?.value : price;
@@ -1071,6 +1075,14 @@ function renderSandbox() {
         requestAnimationFrame(renderSandboxCharts);
       });
     });
+    const toggleBtn = $('#asset-toggle');
+    if (toggleBtn) {
+      toggleBtn.textContent = state.ui?.showAllAssets ? 'Show less' : 'Show more';
+      toggleBtn.onclick = () => {
+        state.ui.showAllAssets = !state.ui.showAllAssets;
+        renderSandbox();
+      };
+    }
   }
 
   requestAnimationFrame(renderSandboxCharts);
