@@ -210,7 +210,8 @@ export const sandboxBulletins = [
       'Headline inflation prints 20 bps below consensus. Desk chatter expects calmer rate projections that could buoy BTC and ETH.',
     sentiment: 'bullish',
     assets: ['BTC', 'ETH', 'WBTC'],
-    impact: 'Macro easing may expand risk appetite for majors.'
+    impact: 'Macro easing may expand risk appetite for majors.',
+    drift: 0.008
   },
   {
     id: 'layer2-fees',
@@ -219,7 +220,8 @@ export const sandboxBulletins = [
       'Optimistic and zk rollups both slash fees for 48 hours; on-chain DEX flows jump. Watch DeFi beta and ETH correlation.',
     sentiment: 'bullish',
     assets: ['ETH', 'ARB', 'MNT', 'POL'],
-    impact: 'Scaling catalysts tend to lift ETH beta trades.'
+    impact: 'Scaling catalysts tend to lift ETH beta trades.',
+    drift: 0.01
   },
   {
     id: 'stablecoin-flow',
@@ -228,7 +230,8 @@ export const sandboxBulletins = [
       'USDT, USDC, and PYUSD issuance expand on exchanges, hinting at fresh sidelined liquidity waiting to deploy.',
     sentiment: 'bullish',
     assets: ['USDT', 'USDC', 'DAI', 'PYUSD', 'USDS', 'USD1'],
-    impact: 'Rising stable balances often precede market rotations.'
+    impact: 'Rising stable balances often precede market rotations.',
+    drift: 0.006
   },
   {
     id: 'layer1-outage',
@@ -237,7 +240,8 @@ export const sandboxBulletins = [
       'SUI validators briefly halt blocks; chain restarts within 30 minutes with new client release. Users watching reliability.',
     sentiment: 'bearish',
     assets: ['SUI', 'AVAX', 'NEAR'],
-    impact: 'Infra hiccups can pressure riskier L1 valuations.'
+    impact: 'Infra hiccups can pressure riskier L1 valuations.',
+    drift: -0.012
   },
   {
     id: 'etf-flows',
@@ -246,7 +250,8 @@ export const sandboxBulletins = [
       'Legacy funds continue to add WBTC backing; on-chain wraps mirror demand. Vol desks note rising call skew.',
     sentiment: 'bullish',
     assets: ['BTC', 'WBTC'],
-    impact: 'Institutional demand may firm support zones.'
+    impact: 'Institutional demand may firm support zones.',
+    drift: 0.014
   },
   {
     id: 'reg-hearing',
@@ -255,7 +260,8 @@ export const sandboxBulletins = [
       'Draft language singles out XMR and ZEC mixers; compliance desks anticipate liquidity fragmentation.',
     sentiment: 'bearish',
     assets: ['XMR', 'ZEC'],
-    impact: 'Policy headwinds could widen spreads and damp volume.'
+    impact: 'Policy headwinds could widen spreads and damp volume.',
+    drift: -0.018
   },
   {
     id: 'defi-hack',
@@ -264,7 +270,8 @@ export const sandboxBulletins = [
       'Protocol halts deposits while patching price feed; insurers flag temporary capital flight into majors and stables.',
     sentiment: 'cautious',
     assets: ['AAVE', 'ETH', 'DAI'],
-    impact: 'Short-term volatility expected across DeFi blue chips.'
+    impact: 'Short-term volatility expected across DeFi blue chips.',
+    drift: -0.01
   },
   {
     id: 'meme-season',
@@ -273,7 +280,8 @@ export const sandboxBulletins = [
       'PEPE, PUMP, and M light up crypto Twitter; funding rates widen as speculators chase momentum.',
     sentiment: 'speculative',
     assets: ['PEPE', 'PUMP', 'M'],
-    impact: 'High beta could spill into alt baskets if mania holds.'
+    impact: 'High beta could spill into alt baskets if mania holds.',
+    drift: 0.02
   },
   {
     id: 'ai-partnership',
@@ -282,7 +290,8 @@ export const sandboxBulletins = [
       'Partnership pilots GPU leasing and data attestation on-chain; storage tokens bid on efficiency gains.',
     sentiment: 'bullish',
     assets: ['FIL', 'ICP', 'TAO'],
-    impact: 'Narrative lift for AI-aligned infra assets.'
+    impact: 'Narrative lift for AI-aligned infra assets.',
+    drift: 0.012
   },
   {
     id: 'payments-push',
@@ -291,7 +300,8 @@ export const sandboxBulletins = [
       'Retail app rolls PYUSD and USDC to three new markets; analysts eye volume growth versus card rails.',
     sentiment: 'bullish',
     assets: ['PYUSD', 'USDC', 'USDT'],
-    impact: 'Payments traction can tighten stablecoin spreads.'
+    impact: 'Payments traction can tighten stablecoin spreads.',
+    drift: 0.007
   },
   {
     id: 'miner-revenue',
@@ -300,7 +310,8 @@ export const sandboxBulletins = [
       'Higher difficulty squeezes margins; some miners hedge by selling forward. Could add near-term BTC supply.',
     sentiment: 'cautious',
     assets: ['BTC', 'WBTC'],
-    impact: 'Extra sell pressure may weigh on spot bids.'
+    impact: 'Extra sell pressure may weigh on spot bids.',
+    drift: -0.006
   },
   {
     id: 'governance-upgrade',
@@ -309,7 +320,8 @@ export const sandboxBulletins = [
       'Uniswap-style governance debates routing a slice of fees to stakers; liquidity providers price in incentives.',
     sentiment: 'bullish',
     assets: ['UNI', 'CRO'],
-    impact: 'Protocol revenue could re-rate governance tokens.'
+    impact: 'Protocol revenue could re-rate governance tokens.',
+    drift: 0.008
   },
   {
     id: 'airdrop-rumor',
@@ -318,7 +330,8 @@ export const sandboxBulletins = [
       'Validator code references “epoch bonus” triggering speculation. On-chain activity spikes as users farm eligibility.',
     sentiment: 'speculative',
     assets: ['ARB', 'POL', 'MNT'],
-    impact: 'Engagement surges but may unwind after snapshot.'
+    impact: 'Engagement surges but may unwind after snapshot.',
+    drift: 0.009
   },
   {
     id: 'governance-spat',
@@ -327,7 +340,8 @@ export const sandboxBulletins = [
       'Community split on diverting funds to marketing. Short-term governance uncertainty weighs on sentiment.',
     sentiment: 'bearish',
     assets: ['ATOM', 'NEAR', 'QNT'],
-    impact: 'Choppy price action likely until clarity returns.'
+    impact: 'Choppy price action likely until clarity returns.',
+    drift: -0.009
   },
   {
     id: 'energy-prices',
@@ -336,7 +350,58 @@ export const sandboxBulletins = [
       'Natural gas contracts slide 4%; proof-of-work miners eye better margins, potentially slowing sell flows.',
     sentiment: 'bullish',
     assets: ['BTC', 'WBTC', 'LTC', 'ETC'],
-    impact: 'Lower opex can reduce forced selling risk.'
+    impact: 'Lower opex can reduce forced selling risk.',
+    drift: 0.005
+  },
+  {
+    id: 'election-surprise',
+    title: 'Election upset rekindles “risk hedge” bid for BTC',
+    summary:
+      'A populist White House return echoes the 2016 shock that sent Bitcoin parabolic within months as investors seek non-sovereign hedges.',
+    sentiment: 'bullish',
+    assets: ['BTC', 'WBTC', 'ETH'],
+    impact: 'Historical election jolts have ignited major crypto rallies.',
+    drift: 0.028
+  },
+  {
+    id: 'geopolitical-strike',
+    title: 'Regional conflict flares after overnight airstrike',
+    summary:
+      'A Middle East escalation rattles risk assets, mirroring past drawdowns when war headlines pushed traders into dollars and gold.',
+    sentiment: 'bearish',
+    assets: ['BTC', 'ETH', 'SOL', 'AVAX', 'XAUT', 'PAXG'],
+    impact: 'Flight-to-safety moves historically clipped crypto by mid-single digits in hours.',
+    drift: -0.026
+  },
+  {
+    id: 'tariff-shock',
+    title: 'New import tariffs reignite global growth fears',
+    summary:
+      'Trade tensions resurface, echoing the 2018 tariff volley that dented tech and altcoins while stoking demand for stablecoins.',
+    sentiment: 'bearish',
+    assets: ['SOL', 'ADA', 'DOT', 'NEAR', 'USDT', 'USDC', 'DAI'],
+    impact: 'Risk-off rotations have previously dragged alts while lifting stables.',
+    drift: -0.018
+  },
+  {
+    id: 'etf-approval',
+    title: 'Regulator fast-tracks ETH ETF approval',
+    summary:
+      'A surprise green light mimics the 2024 BTC ETF effect, with options desks scrambling to price upside convexity.',
+    sentiment: 'bullish',
+    assets: ['ETH', 'WBTC', 'UNI', 'AAVE'],
+    impact: 'Spot ETF launches have historically driven double-digit weekly moves.',
+    drift: 0.022
+  },
+  {
+    id: 'privacy-crackdown',
+    title: 'Global taskforce targets mixers after coordinated arrests',
+    summary:
+      'Regulatory pressure mirrors the 2020 mixer seizures that drained liquidity from privacy coins and bled into broader alt markets.',
+    sentiment: 'bearish',
+    assets: ['XMR', 'ZEC', 'ATOM', 'ARB'],
+    impact: 'Past crackdowns sparked sharp privacy coin drawdowns and wider de-risking.',
+    drift: -0.024
   }
 ];
 

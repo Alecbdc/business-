@@ -34,8 +34,8 @@ const maxBulletins = 6;
 
 const isSupabaseConfigured = hasSupabaseCredentials();
 
-function randomizePrice(price) {
-  const delta = (Math.random() - 0.5) * 0.04;
+function randomizePrice(price, drift = 0) {
+  const delta = (Math.random() - 0.5) * 0.04 + drift;
   return Math.max(0, price * (1 + delta));
 }
 
@@ -257,6 +257,25 @@ function refreshBulletins() {
     items.push({ ...base, ts });
   }
   state.bulletin = { bucket, items };
+}
+
+function buildBulletinDriftMap() {
+  const impacts = {};
+  const items = state.bulletin.items ?? [];
+  items.forEach((item, idx) => {
+    const drift = item.drift ?? 0;
+    if (!drift) return;
+    const softened = drift * (1 - idx * 0.1);
+    item.assets?.forEach((symbol) => {
+      impacts[symbol] = (impacts[symbol] ?? 0) + softened;
+    });
+    if (!item.assets?.length) {
+      assetSymbols.forEach((symbol) => {
+        impacts[symbol] = (impacts[symbol] ?? 0) + softened * 0.6;
+      });
+    }
+  });
+  return impacts;
 }
 
 function findLesson(lessonId) {
@@ -873,6 +892,9 @@ function renderBulletinBoard() {
             ? 'bg-amber-500/20 text-amber-100'
             : 'bg-sky-500/20 text-sky-100';
         const focusAssets = item.assets?.slice(0, 5).join(', ') ?? 'Market-wide';
+        const driftLabel = item.drift
+          ? `${item.drift > 0 ? '↗︎ +' : '↘︎ '}${(item.drift * 100).toFixed(1)}% tilt`
+          : 'Neutral drift';
         return `
           <article class="rounded-2xl border border-white/10 bg-white/5 p-3 space-y-2">
             <div class="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-slate-400">
@@ -884,6 +906,7 @@ function renderBulletinBoard() {
             <div class="flex flex-wrap gap-2 text-[11px] text-slate-300">
               <span class="mini-badge">Focus: ${focusAssets}</span>
               <span class="mini-badge">Cue: ${item.impact}</span>
+              <span class="mini-badge">Bias: ${driftLabel}</span>
             </div>
           </article>
         `;
@@ -1150,8 +1173,10 @@ function recordPortfolioSnapshot() {
 }
 
 function tickPrices() {
+  const driftMap = buildBulletinDriftMap();
   Object.keys(state.prices).forEach((symbol) => {
-    state.prices[symbol] = randomizePrice(state.prices[symbol]);
+    const drift = driftMap[symbol] ?? 0;
+    state.prices[symbol] = randomizePrice(state.prices[symbol], drift);
   });
   recordPriceSnapshot();
   recordPortfolioSnapshot();
