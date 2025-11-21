@@ -8,6 +8,7 @@ A lightweight MVP that combines learning, quizzes, and a virtual trading sandbox
 - **Video lessons**: 15 curated classes across three courses with inline video player and completion tracking.
 - **Quizzes**: topic-based arenas with a 20-question bank, score calculation, and optional auto-complete of linked lessons after a passing score.
 - **Fake trading sandbox**: €10k starting balance, random-walk prices, and 60+ tradable assets (BTC, ETH, USDT, XRP, SOL, etc.) with persisted portfolio value plus zoomable 1D → 10Y charts for both the portfolio and each asset.
+- **Market bulletin board**: rotating, fictional headlines beneath the sandbox charts/logs that refresh every few hours so learners can practice reading sentiment and mapping it to assets.
 - **Gamified progression**: XP ranks, streak tracking, quest board, and badges that react to your learning and trading activity.
 - **Dashboard**: shows completed lessons, quiz history, sandbox KPIs, and a profile summary.
 - **Tailwind UI**: modern dark-mode interface powered by the CDN build of TailwindCSS so no build tooling is required.

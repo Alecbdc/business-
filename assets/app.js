@@ -1,4 +1,4 @@
-import { courses, defaultSandboxState, initialPrices, quizTopics } from './data.js';
+import { courses, defaultSandboxState, initialPrices, quizTopics, sandboxBulletins } from './data.js';
 import {
   supabaseConfig,
   featureToggles,
@@ -29,12 +29,19 @@ const timeframeOptions = [
   { key: 'ALL', label: 'All', ms: null }
 ];
 const defaultTimeframe = '3M';
+const bulletinRefreshMs = featureToggles.newsRefreshMs ?? 1000 * 60 * 60 * 2;
+const maxBulletins = 6;
 
 const isSupabaseConfigured = hasSupabaseCredentials();
 
 function randomizePrice(price) {
   const delta = (Math.random() - 0.5) * 0.04;
   return Math.max(0, price * (1 + delta));
+}
+
+function seededRandom(seed) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
 }
 
 function generateHistorySeries(anchorPrice) {
@@ -121,7 +128,8 @@ const state = {
   portfolioHistory: seededPortfolioHistory,
   chartTimeframes: { portfolio: defaultTimeframe, asset: defaultTimeframe },
   chartZoom: { portfolio: 1, asset: 1 },
-  activeAsset: assetSymbols[0] ?? 'BTC'
+  activeAsset: assetSymbols[0] ?? 'BTC',
+  bulletin: { bucket: null, items: [] }
 };
 
 const elements = {};
@@ -220,6 +228,35 @@ function calculatePortfolioValue() {
     Number(state.sandbox.balance) +
     Object.entries(state.sandbox.holdings).reduce((total, [symbol, units]) => total + units * state.prices[symbol], 0)
   );
+}
+
+function currentBulletinBucket() {
+  return Math.floor(Date.now() / bulletinRefreshMs);
+}
+
+function formatRelativeTime(ts) {
+  const diffHours = Math.max(0, Math.round((Date.now() - ts) / (1000 * 60 * 60)));
+  if (diffHours < 24) return `${Math.max(1, diffHours)}h ago`;
+  const diffDays = Math.round(diffHours / 24);
+  if (diffDays < 30) return `${diffDays}d ago`;
+  const diffMonths = Math.round(diffDays / 30);
+  return `${diffMonths}mo ago`;
+}
+
+function refreshBulletins() {
+  const bucket = currentBulletinBucket();
+  if (state.bulletin.bucket === bucket && state.bulletin.items.length) return;
+  const pool = sandboxBulletins.slice();
+  const items = [];
+  const count = Math.min(maxBulletins, pool.length);
+  for (let i = 0; i < count; i++) {
+    const idx = Math.floor(seededRandom(bucket + i) * pool.length);
+    const base = pool.splice(idx, 1)[0];
+    const hourOffset = Math.floor(seededRandom(bucket * (i + 2)) * 6);
+    const ts = Date.now() - hourOffset * 60 * 60 * 1000;
+    items.push({ ...base, ts });
+  }
+  state.bulletin = { bucket, items };
 }
 
 function findLesson(lessonId) {
@@ -814,6 +851,46 @@ function renderSandboxCharts() {
   bindChartHover($('#asset-chart'), assetSeries, $('#asset-inspect'));
 }
 
+function renderBulletinBoard() {
+  const container = $('#sandbox-bulletin');
+  if (!container) return;
+  refreshBulletins();
+  const refreshLabel = $('#bulletin-refresh-label');
+  if (refreshLabel) {
+    const hours = Math.round(bulletinRefreshMs / (1000 * 60 * 60));
+    refreshLabel.textContent = `Auto-updates ~${hours}h`;
+  }
+  const items = state.bulletin.items ?? [];
+  container.innerHTML =
+    items
+      .map((item) => {
+        const toneClass =
+          item.sentiment === 'bullish'
+            ? 'bg-emerald-500/20 text-emerald-100'
+            : item.sentiment === 'bearish'
+            ? 'bg-rose-500/20 text-rose-100'
+            : item.sentiment === 'speculative'
+            ? 'bg-amber-500/20 text-amber-100'
+            : 'bg-sky-500/20 text-sky-100';
+        const focusAssets = item.assets?.slice(0, 5).join(', ') ?? 'Market-wide';
+        return `
+          <article class="rounded-2xl border border-white/10 bg-white/5 p-3 space-y-2">
+            <div class="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-slate-400">
+              <span class="badge ${toneClass}">${item.sentiment}</span>
+              <span>${formatRelativeTime(item.ts)}</span>
+            </div>
+            <p class="text-sm font-semibold">${item.title}</p>
+            <p class="text-xs text-slate-300 leading-relaxed">${item.summary}</p>
+            <div class="flex flex-wrap gap-2 text-[11px] text-slate-300">
+              <span class="mini-badge">Focus: ${focusAssets}</span>
+              <span class="mini-badge">Cue: ${item.impact}</span>
+            </div>
+          </article>
+        `;
+      })
+      .join('') || '<p class="text-slate-400 text-sm">Bulletins will refresh shortly.</p>';
+}
+
 function renderSandbox() {
   const portfolioValue = calculatePortfolioValue();
   $('#sandbox-balance').textContent = formatCurrency(state.sandbox.balance);
@@ -847,6 +924,8 @@ function renderSandbox() {
     )
     .join('');
   historyContainer.innerHTML = historyMarkup || '<p class="text-slate-400 text-sm">No trades yet</p>';
+
+  renderBulletinBoard();
 
   const activeAsset = state.prices[state.activeAsset] != null ? state.activeAsset : assetSymbols[0];
   state.activeAsset = activeAsset;

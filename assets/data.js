@@ -202,6 +202,144 @@ export const courses = [
   }
 ];
 
+export const sandboxBulletins = [
+  {
+    id: 'macro-inflation',
+    title: 'Eurozone CPI surprise cools liquidity fears',
+    summary:
+      'Headline inflation prints 20 bps below consensus. Desk chatter expects calmer rate projections that could buoy BTC and ETH.',
+    sentiment: 'bullish',
+    assets: ['BTC', 'ETH', 'WBTC'],
+    impact: 'Macro easing may expand risk appetite for majors.'
+  },
+  {
+    id: 'layer2-fees',
+    title: 'Layer-2 gas rebates spike on weekend volume',
+    summary:
+      'Optimistic and zk rollups both slash fees for 48 hours; on-chain DEX flows jump. Watch DeFi beta and ETH correlation.',
+    sentiment: 'bullish',
+    assets: ['ETH', 'ARB', 'MNT', 'POL'],
+    impact: 'Scaling catalysts tend to lift ETH beta trades.'
+  },
+  {
+    id: 'stablecoin-flow',
+    title: 'Stablecoin inflows hit multi-month high',
+    summary:
+      'USDT, USDC, and PYUSD issuance expand on exchanges, hinting at fresh sidelined liquidity waiting to deploy.',
+    sentiment: 'bullish',
+    assets: ['USDT', 'USDC', 'DAI', 'PYUSD', 'USDS', 'USD1'],
+    impact: 'Rising stable balances often precede market rotations.'
+  },
+  {
+    id: 'layer1-outage',
+    title: 'Minor outage on emerging L1 resolved after patch',
+    summary:
+      'SUI validators briefly halt blocks; chain restarts within 30 minutes with new client release. Users watching reliability.',
+    sentiment: 'bearish',
+    assets: ['SUI', 'AVAX', 'NEAR'],
+    impact: 'Infra hiccups can pressure riskier L1 valuations.'
+  },
+  {
+    id: 'etf-flows',
+    title: 'Spot BTC ETF logs third straight day of inflows',
+    summary:
+      'Legacy funds continue to add WBTC backing; on-chain wraps mirror demand. Vol desks note rising call skew.',
+    sentiment: 'bullish',
+    assets: ['BTC', 'WBTC'],
+    impact: 'Institutional demand may firm support zones.'
+  },
+  {
+    id: 'reg-hearing',
+    title: 'Senate hearing floats stricter privacy coin oversight',
+    summary:
+      'Draft language singles out XMR and ZEC mixers; compliance desks anticipate liquidity fragmentation.',
+    sentiment: 'bearish',
+    assets: ['XMR', 'ZEC'],
+    impact: 'Policy headwinds could widen spreads and damp volume.'
+  },
+  {
+    id: 'defi-hack',
+    title: 'Mid-size DeFi lending pool pauses after oracle drift',
+    summary:
+      'Protocol halts deposits while patching price feed; insurers flag temporary capital flight into majors and stables.',
+    sentiment: 'cautious',
+    assets: ['AAVE', 'ETH', 'DAI'],
+    impact: 'Short-term volatility expected across DeFi blue chips.'
+  },
+  {
+    id: 'meme-season',
+    title: 'Meme coin rotation accelerates on social buzz',
+    summary:
+      'PEPE, PUMP, and M light up crypto Twitter; funding rates widen as speculators chase momentum.',
+    sentiment: 'speculative',
+    assets: ['PEPE', 'PUMP', 'M'],
+    impact: 'High beta could spill into alt baskets if mania holds.'
+  },
+  {
+    id: 'ai-partnership',
+    title: 'AI lab announces compute deal with decentralized storage network',
+    summary:
+      'Partnership pilots GPU leasing and data attestation on-chain; storage tokens bid on efficiency gains.',
+    sentiment: 'bullish',
+    assets: ['FIL', 'ICP', 'TAO'],
+    impact: 'Narrative lift for AI-aligned infra assets.'
+  },
+  {
+    id: 'payments-push',
+    title: 'Fintech giant expands stable settlement pilot',
+    summary:
+      'Retail app rolls PYUSD and USDC to three new markets; analysts eye volume growth versus card rails.',
+    sentiment: 'bullish',
+    assets: ['PYUSD', 'USDC', 'USDT'],
+    impact: 'Payments traction can tighten stablecoin spreads.'
+  },
+  {
+    id: 'miner-revenue',
+    title: 'Hashrate climbs while miner revenues soften',
+    summary:
+      'Higher difficulty squeezes margins; some miners hedge by selling forward. Could add near-term BTC supply.',
+    sentiment: 'cautious',
+    assets: ['BTC', 'WBTC'],
+    impact: 'Extra sell pressure may weigh on spot bids.'
+  },
+  {
+    id: 'governance-upgrade',
+    title: 'DAO schedules vote on fee switch activation',
+    summary:
+      'Uniswap-style governance debates routing a slice of fees to stakers; liquidity providers price in incentives.',
+    sentiment: 'bullish',
+    assets: ['UNI', 'CRO'],
+    impact: 'Protocol revenue could re-rate governance tokens.'
+  },
+  {
+    id: 'airdrop-rumor',
+    title: 'L2 points program hints at surprise airdrop window',
+    summary:
+      'Validator code references “epoch bonus” triggering speculation. On-chain activity spikes as users farm eligibility.',
+    sentiment: 'speculative',
+    assets: ['ARB', 'POL', 'MNT'],
+    impact: 'Engagement surges but may unwind after snapshot.'
+  },
+  {
+    id: 'governance-spat',
+    title: 'Validator spat over treasury spend hits social channels',
+    summary:
+      'Community split on diverting funds to marketing. Short-term governance uncertainty weighs on sentiment.',
+    sentiment: 'bearish',
+    assets: ['ATOM', 'NEAR', 'QNT'],
+    impact: 'Choppy price action likely until clarity returns.'
+  },
+  {
+    id: 'energy-prices',
+    title: 'Energy futures dip, easing miner cost pressure',
+    summary:
+      'Natural gas contracts slide 4%; proof-of-work miners eye better margins, potentially slowing sell flows.',
+    sentiment: 'bullish',
+    assets: ['BTC', 'WBTC', 'LTC', 'ETC'],
+    impact: 'Lower opex can reduce forced selling risk.'
+  }
+];
+
 export const quizTopics = [
   {
     id: 'topic-bitcoin',
