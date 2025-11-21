@@ -382,7 +382,24 @@
                 </div>
                 <div>
                   <p class="text-sm text-slate-400">Total performance</p>
-                  <canvas id="portfolio-chart" class="w-full h-48 mt-3"></canvas>
+                  <div class="flex flex-col gap-2 mt-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-400">
+                      <div id="portfolio-timeframe-controls" class="flex flex-wrap gap-2"></div>
+                      <div id="portfolio-zoom-controls" class="flex items-center gap-2">
+                        <button data-zoom="out" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                          −
+                        </button>
+                        <button data-zoom="reset" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                          Reset
+                        </button>
+                        <button data-zoom="in" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <canvas id="portfolio-chart" class="w-full h-48"></canvas>
+                    <p id="portfolio-inspect" class="text-xs text-slate-300"></p>
+                  </div>
                 </div>
                 <div>
                   <p class="text-sm text-slate-400 mb-2">Holdings</p>
@@ -404,7 +421,24 @@
                   <div id="sandbox-prices" class="space-y-3"></div>
                   <div>
                     <p class="text-sm text-slate-400">Asset trend</p>
-                    <canvas id="asset-chart" class="w-full h-48 mt-3"></canvas>
+                    <div class="flex flex-col gap-2 mt-2">
+                      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-400">
+                        <div id="asset-timeframe-controls" class="flex flex-wrap gap-2"></div>
+                        <div id="asset-zoom-controls" class="flex items-center gap-2">
+                          <button data-zoom="out" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                            −
+                          </button>
+                          <button data-zoom="reset" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                            Reset
+                          </button>
+                          <button data-zoom="in" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                            +
+                          </button>
+                        </div>
+                      </div>
+                      <canvas id="asset-chart" class="w-full h-48"></canvas>
+                      <p id="asset-inspect" class="text-xs text-slate-300"></p>
+                    </div>
                   </div>
                 </div>
                 <div class="card-glass rounded-3xl p-6 space-y-4">
