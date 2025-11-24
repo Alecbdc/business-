@@ -17,7 +17,7 @@ const {
   sandboxBulletins,
   strategyCards,
   eventScenarios,
-  learningTracks
+  learningTracks = []
 } = data;
 
 const cacheKey = 'aether-cache-v2';
