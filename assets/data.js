@@ -932,3 +932,89 @@ export const quizTopics = [
     ]
   }
 ];
+
+export const strategyCards = [
+  {
+    id: 'trend-following',
+    name: 'Trend following',
+    difficulty: 'Beginner',
+    description: 'Ride sustained moves rather than predicting tops or bottoms.',
+    note: 'Use simulated charts to spot higher highs or lower lows before scaling entries.'
+  },
+  {
+    id: 'dca',
+    name: 'Dollar Cost Averaging (DCA)',
+    difficulty: 'Beginner',
+    description: 'Invest a fixed amount at regular intervals to smooth volatility.',
+    note: 'Set recurring buys in your practice to see how cost basis steadies swings.'
+  },
+  {
+    id: 'breakout',
+    name: 'Breakout checks',
+    difficulty: 'Intermediate',
+    description: 'Wait for range breaks with volume before chasing momentum.',
+    note: 'Combine news bulletins with simulated spikes to test your patience and sizing.'
+  },
+  {
+    id: 'news-react',
+    name: 'News reaction',
+    difficulty: 'Intermediate',
+    description: 'Gauge sentiment shifts from headlines and react with defined risk.',
+    note: 'Use the bulletin board plus scenario lab to observe how bias tilts prices.'
+  },
+  {
+    id: 'rebalance',
+    name: 'Periodic rebalance',
+    difficulty: 'Advanced',
+    description: 'Trim winners and add to laggards on a schedule to manage concentration.',
+    note: 'Simulate monthly rebalances to keep BTC/ETH weight in check as prices drift.'
+  }
+];
+
+export const eventScenarios = [
+  {
+    id: 'btc-etf-approval',
+    name: 'Bitcoin ETF approval',
+    description: 'Simulate capital inflows and optimistic majors after a landmark ETF nod.',
+    impact: { bias: 'bullish', affectedAssets: ['BTC', 'ETH', 'SOL'], shockMagnitude: 0.05, duration: 6 }
+  },
+  {
+    id: 'exchange-hack',
+    name: 'Major exchange hack',
+    description: 'Model a risk-off wobble and short-term sell pressure across majors.',
+    impact: { bias: 'bearish', affectedAssets: ['BTC', 'ETH', 'ALT_BASKET'], shockMagnitude: -0.08, duration: 6 }
+  },
+  {
+    id: 'stablecoin-peg',
+    name: 'Stablecoin de-peg scare',
+    description: 'Test what happens when stable liquidity jitters ripple through alts.',
+    impact: { bias: 'bearish', affectedAssets: ['USDT', 'USDC', 'DAI', 'ALT_BASKET'], shockMagnitude: -0.03, duration: 4 }
+  },
+  {
+    id: 'l2-surge',
+    name: 'Layer-2 adoption surge',
+    description: 'Explore optimism-driven moves in ecosystems tied to scaling wins.',
+    impact: { bias: 'bullish', affectedAssets: ['ETH', 'ARB', 'POL'], shockMagnitude: 0.04, duration: 5 }
+  }
+];
+
+export const learningTracks = [
+  {
+    id: 'beginner',
+    name: 'Beginner',
+    description: 'Core concepts: what is crypto, risk basics, order types.',
+    lessonIds: ['lesson-intro-crypto', 'lesson-monetary-history', 'lesson-wallets', 'lesson-risks-basics']
+  },
+  {
+    id: 'intermediate',
+    name: 'Intermediate',
+    description: 'Market structure, sentiment, strategies, and reacting to catalysts.',
+    lessonIds: ['lesson-defi', 'lesson-yield', 'lesson-defi-risk', 'lesson-trading-basics', 'lesson-sentiment']
+  },
+  {
+    id: 'advanced',
+    name: 'Advanced',
+    description: 'Advanced scenarios, news interpretation, and portfolio management.',
+    lessonIds: ['lesson-market-prediction', 'lesson-portfolio-shapes', 'lesson-risk-sim', 'lesson-macro']
+  }
+];

@@ -1,4 +1,13 @@
-import { courses, defaultSandboxState, initialPrices, quizTopics, sandboxBulletins } from './data.js';
+import {
+  courses,
+  defaultSandboxState,
+  initialPrices,
+  quizTopics,
+  sandboxBulletins,
+  strategyCards,
+  eventScenarios,
+  learningTracks
+} from './data.js';
 import {
   supabaseConfig,
   featureToggles,
@@ -128,7 +137,9 @@ const state = {
   sandbox: {
     balance: defaultSandboxState.balance,
     holdings: normalizeHoldings(defaultSandboxState.holdings),
-    history: defaultSandboxState.history ?? []
+    history: defaultSandboxState.history ?? [],
+    activeScenario: null,
+    scenarioTicks: 0
   },
   prices: { ...latestSeededPrices },
   priceHistory: seededPriceHistory,
@@ -138,7 +149,8 @@ const state = {
   activeAsset: assetSymbols[0] ?? 'BTC',
   bulletin: { bucket: null, items: [] },
   activeBulletinArticleId: null,
-  ui: { showAllAssets: false }
+  ui: { showAllAssets: false },
+  pendingTrade: null
 };
 
 const elements = {};
@@ -572,6 +584,68 @@ function renderCurriculumSummary() {
       </div>
     </div>
   `;
+  renderLearningTracks();
+  renderStrategyCards();
+}
+
+function renderLearningTracks() {
+  const list = $('#learning-track-list');
+  if (!list) return;
+  list.innerHTML = learningTracks
+    .map((track) => {
+      const total = track.lessonIds.length;
+      const done = track.lessonIds.filter((lessonId) => state.progress[lessonId]?.completed).length;
+      const percent = total ? Math.round((done / total) * 100) : 0;
+      return `
+        <div class="rounded-2xl border border-white/10 p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-semibold">${track.name}</p>
+              <p class="text-xs text-slate-400">${track.description}</p>
+            </div>
+            <span class="badge">${done}/${total}</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+            <span class="block h-full bg-gradient-to-r from-sky-400 to-emerald-400" style="width: ${percent}%;"></span>
+          </div>
+          <button class="text-xs px-3 py-1 rounded-full border border-white/15 hover:border-white/40" data-track="${track.id}">
+            Continue
+          </button>
+        </div>
+      `;
+    })
+    .join('');
+  list.querySelectorAll('button[data-track]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const track = learningTracks.find((t) => t.id === btn.dataset.track);
+      if (!track) return;
+      const next = track.lessonIds.find((lessonId) => !state.progress[lessonId]?.completed) ?? track.lessonIds[0];
+      if (next) {
+        state.selectedLessonId = next;
+        renderLessonDetail();
+        setView('curriculum');
+      }
+    });
+  });
+}
+
+function renderStrategyCards() {
+  const list = $('#strategy-card-list');
+  if (!list) return;
+  list.innerHTML = strategyCards
+    .map(
+      (card) => `
+        <div class="rounded-2xl border border-white/10 p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold">${card.name}</p>
+            <span class="mini-badge">${card.difficulty}</span>
+          </div>
+          <p class="text-sm text-slate-300">${card.description}</p>
+          <p class="text-xs text-slate-400">${card.note}</p>
+        </div>
+      `
+    )
+    .join('');
 }
 
 function setQuizTopic(topicId) {
@@ -1062,6 +1136,63 @@ function renderBulletinArticle() {
   timeEl.textContent = formatRelativeTime(article.ts ?? Date.now());
 }
 
+function computePortfolioInsights() {
+  const totalValue = calculatePortfolioValue();
+  const entries = Object.entries(state.sandbox.holdings || {}).filter(([, units]) => units > 0);
+  const values = entries.map(([symbol, units]) => ({ symbol, value: units * (state.prices[symbol] ?? 0) }));
+  const top = values.sort((a, b) => b.value - a.value)[0];
+  const concentration = totalValue && top ? `${Math.round((top.value / totalValue) * 100)}% in ${top.symbol}` : 'No holdings';
+  const series = filterSeriesByTimeframe(state.portfolioHistory, state.chartTimeframes.portfolio);
+  const returns = [];
+  for (let i = 1; i < series.length; i++) {
+    const prev = series[i - 1].value;
+    const cur = series[i].value;
+    if (prev) returns.push((cur - prev) / prev);
+  }
+  const vol = computeStdDev(returns);
+  const volLabel = vol < 0.005 ? 'Low' : vol < 0.015 ? 'Moderate' : 'High';
+  const risk = vol < 0.005 ? 'Conservative' : vol < 0.015 ? 'Moderate' : 'Aggressive';
+  return { concentration, volatility: volLabel, risk };
+}
+
+function renderPortfolioInsights() {
+  const insight = computePortfolioInsights();
+  const riskEl = $('#insight-risk');
+  const concEl = $('#insight-concentration');
+  const volEl = $('#insight-volatility');
+  if (!riskEl || !concEl || !volEl) return;
+  riskEl.textContent = insight.risk;
+  concEl.textContent = insight.concentration;
+  volEl.textContent = insight.volatility;
+}
+
+function updateTradeAssistant() {
+  const tipEl = $('#trade-assistant-text');
+  if (!tipEl) return;
+  const holdings = Object.entries(state.sandbox.holdings || {}).filter(([, units]) => units > 0);
+  const totalValue = calculatePortfolioValue();
+  const activePriceHistory = state.priceHistory[state.activeAsset] ?? [];
+  const latest = activePriceHistory.slice(-5);
+  const vol = computeStdDev(
+    latest.map((point, idx) => {
+      if (idx === 0) return 0;
+      const prev = latest[idx - 1].value;
+      return prev ? (point.value - prev) / prev : 0;
+    })
+  );
+  const concentration = holdings.sort((a, b) => b[1] - a[1]).slice(0, 1);
+  if (vol > 0.02) {
+    tipEl.textContent = 'High volatility increases both risk and potential reward. Consider your position sizing.';
+  } else if (concentration.length && totalValue) {
+    const symbol = concentration[0][0];
+    tipEl.textContent = `A big share of your simulated portfolio sits in ${symbol}. Diversification reduces single-asset swings.`;
+  } else if (holdings.length < 1) {
+    tipEl.textContent = 'Start with small position sizes and review the sentiment pulse before placing trades.';
+  } else {
+    tipEl.textContent = 'Avoid trading solely on short-term spikes; combine news cues with your timeframe of choice.';
+  }
+}
+
 function renderSandbox() {
   const portfolioValue = calculatePortfolioValue();
   $('#sandbox-balance').textContent = formatCurrency(state.sandbox.balance);
@@ -1097,6 +1228,7 @@ function renderSandbox() {
   historyContainer.innerHTML = historyMarkup || '<p class="text-slate-400 text-sm">No trades yet</p>';
 
   renderBulletinBoard();
+  renderSentiment();
 
   const activeAsset = state.prices[state.activeAsset] != null ? state.activeAsset : assetSymbols[0];
   state.activeAsset = activeAsset;
@@ -1146,6 +1278,7 @@ function renderSandbox() {
         state.activeAsset = btn.dataset.asset;
         renderSandbox();
         requestAnimationFrame(renderSandboxCharts);
+        updateTradeAssistant();
       });
     });
     const toggleBtn = $('#asset-toggle');
@@ -1158,6 +1291,8 @@ function renderSandbox() {
     }
   }
 
+  updateTradeAssistant();
+  renderPortfolioInsights();
   requestAnimationFrame(renderSandboxCharts);
 }
 
@@ -1330,8 +1465,85 @@ function recordPortfolioSnapshot() {
   state.portfolioHistory = state.portfolioHistory.slice(-historyLimit);
 }
 
+function computeStdDev(values = []) {
+  if (!values.length) return 0;
+  const mean = values.reduce((a, b) => a + b, 0) / values.length;
+  const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / values.length;
+  return Math.sqrt(variance);
+}
+
+function buildScenarioDriftMap() {
+  const map = {};
+  const scenario = state.sandbox.activeScenario;
+  if (!scenario || !scenario.impact) return map;
+  if (state.sandbox.scenarioTicks <= 0) {
+    state.sandbox.activeScenario = null;
+    return map;
+  }
+  state.sandbox.scenarioTicks -= 1;
+  const { affectedAssets = [], shockMagnitude = 0 } = scenario.impact;
+  const targets = affectedAssets.includes('ALT_BASKET')
+    ? [...assetSymbols.filter((sym) => sym !== 'BTC' && sym !== 'ETH' && !sym.startsWith('USD')), ...affectedAssets]
+    : affectedAssets;
+  targets.forEach((symbol) => {
+    if (symbol === 'ALT_BASKET') return;
+    map[symbol] = (map[symbol] ?? 0) + shockMagnitude;
+  });
+  return map;
+}
+
+function computeSentimentPulse() {
+  const series = filterSeriesByTimeframe(state.portfolioHistory, state.chartTimeframes.portfolio) || [];
+  if (series.length < 4) {
+    return { label: 'Neutral', fg: 50, volatilityLabel: 'Medium', description: 'Awaiting more simulated history.' };
+  }
+  const first = series[0].value;
+  const last = series[series.length - 1].value;
+  const change = first ? (last - first) / first : 0;
+  const returns = [];
+  for (let i = 1; i < series.length; i++) {
+    const prev = series[i - 1].value;
+    const cur = series[i].value;
+    if (prev) returns.push((cur - prev) / prev);
+  }
+  const vol = computeStdDev(returns);
+  const fg = Math.max(0, Math.min(100, Math.round(50 + change * 800 - vol * 2000)));
+  const label = change > 0.03 ? 'Bullish' : change < -0.03 ? 'Bearish' : 'Neutral';
+  const volatilityLabel = vol < 0.005 ? 'Low' : vol < 0.015 ? 'Medium' : 'High';
+  return {
+    label,
+    fg,
+    volatilityLabel,
+    description: label === 'Bullish' ? 'Positive drift in your simulated portfolio.' : label === 'Bearish' ? 'Downward tilt detected.' : 'Sideways chop with balanced sentiment.'
+  };
+}
+
+function renderSentiment() {
+  const pulse = computeSentimentPulse();
+  const labelEl = $('#sentiment-label');
+  const fgEl = $('#sentiment-fg');
+  const volEl = $('#sentiment-volatility');
+  const descEl = $('#sentiment-description');
+  if (!labelEl || !fgEl || !volEl || !descEl) return;
+  labelEl.textContent = pulse.label;
+  labelEl.className = `badge ${
+    pulse.label === 'Bullish'
+      ? 'bg-emerald-500/20 text-emerald-100'
+      : pulse.label === 'Bearish'
+      ? 'bg-rose-500/20 text-rose-100'
+      : 'bg-sky-500/20 text-sky-100'
+  }`;
+  fgEl.textContent = `${pulse.fg} / 100`;
+  volEl.textContent = pulse.volatilityLabel;
+  descEl.textContent = pulse.description;
+}
+
 function tickPrices() {
-  const driftMap = buildBulletinDriftMap();
+  const driftMap = { ...buildBulletinDriftMap() };
+  const scenarioMap = buildScenarioDriftMap();
+  Object.keys(scenarioMap).forEach((symbol) => {
+    driftMap[symbol] = (driftMap[symbol] ?? 0) + scenarioMap[symbol];
+  });
   Object.keys(state.prices).forEach((symbol) => {
     const drift = driftMap[symbol] ?? 0;
     state.prices[symbol] = randomizePrice(state.prices[symbol], drift);
@@ -1340,6 +1552,8 @@ function tickPrices() {
   recordPortfolioSnapshot();
   renderSandbox();
   renderDashboard();
+  renderSentiment();
+  renderPortfolioInsights();
 }
 
 function startPriceLoop() {
@@ -1364,6 +1578,31 @@ function renderAssetSelects() {
   });
 }
 
+function renderEventSelect() {
+  const select = $('#event-select');
+  if (!select) return;
+  select.innerHTML = ['<option value="">Choose a scenario…</option>',
+    ...eventScenarios.map((scenario) => `<option value="${scenario.id}">${scenario.name}</option>`)
+  ].join('');
+}
+
+function handleScenarioChange(event) {
+  const scenarioId = event.target.value;
+  const desc = $('#event-description');
+  if (!scenarioId) {
+    state.sandbox.activeScenario = null;
+    state.sandbox.scenarioTicks = 0;
+    if (desc) desc.textContent = 'Select a scenario to simulate its impact on your sandbox prices.';
+    return;
+  }
+  const scenario = eventScenarios.find((s) => s.id === scenarioId);
+  if (!scenario) return;
+  state.sandbox.activeScenario = scenario;
+  state.sandbox.scenarioTicks = scenario.impact?.duration ?? 5;
+  if (desc) desc.textContent = scenario.description;
+  showToast(`Scenario applied: ${scenario.name}`, 'info');
+}
+
 async function syncSandbox() {
   state.sandbox.holdings = normalizeHoldings(state.sandbox.holdings);
   persistCache();
@@ -1380,6 +1619,40 @@ async function syncSandbox() {
   }
 }
 
+function openTradeConfirm(summary, trade) {
+  const modal = $('#trade-confirm-modal');
+  const summaryEl = $('#trade-confirm-summary');
+  if (!modal || !summaryEl) return;
+  summaryEl.textContent = summary;
+  state.pendingTrade = trade;
+  modal.classList.remove('hidden');
+}
+
+function closeTradeConfirm() {
+  const modal = $('#trade-confirm-modal');
+  if (modal) modal.classList.add('hidden');
+  state.pendingTrade = null;
+}
+
+async function executeTrade(trade) {
+  if (!trade) return;
+  if (trade.side === 'BUY') {
+    state.sandbox.balance -= trade.amount;
+    state.sandbox.holdings[trade.asset] = (state.sandbox.holdings[trade.asset] ?? 0) + trade.units;
+    recordTrade({ type: 'BUY', detail: `${trade.asset} @ ${trade.price.toFixed(2)} (${trade.units.toFixed(4)} units)` });
+  } else {
+    state.sandbox.balance += trade.amount;
+    state.sandbox.holdings[trade.asset] = Math.max(0, (state.sandbox.holdings[trade.asset] ?? 0) - trade.units);
+    recordTrade({ type: 'SELL', detail: `${trade.asset} @ ${trade.price.toFixed(2)} (${trade.units.toFixed(4)} units)` });
+  }
+  await syncSandbox();
+  closeTradeConfirm();
+  if (trade.side === 'BUY') $('#buy-form')?.reset();
+  if (trade.side === 'SELL') $('#sell-form')?.reset();
+  showToast(`${trade.side === 'BUY' ? 'Purchase' : 'Sale'} executed`, 'success');
+  updateTradeAssistant();
+}
+
 async function handleBuy(event) {
   event.preventDefault();
   const amount = Number($('#buy-amount').value);
@@ -1388,21 +1661,20 @@ async function handleBuy(event) {
     showToast('Select a supported asset', 'error');
     return;
   }
-  if (!state.sandbox.holdings[asset]) {
-    state.sandbox.holdings[asset] = 0;
-  }
   if (amount <= 0 || amount > state.sandbox.balance) {
     showToast('Insufficient balance', 'error');
     return;
   }
   const price = state.prices[asset];
   const units = amount / price;
-  state.sandbox.balance -= amount;
-  state.sandbox.holdings[asset] += units;
-  recordTrade({ type: 'BUY', detail: `${asset} @ ${price.toFixed(2)} (${units.toFixed(4)} units)` });
-  await syncSandbox();
-  $('#buy-form').reset();
-  showToast('Purchase executed', 'success');
+  const nextBalance = state.sandbox.balance - amount;
+  openTradeConfirm(`Buy ${units.toFixed(4)} ${asset} at ${formatCurrency(price)} (est. total ${formatCurrency(amount)}). New cash balance: ${formatCurrency(nextBalance)}.`, {
+    side: 'BUY',
+    asset,
+    amount,
+    price,
+    units
+  });
 }
 
 async function handleSell(event) {
@@ -1423,12 +1695,14 @@ async function handleSell(event) {
   }
   const price = state.prices[asset];
   const amount = units * price;
-  state.sandbox.balance += amount;
-  state.sandbox.holdings[asset] = Math.max(0, state.sandbox.holdings[asset] - units);
-  recordTrade({ type: 'SELL', detail: `${asset} @ ${price.toFixed(2)} (${units.toFixed(4)} units)` });
-  await syncSandbox();
-  $('#sell-form').reset();
-  showToast('Sale executed', 'success');
+  const nextBalance = state.sandbox.balance + amount;
+  openTradeConfirm(`Sell ${units.toFixed(4)} ${asset} at ${formatCurrency(price)} (est. ${formatCurrency(amount)}). New cash balance: ${formatCurrency(nextBalance)}.`, {
+    side: 'SELL',
+    asset,
+    amount,
+    price,
+    units
+  });
 }
 
 async function ensureProfile(user) {
@@ -1615,17 +1889,20 @@ function initBackendSettingsPanel() {
 }
 
 function bindEvents() {
-  $('#signup-form').addEventListener('submit', handleSignup);
-  $('#login-form').addEventListener('submit', handleLogin);
-  $('#google-auth').addEventListener('click', handleGoogle);
-  $('#logout-btn').addEventListener('click', handleLogout);
-  $('#complete-lesson-btn').addEventListener('click', handleMarkComplete);
-  $('#submit-quiz').addEventListener('click', handleQuizSubmit);
-  $('#buy-form').addEventListener('submit', handleBuy);
-  $('#sell-form').addEventListener('submit', handleSell);
-  $('#refresh-courses').addEventListener('click', renderCourses);
-  $('#enter-demo').addEventListener('click', handleDemoEntry);
+  $('#signup-form')?.addEventListener('submit', handleSignup);
+  $('#login-form')?.addEventListener('submit', handleLogin);
+  $('#google-auth')?.addEventListener('click', handleGoogle);
+  $('#logout-btn')?.addEventListener('click', handleLogout);
+  $('#complete-lesson-btn')?.addEventListener('click', handleMarkComplete);
+  $('#submit-quiz')?.addEventListener('click', handleQuizSubmit);
+  $('#buy-form')?.addEventListener('submit', handleBuy);
+  $('#sell-form')?.addEventListener('submit', handleSell);
+  $('#refresh-courses')?.addEventListener('click', renderCourses);
+  $('#enter-demo')?.addEventListener('click', handleDemoEntry);
   $('#bulletin-article-back')?.addEventListener('click', () => setView(state.previousView || 'sandbox'));
+  $('#trade-confirm-cancel')?.addEventListener('click', closeTradeConfirm);
+  $('#trade-confirm-accept')?.addEventListener('click', () => executeTrade(state.pendingTrade));
+  $('#event-select')?.addEventListener('change', handleScenarioChange);
   bindNavigation();
 }
 
@@ -1698,6 +1975,7 @@ function init() {
   renderQuiz();
   renderQuizThresholdHint();
   renderAssetSelects();
+  renderEventSelect();
   initChartControls();
   renderSandbox();
   renderDashboard();
