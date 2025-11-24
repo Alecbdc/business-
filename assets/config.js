@@ -1,4 +1,4 @@
-export const FORCE_DEMO_MODE = true; // set to false for real deployments
+export const FORCE_DEMO_MODE = false; // set to true for offline-only builds
 
 const storageKey = 'aether-supabase-overrides';
 

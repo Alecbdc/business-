@@ -1996,7 +1996,7 @@ function init() {
   // Safety net: if we're still on the auth screen shortly after load, auto-open demo mode.
   setTimeout(() => {
     const authHidden = $('#view-auth')?.classList.contains('hidden');
-    if (!authHidden && !supabaseClient) {
+    if (!authHidden && (!supabaseClient || !state.user)) {
       handleDemoEntry(true);
     }
   }, 800);
