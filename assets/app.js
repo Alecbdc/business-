@@ -1,13 +1,4 @@
-import {
-  courses,
-  defaultSandboxState,
-  initialPrices,
-  quizTopics,
-  sandboxBulletins,
-  strategyCards,
-  eventScenarios,
-  learningTracks
-} from './data.js';
+import * as data from './data.js';
 import {
   supabaseConfig,
   featureToggles,
@@ -17,6 +8,17 @@ import {
   hasSupabaseCredentials,
   FORCE_DEMO_MODE
 } from './config.js';
+
+const {
+  courses,
+  defaultSandboxState,
+  initialPrices,
+  quizTopics,
+  sandboxBulletins,
+  strategyCards,
+  eventScenarios,
+  learningTracks
+} = data;
 
 const cacheKey = 'aether-cache-v2';
 const historyLimit = 1200;
