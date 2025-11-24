@@ -41,29 +41,6 @@
       </div>
     </div>
 
-    <div
-      id="trade-confirm-modal"
-      class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden"
-    >
-      <div class="card-glass rounded-3xl p-6 w-full max-w-md space-y-4">
-        <h3 class="text-lg font-semibold">Confirm trade</h3>
-        <p id="trade-confirm-summary" class="text-sm text-slate-300"></p>
-        <p class="text-xs text-slate-400">
-          This is a simulated environment for educational purposes only. No real funds are used.
-        </p>
-        <div class="flex justify-end gap-3 text-sm">
-          <button id="trade-confirm-cancel" class="px-4 py-2 rounded-2xl border border-white/20">
-            Cancel
-          </button>
-          <button
-            id="trade-confirm-accept"
-            class="px-4 py-2 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-950 font-semibold"
-          >
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
     <div id="view-auth" class="relative z-10 px-6 py-16 flex items-center justify-center min-h-screen hidden">
       <div class="max-w-5xl w-full grid gap-10 lg:grid-cols-2">
         <section class="card-glass rounded-3xl p-8 space-y-6">
@@ -345,42 +322,11 @@
                 </div>
                 <div id="dashboard-progress" class="scroll-area space-y-3"></div>
               </div>
-              <div class="card-glass rounded-3xl p-6 space-y-3" id="portfolio-insights">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm text-slate-400">Portfolio insights</p>
-                </div>
-                <div class="space-y-2 text-sm text-slate-300">
-                  <div class="flex items-center justify-between">
-                    <span>Risk profile</span>
-                    <span id="insight-risk">Moderate</span>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <span>Concentration</span>
-                    <span id="insight-concentration">—</span>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <span>Volatility</span>
-                    <span id="insight-volatility">—</span>
-                  </div>
-                </div>
-                <p class="text-xs text-slate-400">
-                  Insights are based on your simulated trades and prices, for learning only.
-                </p>
-              </div>
             </div>
           </section>
 
           <section id="view-curriculum" class="app-view hidden space-y-8">
             <div class="card-glass rounded-3xl p-8" id="curriculum-progress"></div>
-            <section class="card-glass rounded-3xl p-6 space-y-4" id="learning-path">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm text-slate-400">Learning path</p>
-                  <h3 class="text-2xl font-semibold">Progress by track</h3>
-                </div>
-              </div>
-              <div id="learning-track-list" class="space-y-3"></div>
-            </section>
             <div class="grid gap-6 lg:grid-cols-2">
               <div class="card-glass rounded-3xl p-8 space-y-6" id="curriculum-videos">
                 <div class="flex items-center justify-between">
@@ -430,15 +376,6 @@
                 </button>
               </div>
             </div>
-            <section class="card-glass rounded-3xl p-6 space-y-4" id="strategy-section">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm text-slate-400">Learning lab</p>
-                  <h3 class="text-2xl font-semibold">Trading strategies</h3>
-                </div>
-              </div>
-              <div id="strategy-card-list" class="grid gap-3 md:grid-cols-2"></div>
-            </section>
           </section>
 
           <section id="view-sandbox" class="app-view hidden space-y-8">
@@ -474,38 +411,6 @@
                     <canvas id="portfolio-chart" class="w-full h-48"></canvas>
                     <p id="portfolio-inspect" class="text-xs text-slate-300"></p>
                   </div>
-                </div>
-                <div class="card-glass rounded-3xl p-4 space-y-2" id="sandbox-sentiment">
-                  <div class="flex items-center justify-between">
-                    <p class="text-sm text-slate-400">Market sentiment</p>
-                    <span id="sentiment-label" class="badge">Neutral</span>
-                  </div>
-                  <p id="sentiment-description" class="text-xs text-slate-400">
-                    Sentiment is based on your simulated market conditions.
-                  </p>
-                  <div class="flex items-center justify-between text-xs text-slate-300">
-                    <span>Fear &amp; greed</span>
-                    <span id="sentiment-fg">50 / 100</span>
-                  </div>
-                  <div class="flex items-center justify-between text-xs text-slate-300">
-                    <span>Volatility</span>
-                    <span id="sentiment-volatility">Medium</span>
-                  </div>
-                </div>
-                <div class="card-glass rounded-3xl p-4 space-y-3" id="sandbox-events">
-                  <div class="flex items-center justify-between">
-                    <p class="text-sm text-slate-400">Scenario lab</p>
-                    <p class="text-xs text-slate-400">Simulated events</p>
-                  </div>
-                  <select
-                    id="event-select"
-                    class="w-full rounded-2xl border border-white/10 bg-transparent px-3 py-2 text-sm"
-                  >
-                    <option value="">Choose a scenario…</option>
-                  </select>
-                  <p id="event-description" class="text-xs text-slate-400">
-                    Select a scenario to simulate its impact on your sandbox prices.
-                  </p>
                 </div>
                 <div>
                   <p class="text-sm text-slate-400 mb-2">Holdings</p>
@@ -545,9 +450,9 @@
                         Buy
                       </button>
                     </form>
-                    <form id="sell-form" class="space-y-3">
-                      <p class="text-sm text-slate-400">Sell crypto</p>
-                      <select id="sell-asset" class="w-full rounded-2xl border border-white/10 px-4 py-2"></select>
+                  <form id="sell-form" class="space-y-3">
+                    <p class="text-sm text-slate-400">Sell crypto</p>
+                    <select id="sell-asset" class="w-full rounded-2xl border border-white/10 px-4 py-2"></select>
                       <input
                         id="sell-amount"
                         type="number"
@@ -561,12 +466,6 @@
                         Sell
                       </button>
                     </form>
-                  </div>
-                  <div id="trade-assistant" class="mt-4 rounded-2xl bg-white/5 p-3 text-xs text-slate-300">
-                    <p class="font-semibold mb-1">Educational tip</p>
-                    <p id="trade-assistant-text">
-                      This sandbox is for learning only. Prices and indicators are simulated.
-                    </p>
                   </div>
                 </div>
                 <div class="card-glass rounded-3xl p-8 space-y-6">
