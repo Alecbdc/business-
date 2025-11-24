@@ -1980,6 +1980,11 @@ function init() {
   if (!supabaseClient || FORCE_DEMO_MODE) {
     handleDemoEntry(true);
   }
+  setTimeout(() => {
+    if (!demoEntered) {
+      handleDemoEntry(true);
+    }
+  }, 800);
   resetHistorySnapshots();
   renderCourses();
   renderCurriculumSummary();
