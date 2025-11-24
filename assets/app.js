@@ -315,6 +315,55 @@ function calculatePortfolioValue() {
   );
 }
 
+function standardDeviation(values = []) {
+  if (!values.length) return 0;
+  const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+  const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / values.length;
+  return Math.sqrt(variance);
+}
+
+function computePortfolioInsights() {
+  const portfolioValue = calculatePortfolioValue();
+  const holdings = Object.entries(state.sandbox.holdings || {}).map(([symbol, units]) => ({
+    symbol,
+    value: units * (state.prices[symbol] ?? 0)
+  }));
+  const investedHoldings = holdings.filter((h) => h.value > 0.01);
+  const topHolding = investedHoldings.reduce((max, current) => (current.value > max.value ? current : max), {
+    symbol: '—',
+    value: 0
+  });
+  const concentrationShare = portfolioValue ? (topHolding.value / portfolioValue) * 100 : 0;
+
+  const history = state.portfolioHistory.slice(-50);
+  const returns = [];
+  for (let i = 1; i < history.length; i++) {
+    const prev = history[i - 1].value || 1;
+    returns.push((history[i].value - prev) / prev);
+  }
+  const volatilityScore = standardDeviation(returns);
+  let volatilityLabel = 'Low';
+  if (volatilityScore > 0.04) {
+    volatilityLabel = 'High';
+  } else if (volatilityScore > 0.015) {
+    volatilityLabel = 'Moderate';
+  }
+
+  let riskProfile = 'Low';
+  if (volatilityLabel === 'High') riskProfile = 'High';
+  if (volatilityLabel === 'Moderate') riskProfile = 'Moderate';
+
+  const concentrationLabel = portfolioValue && topHolding.value
+    ? `${concentrationShare.toFixed(1)}% in ${topHolding.symbol}`
+    : 'No positions yet';
+
+  return {
+    risk: riskProfile,
+    concentration: concentrationLabel,
+    volatility: volatilityLabel
+  };
+}
+
 function currentBulletinBucket() {
   return Math.floor(Date.now() / bulletinRefreshMs);
 }
@@ -955,6 +1004,18 @@ function renderSandboxCharts() {
   bindChartHover($('#asset-chart'), assetSeries, $('#asset-inspect'));
 }
 
+function renderPortfolioInsights() {
+  const container = $('#portfolio-insights');
+  if (!container) return;
+  const insights = computePortfolioInsights();
+  const riskEl = $('#insight-risk');
+  const concentrationEl = $('#insight-concentration');
+  const volatilityEl = $('#insight-volatility');
+  if (riskEl) riskEl.textContent = insights.risk;
+  if (concentrationEl) concentrationEl.textContent = insights.concentration;
+  if (volatilityEl) volatilityEl.textContent = insights.volatility;
+}
+
 function renderBulletinBoard() {
   const container = $('#sandbox-bulletin');
   if (!container) return;
@@ -1104,6 +1165,8 @@ function renderSandbox() {
     )
     .join('');
   historyContainer.innerHTML = historyMarkup || '<p class="text-slate-400 text-sm">No trades yet</p>';
+
+  renderPortfolioInsights();
 
   renderBulletinBoard();
 

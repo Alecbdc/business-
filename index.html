@@ -236,7 +236,8 @@
         <div class="flex-1 space-y-10">
           <section id="view-dashboard" class="app-view space-y-8">
             <div class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-              <div class="card-glass rounded-3xl p-8 space-y-6">
+              <div class="space-y-6">
+                <div class="card-glass rounded-3xl p-8 space-y-6">
                 <div>
                   <p class="text-sm text-slate-400">Welcome back</p>
                   <h2 class="text-3xl font-semibold" data-profile-name>Guest</h2>
@@ -419,6 +420,28 @@
                 <div>
                   <p class="text-sm text-slate-400 mb-2">Trade history</p>
                   <div id="sandbox-history" class="scroll-area space-y-2 text-xs"></div>
+                </div>
+                <div class="card-glass rounded-3xl p-6 space-y-3" id="portfolio-insights">
+                  <div class="flex items-center justify-between">
+                    <p class="text-sm text-slate-400">Portfolio insights</p>
+                  </div>
+                  <div class="space-y-2 text-sm text-slate-300">
+                    <div class="flex items-center justify-between">
+                      <span>Risk profile</span>
+                      <span id="insight-risk">Moderate</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span>Concentration</span>
+                      <span id="insight-concentration">65% in BTC</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span>Volatility</span>
+                      <span id="insight-volatility">High</span>
+                    </div>
+                  </div>
+                  <p class="text-xs text-slate-400">
+                    Insights are based on your simulated trades and prices, for learning only.
+                  </p>
                 </div>
                 <div>
                   <div class="flex items-center justify-between mb-2">
