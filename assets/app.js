@@ -173,7 +173,11 @@ function setProfileName(value) {
 function updateBackendStatus() {
   const status = $('#backend-status');
   if (!status) return;
-  const label = isSupabaseConfigured ? 'Supabase connected' : 'Demo mode';
+  const label = isSupabaseConfigured
+    ? 'Supabase connected'
+    : FORCE_DEMO_MODE
+      ? 'Demo enforced'
+      : 'Demo mode';
   status.textContent = label;
   status.className = `badge ${
     isSupabaseConfigured ? 'bg-emerald-500/20 text-emerald-100' : 'bg-amber-500/20 text-amber-100'
@@ -1861,10 +1865,10 @@ function initBackendSettingsPanel() {
   const resetBtn = $('#backend-reset');
   if (!urlInput || !keyInput || !saveBtn) return;
   const overrides = getSupabaseOverrides();
-  if (overrides.url) urlInput.value = overrides.url;
-  if (overrides.anonKey) keyInput.value = overrides.anonKey;
+  urlInput.value = overrides.url || supabaseConfig.url || '';
+  keyInput.value = overrides.anonKey || supabaseConfig.anonKey || '';
   if (redirectInput) {
-    redirectInput.value = overrides.googleRedirectTo || window.location.origin;
+    redirectInput.value = overrides.googleRedirectTo || supabaseConfig.googleRedirectTo || window.location.origin;
   }
   saveBtn.addEventListener('click', () => {
     const url = urlInput.value.trim();
@@ -1989,6 +1993,13 @@ function init() {
   if (!supabaseClient) {
     handleDemoEntry(true);
   }
+  // Safety net: if we're still on the auth screen shortly after load, auto-open demo mode.
+  setTimeout(() => {
+    const authHidden = $('#view-auth')?.classList.contains('hidden');
+    if (!authHidden && !supabaseClient) {
+      handleDemoEntry(true);
+    }
+  }, 800);
 }
 
 window.addEventListener('DOMContentLoaded', init);
