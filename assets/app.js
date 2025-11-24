@@ -5,8 +5,7 @@ import {
   getSupabaseOverrides,
   persistSupabaseOverrides,
   clearSupabaseOverrides,
-  hasSupabaseCredentials,
-  FORCE_DEMO_MODE
+  hasSupabaseCredentials
 } from './config.js';
 
 const {
@@ -45,11 +44,7 @@ const defaultTimeframe = '3M';
 const bulletinRefreshMs = featureToggles.newsRefreshMs ?? 1000 * 60 * 60 * 2;
 const maxBulletins = 12;
 
-if (FORCE_DEMO_MODE) {
-  clearSupabaseOverrides();
-}
-
-const isSupabaseConfigured = hasSupabaseCredentials() && !FORCE_DEMO_MODE;
+const isSupabaseConfigured = hasSupabaseCredentials();
 
 function randomizePrice(price, drift = 0) {
   const delta = (Math.random() - 0.5) * 0.04 + drift;
@@ -217,74 +212,6 @@ function hydrateCache() {
   } catch (err) {
     console.warn('Failed to hydrate cache', err);
   }
-}
-
-function seedDemoStateIfEmpty() {
-  if (supabaseClient) return;
-  const hasProgress = Object.keys(state.progress ?? {}).length > 0;
-  const hasTrades = (state.sandbox.history ?? []).length > 0;
-  const hasHoldings = Object.values(state.sandbox.holdings ?? {}).some((v) => v > 0);
-  const hasQuiz = (state.quizLog ?? []).length > 0;
-  if (hasProgress || hasTrades || hasHoldings || hasQuiz) return;
-
-  const now = new Date();
-  state.profile = {
-    full_name: 'Aether Power User',
-    email: 'guest@aether.academy',
-    joined_at: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 120).toISOString()
-  };
-  setProfileName(state.profile.full_name);
-
-  const demoLessons = courses.flatMap((course) => course.lessons).slice(0, 8);
-  demoLessons.forEach((lesson, idx) => {
-    const score = 72 + (idx % 5) * 4;
-    state.progress[lesson.id] = {
-      completed: true,
-      quiz_score: score,
-      updated_at: new Date(now.getTime() - 1000 * 60 * 60 * 24 * (8 - idx)).toISOString()
-    };
-    state.quizScores[lesson.id] = score;
-  });
-
-  const topicSeed = quizTopics.slice(0, 4);
-  topicSeed.forEach((topic, idx) => {
-    const score = 68 + idx * 6;
-    state.topicScores[topic.id] = score;
-    state.quizLog.push({
-      topicId: topic.id,
-      topicTitle: topic.title,
-      lessonId: topic.relatedLessons[0],
-      lessonTitle: topic.title,
-      score,
-      passed: score >= passingScoreThreshold,
-      ts: new Date(now.getTime() - 1000 * 60 * 60 * 12 * (idx + 1)).toISOString()
-    });
-  });
-
-  state.quizLog = state.quizLog.slice(-50);
-
-  state.sandbox.balance = 18450;
-  state.sandbox.holdings = normalizeHoldings({
-    ...state.sandbox.holdings,
-    BTC: 0.45,
-    ETH: 3.4,
-    SOL: 18,
-    USDT: 2400,
-    AVAX: 30,
-    LINK: 60
-  });
-
-  state.sandbox.history = [
-    { type: 'buy', detail: 'Bought 0.25 BTC @ $62.2k', ts: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 2).toISOString() },
-    { type: 'buy', detail: 'Added 1.5 ETH @ $3.1k', ts: new Date(now.getTime() - 1000 * 60 * 60 * 18).toISOString() },
-    { type: 'sell', detail: 'Trimmed 200 LINK @ $14.1', ts: new Date(now.getTime() - 1000 * 60 * 60 * 12).toISOString() },
-    { type: 'buy', detail: 'Rotated 10 SOL @ $147', ts: new Date(now.getTime() - 1000 * 60 * 60 * 6).toISOString() },
-    { type: 'buy', detail: 'Hedged with 800 USDT', ts: new Date(now.getTime() - 1000 * 60 * 30).toISOString() }
-  ];
-
-  state.portfolioHistory = seedPortfolioSeries(22000);
-
-  persistCache();
 }
 
 function persistCache() {
@@ -1965,14 +1892,8 @@ function initAuthListener() {
 }
 
 function init() {
-  const skeleton = $('#loading-skeleton');
-  if (skeleton) {
-    skeleton.classList.remove('hidden');
-    setTimeout(() => skeleton.classList.add('hidden'), 500);
-  }
   setProfileName('Guest');
   hydrateCache();
-  seedDemoStateIfEmpty();
   resetHistorySnapshots();
   renderCourses();
   renderCurriculumSummary();
