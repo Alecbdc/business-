@@ -1,4 +1,4 @@
-export const FORCE_DEMO_MODE = false; // set to true for offline-only builds
+export const FORCE_DEMO_MODE = true; // enforce demo for direct entry into the app shell
 
 const storageKey = 'aether-supabase-overrides';
 
