@@ -1913,16 +1913,9 @@ function init() {
   toggleDemoHint();
   updateBackendStatus();
   initBackendSettingsPanel();
-  if (!supabaseClient) {
+  if (!supabaseClient || FORCE_DEMO_MODE) {
     handleDemoEntry(true);
   }
-  // Safety net: if we're still on the auth screen shortly after load, auto-open demo mode.
-  setTimeout(() => {
-    const authHidden = $('#view-auth')?.classList.contains('hidden');
-    if (!authHidden && (!supabaseClient || !state.user)) {
-      handleDemoEntry(true);
-    }
-  }, 800);
 }
 
 window.addEventListener('DOMContentLoaded', init);
