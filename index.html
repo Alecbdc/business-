@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aether Academy</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,aspect-ratio,typography"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              midnight: {
+                900: '#050815',
+                800: '#0f172a',
+                700: '#1e293b'
+              }
+            }
+          }
+        }
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body class="bg-midnight-900 text-slate-100 min-h-screen">
+    <div class="absolute inset-0 gradient-brand opacity-30 blur-[140px]"></div>
+    <div
+      id="loading-skeleton"
+      class="fixed inset-0 z-30 flex items-center justify-center bg-midnight-900/80 backdrop-blur hidden"
+    >
+      <div class="space-y-4 text-center">
+        <div class="skeleton-row w-64 h-4 mx-auto"></div>
+        <div class="skeleton-row w-80 h-4 mx-auto"></div>
+        <div class="skeleton-row w-72 h-4 mx-auto"></div>
+      </div>
+    </div>
+
+    <div
+      id="trade-confirm-modal"
+      class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden"
+    >
+      <div class="card-glass rounded-3xl p-6 w-full max-w-md space-y-4">
+        <h3 class="text-lg font-semibold">Confirm trade</h3>
+        <p id="trade-confirm-summary" class="text-sm text-slate-300"></p>
+        <p class="text-xs text-slate-400">
+          This is a simulated environment for educational purposes only. No real funds are used.
+        </p>
+        <div class="flex justify-end gap-3 text-sm">
+          <button id="trade-confirm-cancel" class="px-4 py-2 rounded-2xl border border-white/20">
+            Cancel
+          </button>
+          <button
+            id="trade-confirm-accept"
+            class="px-4 py-2 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-950 font-semibold"
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="view-auth" class="relative z-10 px-6 py-16 flex items-center justify-center min-h-screen hidden">
+      <div class="max-w-5xl w-full grid gap-10 lg:grid-cols-2">
+        <section class="card-glass rounded-3xl p-8 space-y-6">
+          <p class="badge inline-flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Immersive academy
+          </p>
+          <h1 class="text-4xl font-semibold">Master crypto with lessons, quizzes, and a trading lab.</h1>
+          <p class="text-slate-300 text-lg">
+            Sign in to sync your profile with Supabase or jump into the fully functional demo to explore the
+            experience. Progress, quiz scores, and sandbox trades all persist once you authenticate.
+          </p>
+          <ul class="space-y-3 text-sm text-slate-300">
+            <li class="flex items-start gap-3">
+              <span class="mt-1 w-2 h-2 rounded-full bg-sky-400"></span>
+              Email & Google auth with Supabase profiles
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-1 w-2 h-2 rounded-full bg-indigo-400"></span>
+              Video curriculum with quizzes and completion tracking
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-1 w-2 h-2 rounded-full bg-emerald-400"></span>
+              Fake-trading sandbox with live price simulation
+            </li>
+          </ul>
+        </section>
+        <section class="card-glass rounded-3xl p-8 space-y-6">
+          <div>
+            <p class="text-sm text-slate-400 uppercase tracking-[0.3em]">Log in</p>
+            <h2 class="text-2xl font-semibold mt-2">Access your academy workspace</h2>
+          </div>
+          <button
+            id="google-auth"
+            class="w-full py-3 rounded-2xl bg-white/10 hover:bg-white/20 transition text-sm font-semibold"
+          >
+            Continue with Google
+          </button>
+          <div class="grid gap-6 md:grid-cols-2">
+            <form id="signup-form" class="space-y-3">
+              <div>
+                <label for="signup-name">Full name</label>
+                <input
+                  id="signup-name"
+                  type="text"
+                  placeholder="Satoshi Nakamoto"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                  required
+                />
+              </div>
+              <div>
+                <label for="signup-email">Email</label>
+                <input
+                  id="signup-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                  required
+                />
+              </div>
+              <div>
+                <label for="signup-password">Password</label>
+                <input
+                  id="signup-password"
+                  type="password"
+                  minlength="8"
+                  placeholder="••••••••"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                  required
+                />
+              </div>
+              <button type="submit" class="w-full py-2 rounded-2xl bg-white/15 hover:bg-white/30 text-sm font-semibold">
+                Sign up
+              </button>
+            </form>
+            <form id="login-form" class="space-y-3">
+              <div>
+                <label for="login-email">Email</label>
+                <input
+                  id="login-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                  required
+                />
+              </div>
+              <div>
+                <label for="login-password">Password</label>
+                <input
+                  id="login-password"
+                  type="password"
+                  placeholder="••••••••"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                  required
+                />
+              </div>
+              <button type="submit" class="w-full py-2 rounded-2xl bg-white/15 hover:bg-white/30 text-sm font-semibold">
+                Login
+              </button>
+            </form>
+          </div>
+          <button
+            id="enter-demo"
+            class="w-full py-3 rounded-2xl border border-dashed border-white/30 text-sm font-semibold text-slate-200 hover:border-white/60"
+          >
+            Explore demo workspace
+          </button>
+          <p id="demo-hint" class="text-sm text-slate-400 text-center hidden">
+            Tip: without Supabase credentials the full workspace opens in a read-only demo so you can click through every view immediately. Use the backend panel below to paste real Supabase keys when you're ready.
+          </p>
+          <div class="rounded-3xl border border-white/10 p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <p class="text-sm text-slate-400">Backend status</p>
+              <span id="backend-status" class="badge bg-amber-500/20 text-amber-100">Demo mode</span>
+            </div>
+            <details class="space-y-3" open>
+              <summary class="flex items-center justify-between text-sm font-semibold text-white">
+                Supabase credentials
+                <span class="text-xs text-slate-400">Stored locally</span>
+              </summary>
+              <p class="text-xs text-slate-400">
+                Paste your Supabase project URL and anon key. The values stay in this browser only so you can deploy the demo anywhere.
+              </p>
+              <div>
+                <label for="supabase-url-input">Project URL</label>
+                <input
+                  id="supabase-url-input"
+                  type="url"
+                  placeholder="https://your-project.supabase.co"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                />
+              </div>
+              <div>
+                <label for="supabase-key-input">Anon key</label>
+                <input
+                  id="supabase-key-input"
+                  type="password"
+                  placeholder="public-anon-key"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                />
+              </div>
+              <div>
+                <label for="supabase-redirect-input">Google OAuth redirect (optional)</label>
+                <input
+                  id="supabase-redirect-input"
+                  type="url"
+                  placeholder="https://localhost:4173"
+                  class="mt-1 w-full rounded-2xl border border-white/10 px-4 py-2"
+                />
+              </div>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  id="backend-save"
+                  class="w-full py-2 rounded-2xl bg-sky-500/80 hover:bg-sky-400 text-slate-950 text-sm font-semibold"
+                >
+                  Save & reload
+                </button>
+                <button
+                  type="button"
+                  id="backend-reset"
+                  class="w-full py-2 rounded-2xl border border-white/20 text-sm font-semibold text-slate-200 hover:border-white/50"
+                >
+                  Use demo mode
+                </button>
+              </div>
+            </details>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div id="app-shell" class="relative z-10 max-w-6xl mx-auto py-10 px-6">
+      <div class="flex flex-col lg:flex-row gap-8">
+        <aside class="card-glass rounded-3xl p-6 w-full lg:w-64 space-y-6">
+          <div>
+            <p class="text-sm text-slate-400">Aether Academy</p>
+            <h2 data-profile-name class="text-2xl font-semibold mt-2">Guest</h2>
+            <p class="text-sm text-slate-400">Progress syncs automatically when you're signed in.</p>
+          </div>
+          <nav class="flex flex-col gap-2">
+            <button class="nav-link" data-view="dashboard">Dashboard</button>
+            <button class="nav-link" data-view="curriculum">Curriculum</button>
+            <button class="nav-link" data-view="sandbox">Sandbox</button>
+          </nav>
+          <button id="logout-btn" class="w-full py-2 rounded-2xl border border-white/10 text-sm font-semibold hidden">
+            Logout
+          </button>
+          <p class="text-xs text-slate-400">
+            Lessons, quizzes, and fake-trading all live in their own dedicated workspaces for focus.
+          </p>
+        </aside>
+        <div class="flex-1 space-y-10">
+          <section id="view-dashboard" class="app-view space-y-8">
+            <div class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+              <div class="card-glass rounded-3xl p-8 space-y-6">
+                <div>
+                  <p class="text-sm text-slate-400">Welcome back</p>
+                  <h2 class="text-3xl font-semibold" data-profile-name>Guest</h2>
+                  <p class="text-slate-400">See a snapshot of everything happening in your academy.</p>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-3">
+                  <div class="rounded-2xl bg-white/5 p-4">
+                    <p class="text-sm text-slate-400">Lessons complete</p>
+                    <p id="dashboard-lessons" class="text-3xl font-semibold mt-2">0</p>
+                  </div>
+                  <div class="rounded-2xl bg-white/5 p-4">
+                    <p class="text-sm text-slate-400">Avg quiz score</p>
+                    <p id="dashboard-quiz" class="text-3xl font-semibold mt-2">0%</p>
+                  </div>
+                  <div class="rounded-2xl bg-white/5 p-4">
+                    <p class="text-sm text-slate-400">Sandbox value</p>
+                    <p id="dashboard-sandbox" class="text-3xl font-semibold mt-2">€0</p>
+                  </div>
+                </div>
+                <div class="xp-hud">
+                  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p class="text-xs text-slate-400 uppercase tracking-[0.3em]">Season rank</p>
+                      <p id="xp-rank" class="text-2xl font-semibold">Cadet</p>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-xs text-slate-400">Total XP</p>
+                      <p id="xp-points" class="text-2xl font-semibold">0 XP</p>
+                    </div>
+                  </div>
+                  <div class="xp-meter mt-4">
+                    <span id="xp-meter-fill" style="width: 0%;"></span>
+                  </div>
+                  <p id="xp-meter-label" class="text-xs text-slate-400 mt-2">0 XP to next rank</p>
+                  <div class="grid grid-cols-2 gap-3 mt-4 text-center">
+                    <div class="rounded-2xl bg-white/10 py-3">
+                      <p class="text-[11px] uppercase tracking-[0.3em] text-slate-400">Streak</p>
+                      <p id="xp-streak" class="text-lg font-semibold">0 days</p>
+                    </div>
+                    <div class="rounded-2xl bg-white/10 py-3">
+                      <p class="text-[11px] uppercase tracking-[0.3em] text-slate-400">Quests</p>
+                      <p id="xp-quests" class="text-lg font-semibold">0 cleared</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <button data-view-target="curriculum" class="rounded-2xl border border-white/10 py-4 px-4 text-left hover:border-white/40">
+                    <p class="text-sm text-slate-400">Curriculum</p>
+                    <p class="text-lg font-semibold">Review lessons & quizzes</p>
+                  </button>
+                  <button data-view-target="sandbox" class="rounded-2xl border border-white/10 py-4 px-4 text-left hover:border-white/40">
+                    <p class="text-sm text-slate-400">Sandbox</p>
+                    <p class="text-lg font-semibold">Jump into fake trading</p>
+                  </button>
+                </div>
+              </div>
+              <div class="card-glass rounded-3xl p-8 space-y-6">
+                <div>
+                  <p class="text-sm text-slate-400">Quiz log</p>
+                  <p class="text-lg font-semibold">Latest attempts</p>
+                </div>
+                <div id="quiz-log" class="scroll-area space-y-2 text-sm"></div>
+              </div>
+            </div>
+            <div class="grid gap-6 lg:grid-cols-2">
+              <div class="card-glass rounded-3xl p-8 space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-slate-400">Season quests</p>
+                    <h3 class="text-2xl font-semibold">Daily challenges</h3>
+                  </div>
+                  <span class="badge">Live</span>
+                </div>
+                <p class="text-sm text-slate-400">Complete these missions to bank bonus XP and unlock badges.</p>
+                <div id="quest-list" class="space-y-3"></div>
+              </div>
+              <div class="card-glass rounded-3xl p-8">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <p class="text-sm text-slate-400">Learning streak</p>
+                    <h3 class="text-xl font-semibold">Lesson progress</h3>
+                  </div>
+                </div>
+                <div id="dashboard-progress" class="scroll-area space-y-3"></div>
+              </div>
+              <div class="card-glass rounded-3xl p-6 space-y-3" id="portfolio-insights">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm text-slate-400">Portfolio insights</p>
+                </div>
+                <div class="space-y-2 text-sm text-slate-300">
+                  <div class="flex items-center justify-between">
+                    <span>Risk profile</span>
+                    <span id="insight-risk">Moderate</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span>Concentration</span>
+                    <span id="insight-concentration">—</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span>Volatility</span>
+                    <span id="insight-volatility">—</span>
+                  </div>
+                </div>
+                <p class="text-xs text-slate-400">
+                  Insights are based on your simulated trades and prices, for learning only.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section id="view-curriculum" class="app-view hidden space-y-8">
+            <div class="card-glass rounded-3xl p-8" id="curriculum-progress"></div>
+            <section class="card-glass rounded-3xl p-6 space-y-4" id="learning-path">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-slate-400">Learning path</p>
+                  <h3 class="text-2xl font-semibold">Progress by track</h3>
+                </div>
+              </div>
+              <div id="learning-track-list" class="space-y-3"></div>
+            </section>
+            <div class="grid gap-6 lg:grid-cols-2">
+              <div class="card-glass rounded-3xl p-8 space-y-6" id="curriculum-videos">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-slate-400">Courses</p>
+                    <h3 class="text-2xl font-semibold">Video lessons</h3>
+                  </div>
+                  <button id="refresh-courses" class="text-sm text-slate-400 hover:text-white">Refresh</button>
+                </div>
+                <div id="course-list" class="space-y-3"></div>
+                <div id="lesson-detail" class="space-y-4"></div>
+                <button
+                  id="complete-lesson-btn"
+                  class="w-full py-3 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-950 font-semibold"
+                >
+                  Mark lesson complete
+                </button>
+              </div>
+              <div class="card-glass rounded-3xl p-8 space-y-6" id="curriculum-quizzes">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-slate-400">Knowledge check</p>
+                    <h3 class="text-2xl font-semibold">Topic arena</h3>
+                  </div>
+                  <p id="quiz-score-chip" class="badge hidden">Score</p>
+                </div>
+                <p id="quiz-threshold" class="text-xs text-slate-400"></p>
+                <p id="quiz-topic-count" class="text-xs text-slate-400"></p>
+                <div id="quiz-topic-list" class="grid gap-3 md:grid-cols-2"></div>
+                <div class="rounded-2xl bg-white/5 p-4 space-y-1">
+                  <p class="text-xs text-slate-400">Current topic</p>
+                  <p id="quiz-topic-name" class="text-xl font-semibold">Select a topic</p>
+                  <p id="quiz-topic-description" class="text-sm text-slate-400">
+                    Pick a topic card above to unlock the 20-question challenge bank.
+                  </p>
+                  <p class="text-xs text-slate-400">
+                    <span class="font-semibold">Linked lessons:</span>
+                    <span id="quiz-topic-lessons">—</span>
+                  </p>
+                </div>
+                <form id="quiz-form" class="space-y-6"></form>
+                <button
+                  id="submit-quiz"
+                  class="mt-4 w-full py-3 rounded-2xl bg-sky-500/80 hover:bg-sky-400 text-slate-950 font-semibold"
+                >
+                  Submit quiz
+                </button>
+              </div>
+            </div>
+            <section class="card-glass rounded-3xl p-6 space-y-4" id="strategy-section">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-slate-400">Learning lab</p>
+                  <h3 class="text-2xl font-semibold">Trading strategies</h3>
+                </div>
+              </div>
+              <div id="strategy-card-list" class="grid gap-3 md:grid-cols-2"></div>
+            </section>
+          </section>
+
+          <section id="view-sandbox" class="app-view hidden space-y-8">
+            <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+              <div class="card-glass rounded-3xl p-8 space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <p class="text-sm text-slate-400">Portfolio value</p>
+                    <p id="sandbox-portfolio-value" class="text-3xl font-semibold">€0</p>
+                  </div>
+                  <div class="text-sm text-slate-400 text-right">
+                    <p>Cash balance</p>
+                    <p id="sandbox-balance" class="text-xl text-emerald-300 font-semibold">€0</p>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-sm text-slate-400">Total performance</p>
+                  <div class="flex flex-col gap-2 mt-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-400">
+                      <div id="portfolio-timeframe-controls" class="flex flex-wrap gap-2"></div>
+                      <div id="portfolio-zoom-controls" class="flex items-center gap-2">
+                        <button data-zoom="out" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                          −
+                        </button>
+                        <button data-zoom="reset" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                          Reset
+                        </button>
+                        <button data-zoom="in" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <canvas id="portfolio-chart" class="w-full h-48"></canvas>
+                    <p id="portfolio-inspect" class="text-xs text-slate-300"></p>
+                  </div>
+                </div>
+                <div class="card-glass rounded-3xl p-4 space-y-2" id="sandbox-sentiment">
+                  <div class="flex items-center justify-between">
+                    <p class="text-sm text-slate-400">Market sentiment</p>
+                    <span id="sentiment-label" class="badge">Neutral</span>
+                  </div>
+                  <p id="sentiment-description" class="text-xs text-slate-400">
+                    Sentiment is based on your simulated market conditions.
+                  </p>
+                  <div class="flex items-center justify-between text-xs text-slate-300">
+                    <span>Fear &amp; greed</span>
+                    <span id="sentiment-fg">50 / 100</span>
+                  </div>
+                  <div class="flex items-center justify-between text-xs text-slate-300">
+                    <span>Volatility</span>
+                    <span id="sentiment-volatility">Medium</span>
+                  </div>
+                </div>
+                <div class="card-glass rounded-3xl p-4 space-y-3" id="sandbox-events">
+                  <div class="flex items-center justify-between">
+                    <p class="text-sm text-slate-400">Scenario lab</p>
+                    <p class="text-xs text-slate-400">Simulated events</p>
+                  </div>
+                  <select
+                    id="event-select"
+                    class="w-full rounded-2xl border border-white/10 bg-transparent px-3 py-2 text-sm"
+                  >
+                    <option value="">Choose a scenario…</option>
+                  </select>
+                  <p id="event-description" class="text-xs text-slate-400">
+                    Select a scenario to simulate its impact on your sandbox prices.
+                  </p>
+                </div>
+                <div>
+                  <p class="text-sm text-slate-400 mb-2">Holdings</p>
+                  <div id="sandbox-holdings" class="space-y-3 text-sm"></div>
+                </div>
+                <div>
+                  <p class="text-sm text-slate-400 mb-2">Trade history</p>
+                  <div id="sandbox-history" class="scroll-area space-y-2 text-xs"></div>
+                </div>
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <div>
+                      <p class="text-sm text-slate-400">Signals</p>
+                      <h3 class="text-lg font-semibold">News bulletin board</h3>
+                    </div>
+                    <span id="bulletin-refresh-label" class="badge">Auto-updates</span>
+                  </div>
+                  <div id="sandbox-bulletin" class="space-y-3 text-sm"></div>
+                </div>
+              </div>
+              <div class="space-y-6">
+                <div class="card-glass rounded-3xl p-6">
+                  <div class="grid gap-6 md:grid-cols-2">
+                    <form id="buy-form" class="space-y-3">
+                      <p class="text-sm text-slate-400">Buy crypto</p>
+                      <select id="buy-asset" class="w-full rounded-2xl border border-white/10 px-4 py-2"></select>
+                      <input
+                        id="buy-amount"
+                        type="number"
+                        min="10"
+                        step="10"
+                        placeholder="Amount in €"
+                        class="w-full rounded-2xl border border-white/10 px-4 py-2"
+                        required
+                      />
+                      <button type="submit" class="w-full py-2 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-950 font-semibold">
+                        Buy
+                      </button>
+                    </form>
+                    <form id="sell-form" class="space-y-3">
+                      <p class="text-sm text-slate-400">Sell crypto</p>
+                      <select id="sell-asset" class="w-full rounded-2xl border border-white/10 px-4 py-2"></select>
+                      <input
+                        id="sell-amount"
+                        type="number"
+                        min="0.0001"
+                        step="0.0001"
+                        placeholder="Units to sell"
+                        class="w-full rounded-2xl border border-white/10 px-4 py-2"
+                        required
+                      />
+                      <button type="submit" class="w-full py-2 rounded-2xl bg-rose-500/80 hover:bg-rose-400 text-slate-950 font-semibold">
+                        Sell
+                      </button>
+                    </form>
+                  </div>
+                  <div id="trade-assistant" class="mt-4 rounded-2xl bg-white/5 p-3 text-xs text-slate-300">
+                    <p class="font-semibold mb-1">Educational tip</p>
+                    <p id="trade-assistant-text">
+                      This sandbox is for learning only. Prices and indicators are simulated.
+                    </p>
+                  </div>
+                </div>
+                <div class="card-glass rounded-3xl p-8 space-y-6">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-slate-400">Focus asset</p>
+                      <h3 id="active-asset-label" class="text-2xl font-semibold">BTC</h3>
+                    </div>
+                    <span id="active-asset-change" class="badge">0.00%</span>
+                  </div>
+                  <p class="text-sm text-slate-400">
+                    Live price:
+                    <span id="active-asset-price" class="font-semibold text-white">€0.00</span>
+                  </p>
+                  <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p class="text-xs text-slate-400">Units held</p>
+                      <p id="active-asset-units" class="text-lg font-semibold">0.0000</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-slate-400">Portfolio share</p>
+                      <p id="active-asset-share" class="text-lg font-semibold">0%</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-400">Asset trend</p>
+                    <div class="flex flex-col gap-2 mt-2">
+                      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-400">
+                        <div id="asset-timeframe-controls" class="flex flex-wrap gap-2"></div>
+                        <div id="asset-zoom-controls" class="flex items-center gap-2">
+                          <button data-zoom="out" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                            −
+                          </button>
+                          <button data-zoom="reset" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                            Reset
+                          </button>
+                          <button data-zoom="in" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                            +
+                          </button>
+                        </div>
+                      </div>
+                      <canvas id="asset-chart" class="w-full h-48"></canvas>
+                      <p id="asset-inspect" class="text-xs text-slate-300"></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-glass rounded-3xl p-8 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-slate-400">Market</p>
+                      <h3 class="text-xl font-semibold">Available crypto</h3>
+                    </div>
+                    <button id="asset-toggle" type="button" class="text-sm px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                      Show more
+                    </button>
+                  </div>
+                  <div id="sandbox-prices" class="space-y-3"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="view-article" class="app-view hidden space-y-8">
+            <div class="card-glass rounded-3xl p-8 space-y-6">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p class="text-sm text-slate-400">Sandbox intelligence</p>
+                  <h2 class="text-2xl font-semibold">Bulletin brief</h2>
+                </div>
+                <button
+                  id="bulletin-article-back"
+                  class="px-4 py-2 rounded-2xl border border-white/15 hover:border-white/40 text-sm"
+                  type="button"
+                >
+                  ← Back to sandbox
+                </button>
+              </div>
+              <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                <span id="bulletin-article-sentiment" class="badge">Sentiment</span>
+                <span id="bulletin-article-time" class="badge">Just now</span>
+                <span id="bulletin-article-assets" class="mini-badge">Focus assets: —</span>
+              </div>
+              <div class="space-y-3">
+                <h3 id="bulletin-article-title" class="text-xl font-semibold">Select a bulletin to open its full article</h3>
+                <p id="bulletin-article-summary" class="text-sm text-slate-300">
+                  Click any headline in the sandbox bulletin board to read a deeper brief and the projected market tilt.
+                </p>
+                <div id="bulletin-article-body" class="space-y-3"></div>
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-2">
+                <p class="text-sm text-slate-400">Projected effect</p>
+                <p id="bulletin-article-effect" class="text-sm font-semibold text-white">Projected impact will appear here.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="card-glass rounded-2xl p-4 text-sm text-white/90 bg-slate-900/90"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+    <script type="module" src="assets/app.js"></script>
+  </body>
+</html>
