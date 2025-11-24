@@ -1,3 +1,5 @@
+export const FORCE_DEMO_MODE = true; // set to false for real deployments
+
 const storageKey = 'aether-supabase-overrides';
 
 const canUseStorage = () => {

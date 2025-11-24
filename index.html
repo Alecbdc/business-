@@ -30,6 +30,16 @@
   </head>
   <body class="bg-midnight-900 text-slate-100 min-h-screen">
     <div class="absolute inset-0 gradient-brand opacity-30 blur-[140px]"></div>
+    <div
+      id="loading-skeleton"
+      class="fixed inset-0 z-30 flex items-center justify-center bg-midnight-900/80 backdrop-blur hidden"
+    >
+      <div class="space-y-4 text-center">
+        <div class="skeleton-row w-64 h-4 mx-auto"></div>
+        <div class="skeleton-row w-80 h-4 mx-auto"></div>
+        <div class="skeleton-row w-72 h-4 mx-auto"></div>
+      </div>
+    </div>
     <div id="view-auth" class="relative z-10 px-6 py-16 flex items-center justify-center min-h-screen">
       <div class="max-w-5xl w-full grid gap-10 lg:grid-cols-2">
         <section class="card-glass rounded-3xl p-8 space-y-6">
