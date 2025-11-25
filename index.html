@@ -238,23 +238,28 @@
             <div class="grid gap-6">
               <div class="space-y-6">
                 <div class="card-glass rounded-3xl p-8 space-y-6">
-                <div>
-                  <p class="text-sm text-slate-400">Welcome back</p>
-                  <h2 class="text-3xl font-semibold" data-profile-name>Guest</h2>
-                  <p class="text-slate-400">See a snapshot of everything happening in your academy.</p>
-                </div>
-                <div class="grid gap-4 sm:grid-cols-3">
-                  <div class="rounded-2xl bg-white/5 p-4">
-                    <p class="text-sm text-slate-400">Lessons complete</p>
-                    <p id="dashboard-lessons" class="text-3xl font-semibold mt-2">0</p>
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+                  <div class="space-y-2 flex-1">
+                    <p class="text-sm text-slate-400">Welcome back</p>
+                    <h2 class="text-3xl font-semibold" data-profile-name>Guest</h2>
+                    <p class="text-slate-400">See a snapshot of everything happening in your academy.</p>
                   </div>
-                  <div class="rounded-2xl bg-white/5 p-4">
-                    <p class="text-sm text-slate-400">Avg quiz score</p>
-                    <p id="dashboard-quiz" class="text-3xl font-semibold mt-2">0%</p>
-                  </div>
-                  <div class="rounded-2xl bg-white/5 p-4">
-                    <p class="text-sm text-slate-400">Sandbox value</p>
-                    <p id="dashboard-sandbox" class="text-3xl font-semibold mt-2">€0</p>
+                  <div class="w-full md:w-72 space-y-3">
+                    <p class="text-sm text-slate-400">Summary</p>
+                    <div class="space-y-3">
+                      <div class="rounded-2xl bg-white/5 p-4">
+                        <p class="text-sm text-slate-400">Lessons complete</p>
+                        <p id="dashboard-lessons" class="text-3xl font-semibold mt-2">0</p>
+                      </div>
+                      <div class="rounded-2xl bg-white/5 p-4">
+                        <p class="text-sm text-slate-400">Avg quiz score</p>
+                        <p id="dashboard-quiz" class="text-3xl font-semibold mt-2">0%</p>
+                      </div>
+                      <div class="rounded-2xl bg-white/5 p-4">
+                        <p class="text-sm text-slate-400">Sandbox value</p>
+                        <p id="dashboard-sandbox" class="text-3xl font-semibold mt-2">€0</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div class="xp-hud">
