@@ -9,7 +9,15 @@ import {
   FORCE_DEMO_MODE
 } from './config.js';
 
-const { courses, defaultSandboxState, initialPrices, quizTopics, sandboxBulletins, replayScenarios } = data;
+const {
+  courses,
+  defaultSandboxState,
+  initialPrices,
+  quizTopics,
+  sandboxBulletins,
+  replayScenarios,
+  leaderboardPeers
+} = data;
 
 const cacheKey = 'aether-cache-v2';
 const historyLimit = 1200;
@@ -34,6 +42,7 @@ const timeframeOptions = [
 ];
 const defaultTimeframe = '3M';
 const bulletinRefreshMs = featureToggles.newsRefreshMs ?? 1000 * 60 * 60 * 2;
+const priceTickMs = featureToggles.sandboxPriceUpdateMs ?? 8000;
 const maxBulletins = 12;
 
 if (FORCE_DEMO_MODE) {
@@ -41,6 +50,10 @@ if (FORCE_DEMO_MODE) {
 }
 
 const isSupabaseConfigured = hasSupabaseCredentials() && !FORCE_DEMO_MODE;
+
+function currentTickStep() {
+  return Math.floor(Date.now() / priceTickMs);
+}
 
 function classifyNewsImpact(drift) {
   const magnitude = Math.abs(drift);
@@ -50,7 +63,7 @@ function classifyNewsImpact(drift) {
   return null;
 }
 
-function computeNewsShock(drift) {
+function computeNewsShock(drift, seedBase) {
   const tier = classifyNewsImpact(drift);
   if (!tier) return 0;
   const sign = Math.sign(drift) || 1;
@@ -60,22 +73,26 @@ function computeNewsShock(drift) {
     minor: { min: 0.02, max: 0.06, chance: 0.25 }
   };
   const config = ranges[tier];
-  if (Math.random() > config.chance) return 0;
-  const shock = config.min + Math.random() * (config.max - config.min);
+  const roll = seedBase != null ? seededRandom(seedBase + 37) : Math.random();
+  if (roll > config.chance) return 0;
+  const shockRoll = seedBase != null ? seededRandom(seedBase + 73) : Math.random();
+  const shock = config.min + shockRoll * (config.max - config.min);
   return shock * sign;
 }
 
-function randomizePrice(price, drift = 0) {
+function randomizePrice(price, drift = 0, seedBase = null) {
   const baseVolatility = 0.06; // wider swings to feel closer to live markets
-  const newsShock = computeNewsShock(drift);
-  const delta = (Math.random() - 0.5) * baseVolatility + drift + newsShock;
+  const rand = seedBase != null ? seededRandom(seedBase) : Math.random();
+  const centered = rand - 0.5;
+  const newsShock = computeNewsShock(drift, seedBase);
+  const delta = centered * baseVolatility + drift + newsShock;
   return Math.max(0, price * (1 + delta));
 }
 
-function randomizeReplayPrice(price, scenario, symbol, drift = 0) {
+function randomizeReplayPrice(price, scenario, symbol, drift = 0, seedBase = null) {
   const volatility = scenario.id === 'volatile-week' ? 0.16 : 0.06;
   const bias = scenario.id === 'volatile-week' ? 0.004 : 0.0025;
-  const seedStep = state.marketReplay.step++;
+  const seedStep = seedBase != null ? seedBase : state.marketReplay.step++;
   const rand = seededRandom(scenario.seed + seedStep + symbol.charCodeAt(0));
   const delta = (rand - 0.5) * volatility + bias + drift;
   return Math.max(0, price * (1 + delta));
@@ -86,16 +103,23 @@ function seededRandom(seed) {
   return x - Math.floor(x);
 }
 
-function generateHistorySeries(anchorPrice) {
+function seedFromLabel(label) {
+  return String(label)
+    .split('')
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+}
+
+function generateHistorySeries(anchorPrice, seedLabel = 'base') {
   const now = Date.now();
   const yearsMs = 1000 * 60 * 60 * 24 * 365 * 10;
   const basePoints = 520;
   const baseStep = yearsMs / basePoints;
   const series = [];
   let value = anchorPrice * 0.65;
+  const baseSeed = seedFromLabel(seedLabel);
   for (let i = 0; i <= basePoints; i++) {
     const ts = now - yearsMs + i * baseStep;
-    value = randomizePrice(value);
+    value = randomizePrice(value, 0, baseSeed + i);
     series.push({ ts, value: Number(value.toFixed(4)) });
   }
   const densePoints = 168; // hourly over last 7 days
@@ -104,7 +128,7 @@ function generateHistorySeries(anchorPrice) {
   value = series[series.length - 1]?.value ?? anchorPrice;
   for (let i = 0; i <= densePoints; i++) {
     const ts = denseStart + (i / densePoints) * denseSpan;
-    value = randomizePrice(value);
+    value = randomizePrice(value, 0, baseSeed + 1000 + i);
     series.push({ ts, value: Number(value.toFixed(4)) });
   }
   return series.slice(-historyLimit);
@@ -112,13 +136,13 @@ function generateHistorySeries(anchorPrice) {
 
 function seedPriceHistoryMap(priceMap) {
   return Object.entries(priceMap).reduce((acc, [symbol, price]) => {
-    acc[symbol] = generateHistorySeries(price);
+    acc[symbol] = generateHistorySeries(price, symbol);
     return acc;
   }, {});
 }
 
 function seedPortfolioSeries(anchorValue = defaultSandboxState.balance) {
-  const series = generateHistorySeries(anchorValue);
+  const series = generateHistorySeries(anchorValue, 'portfolio');
   return series.map((entry) => ({ ...entry, value: Math.max(entry.value, 0) }));
 }
 
@@ -945,6 +969,79 @@ function renderQuestBoard() {
     .join('');
 }
 
+function getPortfolioValueAt(ts) {
+  const history = state.portfolioHistory;
+  if (!history.length) return null;
+  let candidate = history[0];
+  for (const point of history) {
+    if (point.ts >= ts) return point.value;
+    candidate = point;
+  }
+  return candidate?.value ?? null;
+}
+
+function computeWeeklyPerformance() {
+  const nowValue = calculatePortfolioValue();
+  const weekAgo = Date.now() - 1000 * 60 * 60 * 24 * 7;
+  const weekStartValue = getPortfolioValueAt(weekAgo) ?? nowValue;
+  const pnl = nowValue - weekStartValue;
+  const pct = weekStartValue ? pnl / weekStartValue : 0;
+  return { pct, pnl, base: weekStartValue };
+}
+
+function buildLeaderboardEntries() {
+  const weekBucket = Math.floor(Date.now() / (1000 * 60 * 60 * 24 * 7));
+  const peers = (leaderboardPeers ?? []).map((peer, idx) => {
+    const variance = (seededRandom(weekBucket + idx) - 0.5) * 0.06;
+    const pct = peer.baseReturn + variance;
+    const pnl = peer.capital * pct;
+    return { name: peer.name, pct, pnl, capital: peer.capital, self: false };
+  });
+  const selfPerformance = computeWeeklyPerformance();
+  const selfEntry = {
+    name: state.profile?.full_name || 'You',
+    pct: selfPerformance.pct,
+    pnl: selfPerformance.pnl,
+    capital: selfPerformance.base ?? defaultSandboxState.balance,
+    self: true
+  };
+  return [...peers, selfEntry]
+    .sort((a, b) => b.pnl - a.pnl)
+    .map((entry, idx) => ({ ...entry, rank: idx + 1 }))
+    .slice(0, 7);
+}
+
+function renderLeaderboard() {
+  const list = $('#leaderboard-list');
+  if (!list) return;
+  const entries = buildLeaderboardEntries();
+  list.innerHTML = entries
+    .map((entry) => {
+      const pnlLabel = `${entry.pnl >= 0 ? '+' : ''}${formatCurrency(entry.pnl)}`;
+      return `
+        <div class="flex items-center justify-between rounded-2xl bg-white/5 p-3 ${
+          entry.self ? 'border border-emerald-400/30' : 'border border-white/5'
+        }">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-2xl bg-white/10 flex items-center justify-center text-sm font-semibold">${
+              entry.rank
+            }</span>
+            <div>
+              <p class="font-semibold">${entry.name}${entry.self ? ' (you)' : ''}</p>
+              <p class="text-xs text-slate-400">${pnlLabel} this week</p>
+            </div>
+          </div>
+          <span class="text-sm font-semibold ${entry.pct >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${
+            (entry.pct * 100).toFixed(1)
+          }%</span>
+        </div>
+      `;
+    })
+    .join('');
+  const badge = $('#live-feed-badge');
+  if (badge) badge.textContent = 'Shared feed';
+}
+
 function renderDashboard() {
   const lessonsComplete = Object.values(state.progress).filter((p) => p.completed).length;
   $('#dashboard-lessons').textContent = lessonsComplete;
@@ -972,6 +1069,7 @@ function renderDashboard() {
   renderQuizLog();
   renderProgressList();
   renderQuestBoard();
+  renderLeaderboard();
 }
 
 function filterSeriesByTimeframe(series = [], timeframeKey = defaultTimeframe) {
@@ -1682,12 +1780,19 @@ function tickPrices() {
   const driftMap = { ...buildBulletinDriftMap() };
   const useReplay = state.sandboxMode === 'replay' && state.marketReplay.active;
   const replayScenario = useReplay ? replayScenarios.find((s) => s.id === state.marketReplay.scenarioId) : null;
+  const tickStep = currentTickStep();
   Object.keys(state.prices).forEach((symbol) => {
     const drift = driftMap[symbol] ?? 0;
     if (useReplay && replayScenario) {
-      state.prices[symbol] = randomizeReplayPrice(state.prices[symbol], replayScenario, symbol, drift);
+      state.prices[symbol] = randomizeReplayPrice(
+        state.prices[symbol],
+        replayScenario,
+        symbol,
+        drift,
+        tickStep + symbol.charCodeAt(0)
+      );
     } else {
-      state.prices[symbol] = randomizePrice(state.prices[symbol], drift);
+      state.prices[symbol] = randomizePrice(state.prices[symbol], drift, tickStep + symbol.charCodeAt(0));
     }
   });
   recordPriceSnapshot();
@@ -1700,7 +1805,7 @@ function startPriceLoop() {
   tickPrices();
   setInterval(() => {
     tickPrices();
-  }, featureToggles.sandboxPriceUpdateMs ?? 8000);
+  }, priceTickMs);
 }
 
 function recordTrade(entry) {

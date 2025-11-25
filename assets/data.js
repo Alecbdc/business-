@@ -82,6 +82,15 @@ export const replayScenarios = [
   }
 ];
 
+export const leaderboardPeers = [
+  { name: 'Nova Vector', capital: 12500, baseReturn: 0.11 },
+  { name: 'Atlas Grove', capital: 9800, baseReturn: 0.07 },
+  { name: 'Kairo Drift', capital: 14300, baseReturn: 0.16 },
+  { name: 'Mara Helix', capital: 11200, baseReturn: 0.09 },
+  { name: 'Orion Vale', capital: 8900, baseReturn: 0.05 },
+  { name: 'Sage Ember', capital: 10100, baseReturn: 0.12 }
+];
+
 export const courses = [
   {
     id: 'course-foundations',
