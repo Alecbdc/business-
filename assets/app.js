@@ -1374,6 +1374,11 @@ function setSandboxMode(mode) {
     state.personalSpeed = 1;
     updatePersonalSpeedButtons();
   }
+  // Personal mode should mirror the live layout with portfolio/trade sections visible
+  // and charts populated immediately.
+  if (isPersonal) {
+    setSandboxTab(state.sandboxTab || 'portfolio');
+  }
   if (state.sandboxMode === 'live') {
     state.marketReplay = { active: false, scenarioId: '', step: 0 };
     const select = $('#replay-select');
@@ -2082,6 +2087,13 @@ function bindNavigation() {
     btn.addEventListener('click', () => {
       setView('sandbox');
       setSandboxMode(btn.dataset.sandboxMode);
+      // Ensure the personal market always shows the full live layout
+      // so users see portfolio + trade content immediately.
+      if (btn.dataset.sandboxMode === 'personal') {
+        setSandboxTab(state.sandboxTab || 'portfolio');
+        renderSandbox();
+        requestAnimationFrame(renderSandboxCharts);
+      }
     });
   });
 
