@@ -223,7 +223,14 @@
           </div>
           <nav class="flex flex-col gap-2">
             <button class="nav-link" data-view="dashboard">Dashboard</button>
-            <button class="nav-link" data-view="curriculum">Curriculum</button>
+            <div class="space-y-2">
+              <button class="nav-link" data-view="curriculum" id="nav-curriculum">Curriculum</button>
+              <div id="curriculum-subnav" class="hidden pl-3 space-y-2">
+                <button class="nav-link text-sm" data-curriculum-tab="courses">Courses</button>
+                <button class="nav-link text-sm" data-curriculum-tab="quiz">Quiz</button>
+                <button class="nav-link text-sm" data-curriculum-tab="exam">Exam</button>
+              </div>
+            </div>
             <div class="space-y-2">
               <button class="nav-link" data-view="sandbox" id="nav-sandbox">Sandbox</button>
               <div id="sandbox-subnav" class="hidden pl-3 space-y-2">

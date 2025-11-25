@@ -1209,6 +1209,13 @@ function setSandboxTab(tab) {
   if (tradeSection) tradeSection.classList.toggle('hidden', tab !== 'trade');
 }
 
+function updateCurriculumSidebarVisibility(view) {
+  const subnav = $('#curriculum-subnav');
+  if (subnav) {
+    subnav.classList.toggle('hidden', view !== 'curriculum');
+  }
+}
+
 function updateSandboxSidebarVisibility(view) {
   const subnav = $('#sandbox-subnav');
   if (subnav) {
@@ -1883,6 +1890,7 @@ function setView(view) {
     stopPortfolioReplay(true);
   }
   state.currentView = view;
+  updateCurriculumSidebarVisibility(view);
   updateSandboxSidebarVisibility(view);
   document.querySelectorAll('.app-view').forEach((section) => {
     section.classList.toggle('hidden', section.id !== `view-${view}`);
@@ -1913,7 +1921,10 @@ function bindNavigation() {
   });
 
   document.querySelectorAll('[data-curriculum-tab]').forEach((btn) => {
-    btn.addEventListener('click', () => setCurriculumTab(btn.dataset.curriculumTab));
+    btn.addEventListener('click', () => {
+      setView('curriculum');
+      setCurriculumTab(btn.dataset.curriculumTab);
+    });
   });
 
   document.querySelectorAll('[data-sandbox-tab]').forEach((btn) => {
