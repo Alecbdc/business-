@@ -67,6 +67,21 @@ export const defaultSandboxState = {
   history: []
 };
 
+export const replayScenarios = [
+  {
+    id: 'calm-week',
+    name: 'Calm week',
+    description: 'Low volatility, gradual uptrend.',
+    seed: 1234
+  },
+  {
+    id: 'volatile-week',
+    name: 'Volatile week',
+    description: 'Sharp swings and sudden corrections.',
+    seed: 5678
+  }
+];
+
 export const courses = [
   {
     id: 'course-foundations',

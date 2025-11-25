@@ -9,7 +9,7 @@ import {
   FORCE_DEMO_MODE
 } from './config.js';
 
-const { courses, defaultSandboxState, initialPrices, quizTopics, sandboxBulletins } = data;
+const { courses, defaultSandboxState, initialPrices, quizTopics, sandboxBulletins, replayScenarios } = data;
 
 const cacheKey = 'aether-cache-v2';
 const historyLimit = 1200;
@@ -69,6 +69,15 @@ function randomizePrice(price, drift = 0) {
   const baseVolatility = 0.06; // wider swings to feel closer to live markets
   const newsShock = computeNewsShock(drift);
   const delta = (Math.random() - 0.5) * baseVolatility + drift + newsShock;
+  return Math.max(0, price * (1 + delta));
+}
+
+function randomizeReplayPrice(price, scenario, symbol, drift = 0) {
+  const volatility = scenario.id === 'volatile-week' ? 0.16 : 0.06;
+  const bias = scenario.id === 'volatile-week' ? 0.004 : 0.0025;
+  const seedStep = state.marketReplay.step++;
+  const rand = seededRandom(scenario.seed + seedStep + symbol.charCodeAt(0));
+  const delta = (rand - 0.5) * volatility + bias + drift;
   return Math.max(0, price * (1 + delta));
 }
 
@@ -166,8 +175,10 @@ const state = {
   chartTimeframes: { portfolio: defaultTimeframe, asset: defaultTimeframe },
   chartZoom: { portfolio: 1, asset: 1 },
   activeAsset: assetSymbols[0] ?? 'BTC',
+  sandboxMode: 'live',
   sandboxTab: 'portfolio',
   replay: { active: false, timer: null, index: 0, series: [] },
+  marketReplay: { active: false, scenarioId: '', step: 0 },
   bulletin: { bucket: null, items: [] },
   activeBulletinArticleId: null,
   ui: { showAllAssets: false }
@@ -1119,6 +1130,34 @@ function renderSandboxCharts() {
   bindChartHover($('#asset-chart'), assetSeries, $('#asset-inspect'));
 }
 
+function renderReplayView() {
+  const valueEl = $('#replay-portfolio-value');
+  const chartEl = $('#replay-portfolio-chart');
+  if (!valueEl || !chartEl) return;
+  valueEl.textContent = formatCurrency(calculatePortfolioValue());
+  const series = filterSeriesByTimeframe(state.portfolioHistory, state.chartTimeframes.portfolio);
+  drawLineChart(chartEl, series, '#a78bfa', state.chartZoom.portfolio, $('#replay-inspect'));
+  bindChartHover(chartEl, series, $('#replay-inspect'));
+  const desc = $('#replay-description');
+  const scenario = replayScenarios.find((s) => s.id === state.marketReplay.scenarioId);
+  if (desc) {
+    desc.textContent = scenario
+      ? scenario.description
+      : 'Switch to a synthetic week to practice reacting to predefined patterns.';
+  }
+  updateReplayBadge();
+}
+
+function renderReplaySelect() {
+  const select = $('#replay-select');
+  if (!select) return;
+  const options = [`<option value="">Live sandbox</option>`]
+    .concat(replayScenarios.map((scenario) => `<option value="${scenario.id}">${scenario.name}</option>`))
+    .join('');
+  select.innerHTML = options;
+  select.value = state.marketReplay.scenarioId || '';
+}
+
 function updateReplayControls() {
   const startBtn = $('#replay-start');
   const stopBtn = $('#replay-stop');
@@ -1168,6 +1207,62 @@ function setSandboxTab(tab) {
   const tradeSection = $('#sandbox-trade-section');
   if (portfolioSection) portfolioSection.classList.toggle('hidden', tab !== 'portfolio');
   if (tradeSection) tradeSection.classList.toggle('hidden', tab !== 'trade');
+}
+
+function updateSandboxSidebarVisibility(view) {
+  const subnav = $('#sandbox-subnav');
+  if (subnav) {
+    subnav.classList.toggle('hidden', view !== 'sandbox');
+  }
+}
+
+function updateReplayBadge() {
+  const badge = $('#replay-mode-badge');
+  if (!badge) return;
+  if (state.sandboxMode !== 'replay') {
+    badge.textContent = 'Live sandbox';
+    return;
+  }
+  const scenario = replayScenarios.find((s) => s.id === state.marketReplay.scenarioId);
+  badge.textContent = scenario ? `Replay: ${scenario.name}` : 'Replay idle';
+}
+
+function setSandboxMode(mode) {
+  state.sandboxMode = mode || 'live';
+  document.querySelectorAll('[data-sandbox-mode]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.sandboxMode === state.sandboxMode);
+  });
+  const liveSection = $('#sandbox-live');
+  const replaySection = $('#sandbox-replay');
+  if (liveSection) liveSection.classList.toggle('hidden', state.sandboxMode !== 'live');
+  if (replaySection) replaySection.classList.toggle('hidden', state.sandboxMode !== 'replay');
+  if (state.sandboxMode === 'live') {
+    state.marketReplay = { active: false, scenarioId: '', step: 0 };
+    const select = $('#replay-select');
+    if (select) select.value = '';
+  } else {
+    state.marketReplay.active = !!state.marketReplay.scenarioId;
+  }
+  updateReplayBadge();
+  renderSandbox();
+  requestAnimationFrame(renderSandboxCharts);
+  renderReplayView();
+}
+
+function applyReplayScenario(scenarioId) {
+  state.marketReplay.scenarioId = scenarioId || '';
+  state.marketReplay.active = !!scenarioId;
+  state.marketReplay.step = 0;
+  const scenario = replayScenarios.find((s) => s.id === scenarioId);
+  const badge = $('#replay-mode-badge');
+  if (badge) badge.textContent = scenario ? `Replay: ${scenario.name}` : 'Live sandbox';
+  const desc = $('#replay-description');
+  if (desc) {
+    desc.textContent = scenario
+      ? scenario.description
+      : 'Switch to a synthetic week to practice reacting to predefined patterns.';
+  }
+  renderReplayView();
 }
 
 function renderPortfolioInsights() {
@@ -1403,6 +1498,7 @@ function renderSandbox() {
   renderBulletinBoard();
 
   requestAnimationFrame(renderSandboxCharts);
+  renderReplayView();
 }
 
 async function handleSignup(event) {
@@ -1577,9 +1673,15 @@ function recordPortfolioSnapshot() {
 
 function tickPrices() {
   const driftMap = { ...buildBulletinDriftMap() };
+  const useReplay = state.sandboxMode === 'replay' && state.marketReplay.active;
+  const replayScenario = useReplay ? replayScenarios.find((s) => s.id === state.marketReplay.scenarioId) : null;
   Object.keys(state.prices).forEach((symbol) => {
     const drift = driftMap[symbol] ?? 0;
-    state.prices[symbol] = randomizePrice(state.prices[symbol], drift);
+    if (useReplay && replayScenario) {
+      state.prices[symbol] = randomizeReplayPrice(state.prices[symbol], replayScenario, symbol, drift);
+    } else {
+      state.prices[symbol] = randomizePrice(state.prices[symbol], drift);
+    }
   });
   recordPriceSnapshot();
   recordPortfolioSnapshot();
@@ -1781,6 +1883,7 @@ function setView(view) {
     stopPortfolioReplay(true);
   }
   state.currentView = view;
+  updateSandboxSidebarVisibility(view);
   document.querySelectorAll('.app-view').forEach((section) => {
     section.classList.toggle('hidden', section.id !== `view-${view}`);
   });
@@ -1789,6 +1892,7 @@ function setView(view) {
     btn.classList.toggle('active', isActive);
   });
   if (view === 'sandbox') {
+    setSandboxMode(state.sandboxMode ?? 'live');
     setSandboxTab(state.sandboxTab ?? 'portfolio');
     requestAnimationFrame(renderSandboxCharts);
   }
@@ -1814,6 +1918,24 @@ function bindNavigation() {
 
   document.querySelectorAll('[data-sandbox-tab]').forEach((btn) => {
     btn.addEventListener('click', () => setSandboxTab(btn.dataset.sandboxTab));
+  });
+
+  document.querySelectorAll('[data-sandbox-mode]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setView('sandbox');
+      setSandboxMode(btn.dataset.sandboxMode);
+    });
+  });
+
+  $('#replay-select')?.addEventListener('change', (event) => {
+    const selection = event.target.value;
+    if (!selection) {
+      applyReplayScenario('');
+      setSandboxMode('live');
+      return;
+    }
+    applyReplayScenario(selection);
+    setSandboxMode('replay');
   });
 }
 
@@ -1963,8 +2085,10 @@ function init() {
   renderQuizThresholdHint();
   setCurriculumTab(state.curriculumTab);
   renderAssetSelects();
+  renderReplaySelect();
   initChartControls();
   setSandboxTab(state.sandboxTab);
+  setSandboxMode(state.sandboxMode);
   renderSandbox();
   renderDashboard();
   bindEvents();
