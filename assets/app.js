@@ -142,6 +142,7 @@ const state = {
   chartZoom: { portfolio: 1, asset: 1 },
   activeAsset: assetSymbols[0] ?? 'BTC',
   sandboxTab: 'portfolio',
+  replay: { active: false, timer: null, index: 0, series: [] },
   bulletin: { bucket: null, items: [] },
   activeBulletinArticleId: null,
   ui: { showAllAssets: false }
@@ -1075,14 +1076,61 @@ function initChartControls() {
   bindZoomControls('asset-zoom-controls', 'asset');
 }
 
+function getPortfolioChartSeries() {
+  if (state.replay.active && state.replay.series.length) {
+    const endIndex = Math.min(state.replay.index + 1, state.replay.series.length);
+    return state.replay.series.slice(0, endIndex);
+  }
+  return filterSeriesByTimeframe(state.portfolioHistory, state.chartTimeframes.portfolio);
+}
+
 function renderSandboxCharts() {
-  const portfolioSeries = filterSeriesByTimeframe(state.portfolioHistory, state.chartTimeframes.portfolio);
+  const portfolioSeries = getPortfolioChartSeries();
   drawLineChart($('#portfolio-chart'), portfolioSeries, '#34d399', state.chartZoom.portfolio, $('#portfolio-inspect'));
   bindChartHover($('#portfolio-chart'), portfolioSeries, $('#portfolio-inspect'));
 
   const assetSeries = filterSeriesByTimeframe(state.priceHistory[state.activeAsset] ?? [], state.chartTimeframes.asset);
   drawLineChart($('#asset-chart'), assetSeries, '#60a5fa', state.chartZoom.asset, $('#asset-inspect'));
   bindChartHover($('#asset-chart'), assetSeries, $('#asset-inspect'));
+}
+
+function updateReplayControls() {
+  const startBtn = $('#replay-start');
+  const stopBtn = $('#replay-stop');
+  if (startBtn) startBtn.disabled = state.replay.active;
+  if (stopBtn) stopBtn.disabled = !state.replay.active;
+}
+
+function stopPortfolioReplay(skipRender = false) {
+  if (state.replay.timer) {
+    clearInterval(state.replay.timer);
+  }
+  state.replay = { active: false, timer: null, index: 0, series: [] };
+  updateReplayControls();
+  if (!skipRender) {
+    renderSandboxCharts();
+  }
+}
+
+function startPortfolioReplay() {
+  const series = filterSeriesByTimeframe(state.portfolioHistory, state.chartTimeframes.portfolio);
+  if (!series || series.length < 2) {
+    showToast('Not enough history to replay yet.', 'info');
+    return;
+  }
+  stopPortfolioReplay(true);
+  state.replay = { active: true, timer: null, index: 0, series };
+  updateReplayControls();
+  renderSandboxCharts();
+  state.replay.timer = setInterval(() => {
+    if (!state.replay.active) return;
+    state.replay.index += 1;
+    if (state.replay.index >= state.replay.series.length - 1) {
+      stopPortfolioReplay();
+      return;
+    }
+    renderSandboxCharts();
+  }, 450);
 }
 
 function setSandboxTab(tab) {
@@ -1260,6 +1308,7 @@ function renderSandbox() {
   historyContainer.innerHTML = historyMarkup || '<p class="text-slate-400 text-sm">No trades yet</p>';
 
   renderPortfolioInsights();
+  updateReplayControls();
 
   const activeAsset = state.prices[state.activeAsset] != null ? state.activeAsset : assetSymbols[0];
   state.activeAsset = activeAsset;
@@ -1703,6 +1752,9 @@ function exitAppShell() {
 }
 
 function setView(view) {
+  if (view !== 'sandbox' && state.replay.active) {
+    stopPortfolioReplay(true);
+  }
   state.currentView = view;
   document.querySelectorAll('.app-view').forEach((section) => {
     section.classList.toggle('hidden', section.id !== `view-${view}`);
@@ -1805,6 +1857,8 @@ function bindEvents() {
   $('#submit-quiz')?.addEventListener('click', handleQuizSubmit);
   $('#buy-form')?.addEventListener('submit', handleBuy);
   $('#sell-form')?.addEventListener('submit', handleSell);
+  $('#replay-start')?.addEventListener('click', startPortfolioReplay);
+  $('#replay-stop')?.addEventListener('click', () => stopPortfolioReplay());
   $('#refresh-courses')?.addEventListener('click', renderCourses);
   $('#enter-demo')?.addEventListener('click', handleDemoEntry);
   $('#bulletin-article-back')?.addEventListener('click', () => setView(state.previousView || 'sandbox'));
