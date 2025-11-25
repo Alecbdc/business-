@@ -235,6 +235,7 @@
               <button class="nav-link" data-view="sandbox" id="nav-sandbox">Sandbox</button>
               <div id="sandbox-subnav" class="hidden pl-3 space-y-2">
                 <button class="nav-link text-sm" data-sandbox-mode="live">Live market</button>
+                <button class="nav-link text-sm" data-sandbox-mode="personal">Personal market</button>
                 <button class="nav-link text-sm" data-sandbox-mode="replay">Market replay</button>
               </div>
             </div>
@@ -421,13 +422,25 @@
             <section id="view-sandbox" class="app-view hidden space-y-8">
               <div id="sandbox-live" class="space-y-8">
                 <div class="card-glass rounded-3xl p-6 flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p class="text-sm text-slate-400">Live market</p>
+                  <div class="space-y-1">
+                    <p id="sandbox-market-label" class="text-sm text-slate-400">Live market</p>
                     <h3 class="text-xl font-semibold">Portfolio & trading</h3>
+                    <p id="sandbox-market-note" class="text-xs text-slate-500">Synchronized demo feed.</p>
                   </div>
-                  <div class="flex gap-2">
-                    <button data-sandbox-tab="portfolio" class="nav-link">Portfolio</button>
-                    <button data-sandbox-tab="trade" class="nav-link">Trade</button>
+                  <div class="flex flex-col sm:items-end gap-3">
+                    <div id="personal-speed-controls" class="hidden flex items-center gap-2 text-xs text-slate-300">
+                      <span class="text-slate-400">Time pace</span>
+                      <div class="flex gap-2">
+                        <button class="nav-link" data-personal-speed="1">1x</button>
+                        <button class="nav-link" data-personal-speed="2">2x</button>
+                        <button class="nav-link" data-personal-speed="5">5x</button>
+                        <button class="nav-link" data-personal-speed="10">10x</button>
+                      </div>
+                    </div>
+                    <div class="flex gap-2">
+                      <button data-sandbox-tab="portfolio" class="nav-link">Portfolio</button>
+                      <button data-sandbox-tab="trade" class="nav-link">Trade</button>
+                    </div>
                   </div>
                 </div>
 

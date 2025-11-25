@@ -44,6 +44,8 @@ const defaultTimeframe = '3M';
 const bulletinRefreshMs = featureToggles.newsRefreshMs ?? 1000 * 60 * 60 * 2;
 const priceTickMs = featureToggles.sandboxPriceUpdateMs ?? 8000;
 const maxBulletins = 12;
+let activeTickMs = priceTickMs;
+let priceTimer = null;
 
 if (FORCE_DEMO_MODE) {
   clearSupabaseOverrides();
@@ -52,7 +54,7 @@ if (FORCE_DEMO_MODE) {
 const isSupabaseConfigured = hasSupabaseCredentials() && !FORCE_DEMO_MODE;
 
 function currentTickStep() {
-  return Math.floor(Date.now() / priceTickMs);
+  return Math.floor(Date.now() / activeTickMs);
 }
 
 function classifyNewsImpact(drift) {
@@ -200,6 +202,7 @@ const state = {
   chartZoom: { portfolio: 1, asset: 1 },
   activeAsset: assetSymbols[0] ?? 'BTC',
   sandboxMode: 'live',
+  personalSpeed: 1,
   sandboxTab: 'portfolio',
   replay: { active: false, timer: null, index: 0, series: [] },
   marketReplay: { active: false, scenarioId: '', step: 0 },
@@ -1325,11 +1328,26 @@ function updateReplayBadge() {
   const badge = $('#replay-mode-badge');
   if (!badge) return;
   if (state.sandboxMode !== 'replay') {
-    badge.textContent = 'Live sandbox';
+    badge.textContent = state.sandboxMode === 'personal' ? 'Personal sandbox' : 'Live sandbox';
     return;
   }
   const scenario = replayScenarios.find((s) => s.id === state.marketReplay.scenarioId);
   badge.textContent = scenario ? `Replay: ${scenario.name}` : 'Replay idle';
+}
+
+function updatePersonalSpeedButtons() {
+  document.querySelectorAll('[data-personal-speed]').forEach((btn) => {
+    const isActive = Number(btn.dataset.personalSpeed) === Number(state.personalSpeed || 1);
+    btn.classList.toggle('active', isActive);
+  });
+}
+
+function setPersonalSpeed(multiplier) {
+  state.personalSpeed = multiplier || 1;
+  updatePersonalSpeedButtons();
+  if (state.sandboxMode === 'personal') {
+    setPriceTimer();
+  }
 }
 
 function setSandboxMode(mode) {
@@ -1339,8 +1357,23 @@ function setSandboxMode(mode) {
   });
   const liveSection = $('#sandbox-live');
   const replaySection = $('#sandbox-replay');
-  if (liveSection) liveSection.classList.toggle('hidden', state.sandboxMode !== 'live');
-  if (replaySection) replaySection.classList.toggle('hidden', state.sandboxMode !== 'replay');
+  const isReplay = state.sandboxMode === 'replay';
+  const isPersonal = state.sandboxMode === 'personal';
+  const marketLabel = $('#sandbox-market-label');
+  const marketNote = $('#sandbox-market-note');
+  const speedControls = $('#personal-speed-controls');
+  if (liveSection) liveSection.classList.toggle('hidden', isReplay);
+  if (replaySection) replaySection.classList.toggle('hidden', !isReplay);
+  if (marketLabel) marketLabel.textContent = isPersonal ? 'Personal market' : 'Live market';
+  if (marketNote)
+    marketNote.textContent = isPersonal
+      ? 'Local simulation with adjustable pacing.'
+      : 'Synchronized demo feed.';
+  if (speedControls) speedControls.classList.toggle('hidden', !isPersonal);
+  if (!isPersonal) {
+    state.personalSpeed = 1;
+    updatePersonalSpeedButtons();
+  }
   if (state.sandboxMode === 'live') {
     state.marketReplay = { active: false, scenarioId: '', step: 0 };
     const select = $('#replay-select');
@@ -1349,6 +1382,7 @@ function setSandboxMode(mode) {
     state.marketReplay.active = !!state.marketReplay.scenarioId;
   }
   updateReplayBadge();
+  setPriceTimer();
   renderSandbox();
   requestAnimationFrame(renderSandboxCharts);
   renderReplayView();
@@ -1779,6 +1813,7 @@ function recordPortfolioSnapshot() {
 function tickPrices() {
   const driftMap = { ...buildBulletinDriftMap() };
   const useReplay = state.sandboxMode === 'replay' && state.marketReplay.active;
+  const usePersonal = state.sandboxMode === 'personal';
   const replayScenario = useReplay ? replayScenarios.find((s) => s.id === state.marketReplay.scenarioId) : null;
   const tickStep = currentTickStep();
   Object.keys(state.prices).forEach((symbol) => {
@@ -1791,6 +1826,8 @@ function tickPrices() {
         drift,
         tickStep + symbol.charCodeAt(0)
       );
+    } else if (usePersonal) {
+      state.prices[symbol] = randomizePrice(state.prices[symbol], drift, null);
     } else {
       state.prices[symbol] = randomizePrice(state.prices[symbol], drift, tickStep + symbol.charCodeAt(0));
     }
@@ -1801,11 +1838,16 @@ function tickPrices() {
   renderDashboard();
 }
 
+function setPriceTimer() {
+  const multiplier = state.sandboxMode === 'personal' ? state.personalSpeed || 1 : 1;
+  activeTickMs = priceTickMs / multiplier;
+  if (priceTimer) clearInterval(priceTimer);
+  priceTimer = setInterval(() => tickPrices(), activeTickMs);
+}
+
 function startPriceLoop() {
   tickPrices();
-  setInterval(() => {
-    tickPrices();
-  }, priceTickMs);
+  setPriceTimer();
 }
 
 function recordTrade(entry) {
@@ -2041,6 +2083,10 @@ function bindNavigation() {
       setView('sandbox');
       setSandboxMode(btn.dataset.sandboxMode);
     });
+  });
+
+  document.querySelectorAll('[data-personal-speed]').forEach((btn) => {
+    btn.addEventListener('click', () => setPersonalSpeed(Number(btn.dataset.personalSpeed)));
   });
 
   $('#replay-select')?.addEventListener('change', (event) => {
