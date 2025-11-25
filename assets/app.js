@@ -42,8 +42,33 @@ if (FORCE_DEMO_MODE) {
 
 const isSupabaseConfigured = hasSupabaseCredentials() && !FORCE_DEMO_MODE;
 
+function classifyNewsImpact(drift) {
+  const magnitude = Math.abs(drift);
+  if (magnitude >= 0.012) return 'major';
+  if (magnitude >= 0.007) return 'medium';
+  if (magnitude > 0) return 'minor';
+  return null;
+}
+
+function computeNewsShock(drift) {
+  const tier = classifyNewsImpact(drift);
+  if (!tier) return 0;
+  const sign = Math.sign(drift) || 1;
+  const ranges = {
+    major: { min: 0.2, max: 0.3, chance: 0.45 },
+    medium: { min: 0.05, max: 0.12, chance: 0.35 },
+    minor: { min: 0.02, max: 0.06, chance: 0.25 }
+  };
+  const config = ranges[tier];
+  if (Math.random() > config.chance) return 0;
+  const shock = config.min + Math.random() * (config.max - config.min);
+  return shock * sign;
+}
+
 function randomizePrice(price, drift = 0) {
-  const delta = (Math.random() - 0.5) * 0.04 + drift;
+  const baseVolatility = 0.06; // wider swings to feel closer to live markets
+  const newsShock = computeNewsShock(drift);
+  const delta = (Math.random() - 0.5) * baseVolatility + drift + newsShock;
   return Math.max(0, price * (1 + delta));
 }
 
