@@ -332,170 +332,163 @@
           </section>
 
             <section id="view-curriculum" class="app-view hidden space-y-8">
-              <div class="card-glass rounded-3xl p-8" id="curriculum-progress"></div>
-              <div class="grid gap-6">
-              <div class="card-glass rounded-3xl p-8 space-y-6" id="curriculum-videos">
-                <div class="flex items-center justify-between">
+              <div class="grid gap-6 lg:grid-cols-[240px_1fr]">
+                <aside class="card-glass rounded-3xl p-6 space-y-4 h-full">
                   <div>
-                    <p class="text-sm text-slate-400">Courses</p>
-                    <h3 class="text-2xl font-semibold">Video lessons</h3>
+                    <p class="text-sm text-slate-400">Curriculum</p>
+                    <h3 class="text-xl font-semibold">Choose a track</h3>
+                    <p class="text-xs text-slate-400">Pick between courses, quizzes, or the exam arena.</p>
                   </div>
-                  <button id="refresh-courses" class="text-sm text-slate-400 hover:text-white">Refresh</button>
-                </div>
-                <div id="course-list" class="space-y-3"></div>
-                <div id="lesson-detail" class="space-y-4"></div>
-                <button
-                  id="complete-lesson-btn"
-                  class="w-full py-3 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-950 font-semibold"
-                >
-                  Mark lesson complete
-                </button>
-              </div>
-              <div class="card-glass rounded-3xl p-8 space-y-6" id="curriculum-quizzes">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <p class="text-sm text-slate-400">Knowledge check</p>
-                    <h3 class="text-2xl font-semibold">Topic arena</h3>
+                  <div class="space-y-2">
+                    <button data-curriculum-tab="courses" class="w-full nav-link">Courses</button>
+                    <button data-curriculum-tab="quiz" class="w-full nav-link">Quiz</button>
+                    <button data-curriculum-tab="exam" class="w-full nav-link">Exam</button>
                   </div>
-                  <p id="quiz-score-chip" class="badge hidden">Score</p>
+                  <div class="rounded-2xl bg-white/5 p-3 text-xs text-slate-400">
+                    <p class="font-semibold text-white">Table of contents</p>
+                    <p>Navigate lessons and assessments from any section.</p>
+                  </div>
+                </aside>
+                <div class="space-y-6">
+                  <div class="card-glass rounded-3xl p-8" id="curriculum-progress"></div>
+
+                  <div id="course-pane" class="space-y-6">
+                    <div class="card-glass rounded-3xl p-6" id="course-toc"></div>
+                    <div class="card-glass rounded-3xl p-8 space-y-6" id="curriculum-videos">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <p class="text-sm text-slate-400">Courses</p>
+                          <h3 class="text-2xl font-semibold">Video lessons</h3>
+                        </div>
+                        <button id="refresh-courses" class="text-sm text-slate-400 hover:text-white">Refresh</button>
+                      </div>
+                      <div id="course-list" class="space-y-3"></div>
+                      <div id="lesson-detail" class="space-y-4"></div>
+                      <button
+                        id="complete-lesson-btn"
+                        class="w-full py-3 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-950 font-semibold"
+                      >
+                        Mark lesson complete
+                      </button>
+                    </div>
+                  </div>
+
+                  <div id="assessment-pane" class="space-y-6 hidden">
+                    <div class="card-glass rounded-3xl p-6" id="assessment-toc"></div>
+                    <div class="card-glass rounded-3xl p-8 space-y-6" id="curriculum-quizzes">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <p class="text-sm text-slate-400" id="quiz-mode-label">Knowledge check</p>
+                          <h3 class="text-2xl font-semibold" id="quiz-mode-title">Topic arena</h3>
+                        </div>
+                        <p id="quiz-score-chip" class="badge hidden">Score</p>
+                      </div>
+                      <p id="quiz-threshold" class="text-xs text-slate-400"></p>
+                      <p id="quiz-topic-count" class="text-xs text-slate-400"></p>
+                      <div id="quiz-topic-list" class="grid gap-3 md:grid-cols-2"></div>
+                      <div class="rounded-2xl bg-white/5 p-4 space-y-1">
+                        <p class="text-xs text-slate-400">Current topic</p>
+                        <p id="quiz-topic-name" class="text-xl font-semibold">Select a topic</p>
+                        <p id="quiz-topic-description" class="text-sm text-slate-400">
+                          Pick a topic card above to unlock the challenge bank.
+                        </p>
+                        <p class="text-xs text-slate-400">
+                          <span class="font-semibold">Linked lessons:</span>
+                          <span id="quiz-topic-lessons">—</span>
+                        </p>
+                      </div>
+                      <form id="quiz-form" class="space-y-6"></form>
+                      <button
+                        id="submit-quiz"
+                        class="mt-4 w-full py-3 rounded-2xl bg-sky-500/80 hover:bg-sky-400 text-slate-950 font-semibold"
+                      >
+                        Submit quiz
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <p id="quiz-threshold" class="text-xs text-slate-400"></p>
-                <p id="quiz-topic-count" class="text-xs text-slate-400"></p>
-                <div id="quiz-topic-list" class="grid gap-3 md:grid-cols-2"></div>
-                <div class="rounded-2xl bg-white/5 p-4 space-y-1">
-                  <p class="text-xs text-slate-400">Current topic</p>
-                  <p id="quiz-topic-name" class="text-xl font-semibold">Select a topic</p>
-                  <p id="quiz-topic-description" class="text-sm text-slate-400">
-                    Pick a topic card above to unlock the 20-question challenge bank.
-                  </p>
-                  <p class="text-xs text-slate-400">
-                    <span class="font-semibold">Linked lessons:</span>
-                    <span id="quiz-topic-lessons">—</span>
-                  </p>
-                </div>
-                <form id="quiz-form" class="space-y-6"></form>
-                <button
-                  id="submit-quiz"
-                  class="mt-4 w-full py-3 rounded-2xl bg-sky-500/80 hover:bg-sky-400 text-slate-950 font-semibold"
-                >
-                  Submit quiz
-                </button>
               </div>
-            </div>
-          </section>
+            </section>
 
             <section id="view-sandbox" class="app-view hidden space-y-8">
-              <div class="grid gap-6">
-              <div class="card-glass rounded-3xl p-8 space-y-6">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div>
-                    <p class="text-sm text-slate-400">Portfolio value</p>
-                    <p id="sandbox-portfolio-value" class="text-3xl font-semibold">€0</p>
-                  </div>
-                  <div class="text-sm text-slate-400 text-right">
-                    <p>Cash balance</p>
-                    <p id="sandbox-balance" class="text-xl text-emerald-300 font-semibold">€0</p>
-                  </div>
-                </div>
+              <div class="card-glass rounded-3xl p-6 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p class="text-sm text-slate-400">Total performance</p>
-                  <div class="flex flex-col gap-2 mt-2">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-400">
-                      <div id="portfolio-timeframe-controls" class="flex flex-wrap gap-2"></div>
-                      <div id="portfolio-zoom-controls" class="flex items-center gap-2">
-                        <button data-zoom="out" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
-                          −
-                        </button>
-                        <button data-zoom="reset" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
-                          Reset
-                        </button>
-                        <button data-zoom="in" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
-                          +
-                        </button>
-                      </div>
-                    </div>
-                    <canvas id="portfolio-chart" class="w-full h-48"></canvas>
-                    <p id="portfolio-inspect" class="text-xs text-slate-300"></p>
-                  </div>
+                  <p class="text-sm text-slate-400">Sandbox</p>
+                  <h3 class="text-xl font-semibold">Portfolio & trading</h3>
                 </div>
-                <div>
-                  <p class="text-sm text-slate-400 mb-2">Holdings</p>
-                  <div id="sandbox-holdings" class="space-y-3 text-sm"></div>
-                </div>
-                <div>
-                  <p class="text-sm text-slate-400 mb-2">Trade history</p>
-                  <div id="sandbox-history" class="scroll-area space-y-2 text-xs"></div>
-                </div>
-                <div class="card-glass rounded-3xl p-6 space-y-3" id="portfolio-insights">
-                  <div class="flex items-center justify-between">
-                    <p class="text-sm text-slate-400">Portfolio insights</p>
-                  </div>
-                  <div class="space-y-2 text-sm text-slate-300">
-                    <div class="flex items-center justify-between">
-                      <span>Risk profile</span>
-                      <span id="insight-risk">Moderate</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                      <span>Concentration</span>
-                      <span id="insight-concentration">65% in BTC</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                      <span>Volatility</span>
-                      <span id="insight-volatility">High</span>
-                    </div>
-                  </div>
-                  <p class="text-xs text-slate-400">
-                    Insights are based on your simulated trades and prices, for learning only.
-                  </p>
-                </div>
-                <div>
-                  <div class="flex items-center justify-between mb-2">
-                    <div>
-                      <p class="text-sm text-slate-400">Signals</p>
-                      <h3 class="text-lg font-semibold">News bulletin board</h3>
-                    </div>
-                    <span id="bulletin-refresh-label" class="badge">Auto-updates</span>
-                  </div>
-                  <div id="sandbox-bulletin" class="space-y-3 text-sm"></div>
+                <div class="flex gap-2">
+                  <button data-sandbox-tab="portfolio" class="nav-link">Portfolio</button>
+                  <button data-sandbox-tab="trade" class="nav-link">Trade</button>
                 </div>
               </div>
-              <div class="space-y-6">
-                <div class="card-glass rounded-3xl p-6">
-                  <div class="grid gap-6 md:grid-cols-2">
-                    <form id="buy-form" class="space-y-3">
-                      <p class="text-sm text-slate-400">Buy crypto</p>
-                      <select id="buy-asset" class="w-full rounded-2xl border border-white/10 px-4 py-2"></select>
-                      <input
-                        id="buy-amount"
-                        type="number"
-                        min="10"
-                        step="10"
-                        placeholder="Amount in €"
-                        class="w-full rounded-2xl border border-white/10 px-4 py-2"
-                        required
-                      />
-                      <button type="submit" class="w-full py-2 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-950 font-semibold">
-                        Buy
-                      </button>
-                    </form>
-                  <form id="sell-form" class="space-y-3">
-                    <p class="text-sm text-slate-400">Sell crypto</p>
-                    <select id="sell-asset" class="w-full rounded-2xl border border-white/10 px-4 py-2"></select>
-                      <input
-                        id="sell-amount"
-                        type="number"
-                        min="0.0001"
-                        step="0.0001"
-                        placeholder="Units to sell"
-                        class="w-full rounded-2xl border border-white/10 px-4 py-2"
-                        required
-                      />
-                      <button type="submit" class="w-full py-2 rounded-2xl bg-rose-500/80 hover:bg-rose-400 text-slate-950 font-semibold">
-                        Sell
-                      </button>
-                    </form>
+
+              <div id="sandbox-portfolio-section" class="grid gap-6">
+                <div class="card-glass rounded-3xl p-8 space-y-6">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <p class="text-sm text-slate-400">Portfolio value</p>
+                      <p id="sandbox-portfolio-value" class="text-3xl font-semibold">€0</p>
+                    </div>
+                    <div class="text-sm text-slate-400 text-right">
+                      <p>Cash balance</p>
+                      <p id="sandbox-balance" class="text-xl text-emerald-300 font-semibold">€0</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-400">Total performance</p>
+                    <div class="flex flex-col gap-2 mt-2">
+                      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-400">
+                        <div id="portfolio-timeframe-controls" class="flex flex-wrap gap-2"></div>
+                        <div id="portfolio-zoom-controls" class="flex items-center gap-2">
+                          <button data-zoom="out" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                            −
+                          </button>
+                          <button data-zoom="reset" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                            Reset
+                          </button>
+                          <button data-zoom="in" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                            +
+                          </button>
+                        </div>
+                      </div>
+                      <canvas id="portfolio-chart" class="w-full h-48"></canvas>
+                      <p id="portfolio-inspect" class="text-xs text-slate-300"></p>
+                    </div>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-400 mb-2">Holdings</p>
+                    <div id="sandbox-holdings" class="space-y-3 text-sm"></div>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-400 mb-2">Trade history</p>
+                    <div id="sandbox-history" class="scroll-area space-y-2 text-xs"></div>
+                  </div>
+                  <div class="card-glass rounded-3xl p-6 space-y-3" id="portfolio-insights">
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm text-slate-400">Portfolio insights</p>
+                    </div>
+                    <div class="space-y-2 text-sm text-slate-300">
+                      <div class="flex items-center justify-between">
+                        <span>Risk profile</span>
+                        <span id="insight-risk">Moderate</span>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span>Concentration</span>
+                        <span id="insight-concentration">65% in BTC</span>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span>Volatility</span>
+                        <span id="insight-volatility">High</span>
+                      </div>
+                    </div>
+                    <p class="text-xs text-slate-400">
+                      Insights are based on your simulated trades and prices, for learning only.
+                    </p>
                   </div>
                 </div>
+              </div>
+
+              <div id="sandbox-trade-section" class="space-y-6 hidden">
                 <div class="card-glass rounded-3xl p-8 space-y-6">
                   <div class="flex items-center justify-between">
                     <div>
@@ -540,21 +533,69 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="card-glass rounded-3xl p-6 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-slate-400">Quick picks</p>
+                      <h3 class="text-xl font-semibold">Tap an asset</h3>
+                    </div>
+                    <button id="asset-strip-toggle" type="button" class="text-sm px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
+                      See all
+                    </button>
+                  </div>
+                  <div id="sandbox-asset-strip" class="flex gap-3 overflow-x-auto"></div>
+                </div>
+
+                <div class="card-glass rounded-3xl p-6">
+                  <div class="grid gap-6 md:grid-cols-2">
+                    <form id="buy-form" class="space-y-3">
+                      <p class="text-sm text-slate-400">Buy crypto</p>
+                      <select id="buy-asset" class="w-full rounded-2xl border border-white/10 px-4 py-2"></select>
+                      <input
+                        id="buy-amount"
+                        type="number"
+                        min="10"
+                        step="10"
+                        placeholder="Amount in €"
+                        class="w-full rounded-2xl border border-white/10 px-4 py-2"
+                        required
+                      />
+                      <button type="submit" class="w-full py-2 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-950 font-semibold">
+                        Buy
+                      </button>
+                    </form>
+                  <form id="sell-form" class="space-y-3">
+                    <p class="text-sm text-slate-400">Sell crypto</p>
+                    <select id="sell-asset" class="w-full rounded-2xl border border-white/10 px-4 py-2"></select>
+                      <input
+                        id="sell-amount"
+                        type="number"
+                        min="0.0001"
+                        step="0.0001"
+                        placeholder="Units to sell"
+                        class="w-full rounded-2xl border border-white/10 px-4 py-2"
+                        required
+                      />
+                      <button type="submit" class="w-full py-2 rounded-2xl bg-rose-500/80 hover:bg-rose-400 text-slate-950 font-semibold">
+                        Sell
+                      </button>
+                    </form>
+                  </div>
+                </div>
+
                 <div class="card-glass rounded-3xl p-8 space-y-4">
                   <div class="flex items-center justify-between">
                     <div>
-                      <p class="text-sm text-slate-400">Market</p>
-                      <h3 class="text-xl font-semibold">Available crypto</h3>
+                      <p class="text-sm text-slate-400">Signals</p>
+                      <h3 class="text-lg font-semibold">News bulletin board</h3>
                     </div>
-                    <button id="asset-toggle" type="button" class="text-sm px-3 py-1 rounded-full border border-white/15 hover:border-white/40">
-                      Show more
-                    </button>
+                    <span id="bulletin-refresh-label" class="badge">Auto-updates</span>
                   </div>
-                  <div id="sandbox-prices" class="space-y-3"></div>
+                  <div id="sandbox-bulletin" class="space-y-3 text-sm"></div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
           <section id="view-article" class="app-view hidden space-y-8">
             <div class="card-glass rounded-3xl p-8 space-y-6">
               <div class="flex flex-wrap items-center justify-between gap-3">

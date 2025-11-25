@@ -125,6 +125,7 @@ const state = {
   previousView: 'dashboard',
   selectedLessonId: courses[0]?.lessons[0]?.id ?? null,
   selectedQuizTopicId: quizTopics[0]?.id ?? null,
+  curriculumTab: 'courses',
   progress: {},
   quizScores: {},
   topicScores: {},
@@ -140,6 +141,7 @@ const state = {
   chartTimeframes: { portfolio: defaultTimeframe, asset: defaultTimeframe },
   chartZoom: { portfolio: 1, asset: 1 },
   activeAsset: assetSymbols[0] ?? 'BTC',
+  sandboxTab: 'portfolio',
   bulletin: { bucket: null, items: [] },
   activeBulletinArticleId: null,
   ui: { showAllAssets: false }
@@ -629,6 +631,85 @@ function renderCurriculumSummary() {
       </div>
     </div>
   `;
+
+  renderCourseToc('course-toc', 'Courses');
+  renderCourseToc('assessment-toc', state.curriculumTab === 'exam' ? 'Exam contents' : 'Quiz contents');
+}
+
+function renderCourseToc(containerId, heading = 'Courses') {
+  const container = $(`#${containerId}`);
+  if (!container) return;
+  container.innerHTML = `
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <p class="text-sm text-slate-400">${heading}</p>
+        <h3 class="text-xl font-semibold">Table of contents</h3>
+      </div>
+      <span class="badge">${courses.length} courses</span>
+    </div>
+    <div class="space-y-3">
+      ${courses
+        .map((course) => {
+          const completed = course.lessons.filter((lesson) => state.progress[lesson.id]?.completed).length;
+          return `
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.25em] text-slate-400">${course.level}</p>
+                  <p class="font-semibold">${course.title}</p>
+                </div>
+                <span class="mini-badge">${completed}/${course.lessons.length}</span>
+              </div>
+              <div class="mt-2 grid gap-2">
+                ${course.lessons
+                  .map(
+                    (lesson) => `
+                      <button data-lesson="${lesson.id}" class="w-full text-left rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm ${
+                        state.selectedLessonId === lesson.id ? 'border-white/40' : ''
+                      }">
+                        ${lesson.title}
+                      </button>
+                    `
+                  )
+                  .join('')}
+              </div>
+            </div>
+          `;
+        })
+        .join('')}
+    </div>
+  `;
+
+  container.querySelectorAll('button[data-lesson]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setSelectedLesson(btn.dataset.lesson);
+    });
+  });
+}
+
+function setCurriculumTab(tab) {
+  state.curriculumTab = tab;
+  document.querySelectorAll('[data-curriculum-tab]').forEach((btn) => {
+    const isActive = btn.dataset.curriculumTab === tab;
+    btn.classList.toggle('active', isActive);
+  });
+  const coursePane = $('#course-pane');
+  const assessmentPane = $('#assessment-pane');
+  if (coursePane) coursePane.classList.toggle('hidden', tab !== 'courses');
+  if (assessmentPane) assessmentPane.classList.toggle('hidden', tab === 'courses');
+
+  const isExam = tab === 'exam';
+  const modeLabel = $('#quiz-mode-label');
+  const modeTitle = $('#quiz-mode-title');
+  const submitBtn = $('#submit-quiz');
+  if (modeLabel) modeLabel.textContent = isExam ? 'Exam mode' : 'Knowledge check';
+  if (modeTitle) modeTitle.textContent = isExam ? 'Exam arena' : 'Topic arena';
+  if (submitBtn) submitBtn.textContent = isExam ? 'Submit exam' : 'Submit quiz';
+
+  renderCourseToc('course-toc', 'Courses');
+  renderCourseToc('assessment-toc', isExam ? 'Exam contents' : 'Quiz contents');
+  renderQuiz();
+  renderQuizTopics();
 }
 
 function setQuizTopic(topicId) {
@@ -1004,6 +1085,18 @@ function renderSandboxCharts() {
   bindChartHover($('#asset-chart'), assetSeries, $('#asset-inspect'));
 }
 
+function setSandboxTab(tab) {
+  state.sandboxTab = tab;
+  document.querySelectorAll('[data-sandbox-tab]').forEach((btn) => {
+    const isActive = btn.dataset.sandboxTab === tab;
+    btn.classList.toggle('active', isActive);
+  });
+  const portfolioSection = $('#sandbox-portfolio-section');
+  const tradeSection = $('#sandbox-trade-section');
+  if (portfolioSection) portfolioSection.classList.toggle('hidden', tab !== 'portfolio');
+  if (tradeSection) tradeSection.classList.toggle('hidden', tab !== 'trade');
+}
+
 function renderPortfolioInsights() {
   const container = $('#portfolio-insights');
   if (!container) return;
@@ -1168,8 +1261,6 @@ function renderSandbox() {
 
   renderPortfolioInsights();
 
-  renderBulletinBoard();
-
   const activeAsset = state.prices[state.activeAsset] != null ? state.activeAsset : assetSymbols[0];
   state.activeAsset = activeAsset;
   const activeHistory = state.priceHistory[activeAsset] ?? [];
@@ -1189,46 +1280,53 @@ function renderSandbox() {
   }
   $('#active-asset-units').textContent = activeUnits.toFixed(4);
   $('#active-asset-share').textContent = `${activeValueShare.toFixed(2)}%`;
-  const pricesContainer = $('#sandbox-prices');
-  if (pricesContainer) {
+  const stripContainer = $('#sandbox-asset-strip');
+  if (stripContainer) {
     const entries = Object.entries(state.prices);
-    const visibleEntries = (state.ui?.showAllAssets ? entries : entries.slice(0, maxVisibleAssets)) || entries;
-    pricesContainer.innerHTML = visibleEntries
+    const visible = state.ui?.showAllAssets ? entries : entries.slice(0, 5);
+    stripContainer.innerHTML = visible
       .map(([symbol, price]) => {
         const history = state.priceHistory[symbol] ?? [];
         const prev = history.length > 1 ? history[history.length - 2]?.value : price;
         const changePct = prev ? ((price - prev) / prev) * 100 : 0;
+        const initial = symbol[0] ?? '?';
         return `
-          <button data-asset="${symbol}" class="w-full flex items-center justify-between border rounded-2xl px-4 py-3 ${
-            state.activeAsset === symbol ? 'border-white/40 bg-white/5' : 'border-white/10 bg-white/0'
-          }">
-            <div>
-              <p class="text-sm font-semibold">${symbol}</p>
-              <p class="text-xs text-slate-400">${formatCurrency(price)}</p>
+          <button data-asset="${symbol}" class="min-w-[120px] flex-1 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-left hover:border-white/40">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-semibold">${initial}</span>
+              <div>
+                <p class="font-semibold">${symbol}</p>
+                <p class="text-xs text-slate-400">${formatCurrency(price)}</p>
+              </div>
             </div>
-            <p class="text-sm font-semibold ${changePct >= 0 ? 'text-emerald-300' : 'text-rose-300'}">
-              ${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%
-            </p>
+            <p class="text-xs mt-1 ${changePct >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${
+              changePct >= 0 ? '+' : ''
+            }${changePct.toFixed(2)}%</p>
           </button>
         `;
       })
       .join('');
-    pricesContainer.querySelectorAll('button[data-asset]').forEach((btn) => {
+
+    stripContainer.querySelectorAll('button[data-asset]').forEach((btn) => {
       btn.addEventListener('click', () => {
         state.activeAsset = btn.dataset.asset;
+        setSandboxTab('trade');
         renderSandbox();
         requestAnimationFrame(renderSandboxCharts);
       });
     });
-    const toggleBtn = $('#asset-toggle');
+
+    const toggleBtn = $('#asset-strip-toggle');
     if (toggleBtn) {
-      toggleBtn.textContent = state.ui?.showAllAssets ? 'Show less' : 'Show more';
+      toggleBtn.textContent = state.ui?.showAllAssets ? 'Show less' : 'See all';
       toggleBtn.onclick = () => {
         state.ui.showAllAssets = !state.ui.showAllAssets;
         renderSandbox();
       };
     }
   }
+
+  renderBulletinBoard();
 
   requestAnimationFrame(renderSandboxCharts);
 }
@@ -1614,10 +1712,14 @@ function setView(view) {
     btn.classList.toggle('active', isActive);
   });
   if (view === 'sandbox') {
+    setSandboxTab(state.sandboxTab ?? 'portfolio');
     requestAnimationFrame(renderSandboxCharts);
   }
   if (view === 'article') {
     renderBulletinArticle();
+  }
+  if (view === 'curriculum') {
+    setCurriculumTab(state.curriculumTab ?? 'courses');
   }
 }
 
@@ -1627,6 +1729,14 @@ function bindNavigation() {
   });
   document.querySelectorAll('[data-view-target]').forEach((btn) => {
     btn.addEventListener('click', () => setView(btn.dataset.viewTarget));
+  });
+
+  document.querySelectorAll('[data-curriculum-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => setCurriculumTab(btn.dataset.curriculumTab));
+  });
+
+  document.querySelectorAll('[data-sandbox-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => setSandboxTab(btn.dataset.sandboxTab));
   });
 }
 
@@ -1772,8 +1882,10 @@ function init() {
   renderQuizTopics();
   renderQuiz();
   renderQuizThresholdHint();
+  setCurriculumTab(state.curriculumTab);
   renderAssetSelects();
   initChartControls();
+  setSandboxTab(state.sandboxTab);
   renderSandbox();
   renderDashboard();
   bindEvents();
