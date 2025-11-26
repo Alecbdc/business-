@@ -102,6 +102,7 @@ function updateTimeframeSelection(chartKey) {
 function bindTimeframeControls(containerId, chartKey) {
   const container = $(`#${containerId}`);
   if (!container) return;
+  // TODO: Build timeframe controls with DOM APIs instead of innerHTML if options become user-supplied.
   container.innerHTML = timeframeOptions
     .map(
       (option) => `
@@ -196,6 +197,7 @@ export function renderReplaySelect() {
   const options = [`<option value="">Live sandbox</option>`]
     .concat(replayScenarios.map((scenario) => `<option value="${scenario.id}">${scenario.name}</option>`))
     .join('');
+  // TODO: Populate replay select with option elements instead of concatenated HTML when scenarios are user-defined.
   select.innerHTML = options;
   select.value = state.marketReplay.scenarioId || '';
 }

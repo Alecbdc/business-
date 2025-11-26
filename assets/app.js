@@ -9,7 +9,7 @@ import {
   FORCE_DEMO_MODE
 } from './config.js';
 import { state, hydrateStateFromCache, persistStateToCache } from './modules/state.js';
-import { $, bind, setView as applyView, showToast, formatCurrency, setProfileName } from './modules/ui.js';
+import { $, bind, setView as applyView, showToast, formatCurrency, setProfileName, setText } from './modules/ui.js';
 import {
   initChartControls,
   renderSandboxCharts,
@@ -432,6 +432,7 @@ function getGamifiedStats() {
 function renderCourses() {
   const container = $('#course-list');
   if (!container) return;
+  // TODO: Replace template string rendering with element creation to avoid innerHTML for dynamic course data.
   container.innerHTML = courses
     .map((course) => {
       const totalLessons = course.lessons.length;
@@ -1125,30 +1126,34 @@ function renderBulletinArticle() {
   if (!titleEl || !summaryEl || !assetsEl || !effectEl || !bodyEl || !badgeEl || !timeEl) return;
 
   if (!article) {
-    titleEl.textContent = 'Select a bulletin to open its full article';
-    summaryEl.textContent = 'Click any headline in the sandbox bulletin board to read a deeper brief and the projected market tilt.';
-    assetsEl.textContent = 'Focus assets: —';
-    effectEl.textContent = 'Projected impact will appear here.';
-    bodyEl.innerHTML = '<p class="text-sm text-slate-300">No article selected.</p>';
-    badgeEl.textContent = 'Signals';
+    setText(titleEl, 'Select a bulletin to open its full article');
+    setText(
+      summaryEl,
+      'Click any headline in the sandbox bulletin board to read a deeper brief and the projected market tilt.'
+    );
+    setText(assetsEl, 'Focus assets: —');
+    setText(effectEl, 'Projected impact will appear here.');
+    setText(bodyEl, 'No article selected.');
+    setText(badgeEl, 'Signals');
     badgeEl.className = 'badge';
-    timeEl.textContent = '';
+    setText(timeEl, '');
     return;
   }
 
-  titleEl.textContent = article.title;
-  summaryEl.textContent = article.summary;
-  assetsEl.textContent = `Focus assets: ${article.assets?.join(', ') || 'Market-wide'}`;
+  setText(titleEl, article.title);
+  setText(summaryEl, article.summary);
+  setText(assetsEl, `Focus assets: ${article.assets?.join(', ') || 'Market-wide'}`);
   const projection = article.projection
     ? article.projection
     : article.drift
     ? `Expected ${(article.drift * 100).toFixed(1)}% ${article.drift > 0 ? 'upward' : 'downward'} tilt in sentiment-weighted ticks.`
     : 'Neutral baseline expected.';
-  effectEl.textContent = projection;
+  setText(effectEl, projection);
 
   const paragraphs = article.articleBody?.length
     ? article.articleBody
     : [article.summary, article.impact, projection].filter(Boolean);
+  // TODO: Replace innerHTML assembly with createElement-based rendering to avoid string concatenation for external content.
   bodyEl.innerHTML = paragraphs
     .map((p) => `<p class="text-sm text-slate-200 leading-relaxed">${p}</p>`)
     .join('');
@@ -1161,9 +1166,9 @@ function renderBulletinArticle() {
       : article.sentiment === 'speculative'
       ? 'bg-amber-500/20 text-amber-100'
       : 'bg-sky-500/20 text-sky-100';
-  badgeEl.textContent = article.sentiment ?? 'Signal';
+  setText(badgeEl, article.sentiment ?? 'Signal');
   badgeEl.className = `badge ${toneClass}`;
-  timeEl.textContent = formatRelativeTime(article.ts ?? Date.now());
+  setText(timeEl, formatRelativeTime(article.ts ?? Date.now()));
 }
 
 
@@ -1191,6 +1196,7 @@ function renderSandbox() {
     .join('');
   holdingsContainer.innerHTML = holdingsEntries || '<p class="text-slate-400 text-sm">No holdings yet</p>';
 
+  // TODO: Refactor trade history rendering to build DOM nodes instead of concatenated HTML strings.
   const historyMarkup = state.sandbox.history
     .slice(-10)
     .reverse()

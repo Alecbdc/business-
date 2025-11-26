@@ -28,6 +28,11 @@ export function bind(selector, event, handler) {
   el.addEventListener(event, handler);
 }
 
+export function setText(el, text) {
+  if (!el) return;
+  el.textContent = text ?? '';
+}
+
 export function setProfileName(value) {
   document.querySelectorAll('[data-profile-name]').forEach((node) => {
     node.textContent = value;
