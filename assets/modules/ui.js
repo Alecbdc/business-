@@ -9,6 +9,16 @@ export function $(selector) {
   return elements[key];
 }
 
+export function formatCurrency(value) {
+  if (value == null || Number.isNaN(value)) return '€0.00';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(Number(value));
+}
+
 export function bind(selector, event, handler) {
   const el = $(selector);
   if (!el) {
@@ -16,6 +26,12 @@ export function bind(selector, event, handler) {
     return;
   }
   el.addEventListener(event, handler);
+}
+
+export function setProfileName(value) {
+  document.querySelectorAll('[data-profile-name]').forEach((node) => {
+    node.textContent = value;
+  });
 }
 
 export function showToast(message, type = 'info') {
