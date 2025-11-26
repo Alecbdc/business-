@@ -202,7 +202,6 @@ const state = {
   chartZoom: { portfolio: 1, asset: 1 },
   activeAsset: assetSymbols[0] ?? 'BTC',
   sandboxMode: 'live',
-  personalSpeed: 1,
   sandboxTab: 'portfolio',
   replay: { active: false, timer: null, index: 0, series: [] },
   marketReplay: { active: false, scenarioId: '', step: 0 },
@@ -1328,26 +1327,11 @@ function updateReplayBadge() {
   const badge = $('#replay-mode-badge');
   if (!badge) return;
   if (state.sandboxMode !== 'replay') {
-    badge.textContent = state.sandboxMode === 'personal' ? 'Personal sandbox' : 'Live sandbox';
+    badge.textContent = 'Live sandbox';
     return;
   }
   const scenario = replayScenarios.find((s) => s.id === state.marketReplay.scenarioId);
   badge.textContent = scenario ? `Replay: ${scenario.name}` : 'Replay idle';
-}
-
-function updatePersonalSpeedButtons() {
-  document.querySelectorAll('[data-personal-speed]').forEach((btn) => {
-    const isActive = Number(btn.dataset.personalSpeed) === Number(state.personalSpeed || 1);
-    btn.classList.toggle('active', isActive);
-  });
-}
-
-function setPersonalSpeed(multiplier) {
-  state.personalSpeed = multiplier || 1;
-  updatePersonalSpeedButtons();
-  if (state.sandboxMode === 'personal') {
-    setPriceTimer();
-  }
 }
 
 function setSandboxMode(mode) {
@@ -1358,27 +1342,15 @@ function setSandboxMode(mode) {
   const liveSection = $('#sandbox-live');
   const replaySection = $('#sandbox-replay');
   const isReplay = state.sandboxMode === 'replay';
-  const isPersonal = state.sandboxMode === 'personal';
   const marketLabel = $('#sandbox-market-label');
   const marketNote = $('#sandbox-market-note');
-  const speedControls = $('#personal-speed-controls');
   if (liveSection) liveSection.classList.toggle('hidden', isReplay);
   if (replaySection) replaySection.classList.toggle('hidden', !isReplay);
-  if (marketLabel) marketLabel.textContent = isPersonal ? 'Personal market' : 'Live market';
+  if (marketLabel) marketLabel.textContent = isReplay ? 'Replay market' : 'Live market';
   if (marketNote)
-    marketNote.textContent = isPersonal
-      ? 'Local simulation with adjustable pacing.'
+    marketNote.textContent = isReplay
+      ? 'Synthetic scenarios for practice.'
       : 'Synchronized demo feed.';
-  if (speedControls) speedControls.classList.toggle('hidden', !isPersonal);
-  if (!isPersonal) {
-    state.personalSpeed = 1;
-    updatePersonalSpeedButtons();
-  }
-  // Personal mode should mirror the live layout with portfolio/trade sections visible
-  // and charts populated immediately.
-  if (isPersonal) {
-    setSandboxTab(state.sandboxTab || 'portfolio');
-  }
   if (state.sandboxMode === 'live') {
     state.marketReplay = { active: false, scenarioId: '', step: 0 };
     const select = $('#replay-select');
@@ -1818,7 +1790,6 @@ function recordPortfolioSnapshot() {
 function tickPrices() {
   const driftMap = { ...buildBulletinDriftMap() };
   const useReplay = state.sandboxMode === 'replay' && state.marketReplay.active;
-  const usePersonal = state.sandboxMode === 'personal';
   const replayScenario = useReplay ? replayScenarios.find((s) => s.id === state.marketReplay.scenarioId) : null;
   const tickStep = currentTickStep();
   Object.keys(state.prices).forEach((symbol) => {
@@ -1831,8 +1802,6 @@ function tickPrices() {
         drift,
         tickStep + symbol.charCodeAt(0)
       );
-    } else if (usePersonal) {
-      state.prices[symbol] = randomizePrice(state.prices[symbol], drift, null);
     } else {
       state.prices[symbol] = randomizePrice(state.prices[symbol], drift, tickStep + symbol.charCodeAt(0));
     }
@@ -1844,8 +1813,7 @@ function tickPrices() {
 }
 
 function setPriceTimer() {
-  const multiplier = state.sandboxMode === 'personal' ? state.personalSpeed || 1 : 1;
-  activeTickMs = priceTickMs / multiplier;
+  activeTickMs = priceTickMs;
   if (priceTimer) clearInterval(priceTimer);
   priceTimer = setInterval(() => tickPrices(), activeTickMs);
 }
@@ -2087,18 +2055,7 @@ function bindNavigation() {
     btn.addEventListener('click', () => {
       setView('sandbox');
       setSandboxMode(btn.dataset.sandboxMode);
-      // Ensure the personal market always shows the full live layout
-      // so users see portfolio + trade content immediately.
-      if (btn.dataset.sandboxMode === 'personal') {
-        setSandboxTab(state.sandboxTab || 'portfolio');
-        renderSandbox();
-        requestAnimationFrame(renderSandboxCharts);
-      }
     });
-  });
-
-  document.querySelectorAll('[data-personal-speed]').forEach((btn) => {
-    btn.addEventListener('click', () => setPersonalSpeed(Number(btn.dataset.personalSpeed)));
   });
 
   $('#replay-select')?.addEventListener('change', (event) => {
