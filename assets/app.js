@@ -9,6 +9,19 @@ import {
   FORCE_DEMO_MODE
 } from './config.js';
 
+function $(selector) {
+  return document.querySelector(selector);
+}
+
+function bind(selector, event, handler) {
+  const el = $(selector);
+  if (!el) {
+    console.warn(`Missing element for selector: ${selector}`);
+    return;
+  }
+  el.addEventListener(event, handler);
+}
+
 const {
   courses,
   defaultSandboxState,
@@ -2100,7 +2113,7 @@ function bindNavigation() {
     });
   });
 
-  $('#replay-select')?.addEventListener('change', (event) => {
+  bind('#replay-select', 'change', (event) => {
     const selection = event.target.value;
     if (!selection) {
       applyReplayScenario('');
@@ -2146,7 +2159,7 @@ function initBackendSettingsPanel() {
   if (redirectInput) {
     redirectInput.value = overrides.googleRedirectTo || supabaseConfig.googleRedirectTo || window.location.origin;
   }
-  saveBtn.addEventListener('click', () => {
+  bind('#backend-save', 'click', () => {
     const url = urlInput.value.trim();
     const anonKey = keyInput.value.trim();
     if (!url || !anonKey) {
@@ -2161,7 +2174,7 @@ function initBackendSettingsPanel() {
     showToast('Supabase credentials saved. Reloading...', 'success');
     reloadSoon();
   });
-  resetBtn?.addEventListener('click', () => {
+  bind('#backend-reset', 'click', () => {
     clearSupabaseOverrides();
     showToast('Demo mode restored. Reloading...', 'info');
     reloadSoon();
@@ -2169,19 +2182,19 @@ function initBackendSettingsPanel() {
 }
 
 function bindEvents() {
-  $('#signup-form')?.addEventListener('submit', handleSignup);
-  $('#login-form')?.addEventListener('submit', handleLogin);
-  $('#google-auth')?.addEventListener('click', handleGoogle);
-  $('#logout-btn')?.addEventListener('click', handleLogout);
-  $('#complete-lesson-btn')?.addEventListener('click', handleMarkComplete);
-  $('#submit-quiz')?.addEventListener('click', handleQuizSubmit);
-  $('#buy-form')?.addEventListener('submit', handleBuy);
-  $('#sell-form')?.addEventListener('submit', handleSell);
-  $('#replay-start')?.addEventListener('click', startPortfolioReplay);
-  $('#replay-stop')?.addEventListener('click', () => stopPortfolioReplay());
-  $('#refresh-courses')?.addEventListener('click', renderCourses);
-  $('#enter-demo')?.addEventListener('click', handleDemoEntry);
-  $('#bulletin-article-back')?.addEventListener('click', () => setView(state.previousView || 'sandbox'));
+  bind('#signup-form', 'submit', handleSignup);
+  bind('#login-form', 'submit', handleLogin);
+  bind('#google-auth', 'click', handleGoogle);
+  bind('#logout-btn', 'click', handleLogout);
+  bind('#complete-lesson-btn', 'click', handleMarkComplete);
+  bind('#submit-quiz', 'click', handleQuizSubmit);
+  bind('#buy-form', 'submit', handleBuy);
+  bind('#sell-form', 'submit', handleSell);
+  bind('#replay-start', 'click', startPortfolioReplay);
+  bind('#replay-stop', 'click', () => stopPortfolioReplay());
+  bind('#refresh-courses', 'click', renderCourses);
+  bind('#enter-demo', 'click', handleDemoEntry);
+  bind('#bulletin-article-back', 'click', () => setView(state.previousView || 'sandbox'));
   bindNavigation();
 }
 
