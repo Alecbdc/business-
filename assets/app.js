@@ -22,6 +22,16 @@ function bind(selector, event, handler) {
   el.addEventListener(event, handler);
 }
 
+function showSkeleton() {
+  const el = document.querySelector('#loading-skeleton');
+  if (el) el.classList.remove('hidden');
+}
+
+function hideSkeleton() {
+  const el = document.querySelector('#loading-skeleton');
+  if (el) el.classList.add('hidden');
+}
+
 const {
   courses,
   defaultSandboxState,
@@ -2214,6 +2224,7 @@ async function bootstrapUser() {
     renderQuiz();
     renderSandbox();
     renderDashboard();
+    hideSkeleton();
   }
 }
 
@@ -2248,11 +2259,7 @@ function initAuthListener() {
 }
 
 function init() {
-  const skeleton = $('#loading-skeleton');
-  if (skeleton) {
-    skeleton.classList.remove('hidden');
-    setTimeout(() => skeleton.classList.add('hidden'), 500);
-  }
+  showSkeleton();
   setProfileName('Guest');
   hydrateCache();
   seedDemoStateIfEmpty();
@@ -2281,6 +2288,7 @@ function init() {
   toggleDemoHint();
   updateBackendStatus();
   initBackendSettingsPanel();
+  hideSkeleton();
 }
 
 window.addEventListener('DOMContentLoaded', init);
