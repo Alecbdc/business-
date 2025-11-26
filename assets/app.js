@@ -836,8 +836,17 @@ function renderQuiz() {
   if (topicLessons) {
     topicLessons.textContent = lessons.length ? lessons.join(', ') : 'Core topics';
   }
+  const isExam = state.curriculumTab === 'exam';
   form.innerHTML = topic.questions
     .map((question, idx) => {
+      if (isExam) {
+        return `
+          <fieldset class="space-y-2">
+            <legend class="font-medium">${idx + 1}. ${question.prompt}</legend>
+            <textarea name="${question.id}" rows="3" class="w-full rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm" placeholder="Type your response" required></textarea>
+          </fieldset>
+        `;
+      }
       return `
         <fieldset class="space-y-2">
           <legend class="font-medium">${idx + 1}. ${question.prompt}</legend>
@@ -1709,14 +1718,31 @@ async function handleQuizSubmit(event) {
   event.preventDefault();
   const topic = findTopic(state.selectedQuizTopicId) ?? quizTopics[0];
   if (!topic) return;
+  const isExam = state.curriculumTab === 'exam';
   const formData = new FormData($('#quiz-form'));
-  let correct = 0;
-  topic.questions.forEach((question) => {
-    const response = Number(formData.get(question.id));
-    if (response === question.answer) correct += 1;
-  });
-  const score = Math.round((correct / topic.questions.length) * 100);
-  const passed = score >= passingScoreThreshold;
+  let score = 0;
+  let passed = false;
+
+  if (isExam) {
+    const answeredCount = topic.questions.filter((question) => {
+      const response = (formData.get(question.id) ?? '').toString().trim();
+      return response.length > 0;
+    }).length;
+    if (answeredCount < topic.questions.length) {
+      showToast('Please answer every exam prompt before submitting.', 'error');
+      return;
+    }
+    score = 100;
+    passed = true;
+  } else {
+    let correct = 0;
+    topic.questions.forEach((question) => {
+      const response = Number(formData.get(question.id));
+      if (response === question.answer) correct += 1;
+    });
+    score = Math.round((correct / topic.questions.length) * 100);
+    passed = score >= passingScoreThreshold;
+  }
   const now = new Date().toISOString();
   state.topicScores[topic.id] = score;
   topic.relatedLessons.forEach((lessonId) => {
