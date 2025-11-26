@@ -9,19 +9,7 @@ import {
   FORCE_DEMO_MODE
 } from './config.js';
 import { state, hydrateStateFromCache, persistStateToCache } from './modules/state.js';
-
-function $(selector) {
-  return document.querySelector(selector);
-}
-
-function bind(selector, event, handler) {
-  const el = $(selector);
-  if (!el) {
-    console.warn(`Missing element for selector: ${selector}`);
-    return;
-  }
-  el.addEventListener(event, handler);
-}
+import { $, bind, setView as applyView, showToast } from './modules/ui.js';
 
 function showSkeleton() {
   const el = document.querySelector('#loading-skeleton');
@@ -194,17 +182,6 @@ const supabaseClient =
 
 let demoEntered = false;
 
-const elements = {};
-
-function $(selector) {
-  if (!selector) return null;
-  const key = selector.startsWith('#') ? selector.slice(1) : selector;
-  if (!elements[key]) {
-    elements[key] = document.getElementById(key);
-  }
-  return elements[key];
-}
-
 function setProfileName(value) {
   document.querySelectorAll('[data-profile-name]').forEach((node) => {
     node.textContent = value;
@@ -223,17 +200,6 @@ function updateBackendStatus() {
   status.className = `badge ${
     isSupabaseConfigured ? 'bg-emerald-500/20 text-emerald-100' : 'bg-amber-500/20 text-amber-100'
   }`;
-}
-
-function showToast(message, type = 'info') {
-  const toast = $('#toast');
-  if (!toast) return;
-  toast.textContent = message;
-  toast.className = `card-glass rounded-2xl p-4 text-sm ${
-    type === 'error' ? 'bg-rose-600/80' : type === 'success' ? 'bg-emerald-600/80' : 'bg-slate-900/90'
-  }`;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3200);
 }
 
 function seedDemoStateIfEmpty() {
@@ -1991,30 +1957,22 @@ function exitAppShell() {
 }
 
 function setView(view) {
-  if (view !== 'sandbox' && state.replay.active) {
-    stopPortfolioReplay(true);
-  }
-  state.currentView = view;
-  updateCurriculumSidebarVisibility(view);
-  updateSandboxSidebarVisibility(view);
-  document.querySelectorAll('.app-view').forEach((section) => {
-    section.classList.toggle('hidden', section.id !== `view-${view}`);
+  applyView(state, view, {
+    stopReplayIfNeeded: () => {
+      if (state.replay.active) {
+        stopPortfolioReplay(true);
+      }
+    },
+    updateCurriculumSidebarVisibility,
+    updateSandboxSidebarVisibility,
+    onEnterSandbox: () => {
+      setSandboxMode(state.sandboxMode ?? 'live');
+      setSandboxTab(state.sandboxTab ?? 'portfolio');
+      requestAnimationFrame(renderSandboxCharts);
+    },
+    onEnterArticle: renderBulletinArticle,
+    onEnterCurriculum: () => setCurriculumTab(state.curriculumTab ?? 'courses')
   });
-  document.querySelectorAll('[data-view]').forEach((btn) => {
-    const isActive = btn.dataset.view === view;
-    btn.classList.toggle('active', isActive);
-  });
-  if (view === 'sandbox') {
-    setSandboxMode(state.sandboxMode ?? 'live');
-    setSandboxTab(state.sandboxTab ?? 'portfolio');
-    requestAnimationFrame(renderSandboxCharts);
-  }
-  if (view === 'article') {
-    renderBulletinArticle();
-  }
-  if (view === 'curriculum') {
-    setCurriculumTab(state.curriculumTab ?? 'courses');
-  }
 }
 
 function bindNavigation() {
