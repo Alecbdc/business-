@@ -8,6 +8,7 @@ import {
   hasSupabaseCredentials,
   FORCE_DEMO_MODE
 } from './config.js';
+import { state, hydrateStateFromCache, persistStateToCache } from './modules/state.js';
 
 function $(selector) {
   return document.querySelector(selector);
@@ -42,7 +43,6 @@ const {
   leaderboardPeers
 } = data;
 
-const cacheKey = 'aether-cache-v2';
 const historyLimit = 1200;
 const assetSymbols = Object.keys(initialPrices);
 const totalQuizQuestions = quizTopics.reduce((acc, topic) => acc + topic.questions.length, 0);
@@ -171,12 +171,6 @@ function seedPortfolioSeries(anchorValue = defaultSandboxState.balance) {
   return series.map((entry) => ({ ...entry, value: Math.max(entry.value, 0) }));
 }
 
-const seededPriceHistory = seedPriceHistoryMap(initialPrices);
-const latestSeededPrices = Object.fromEntries(
-  Object.entries(seededPriceHistory).map(([symbol, series]) => [symbol, series[series.length - 1]?.value ?? 0])
-);
-const seededPortfolioHistory = seedPortfolioSeries();
-
 const deepClone = (value) =>
   typeof structuredClone === 'function' ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 
@@ -199,39 +193,6 @@ const supabaseClient =
     : null;
 
 let demoEntered = false;
-
-const state = {
-  user: null,
-  profile: null,
-  previewMode: false,
-  currentView: 'dashboard',
-  previousView: 'dashboard',
-  selectedLessonId: courses[0]?.lessons[0]?.id ?? null,
-  selectedQuizTopicId: quizTopics[0]?.id ?? null,
-  curriculumTab: 'courses',
-  progress: {},
-  quizScores: {},
-  topicScores: {},
-  quizLog: [],
-  sandbox: {
-    balance: defaultSandboxState.balance,
-    holdings: normalizeHoldings(defaultSandboxState.holdings),
-    history: defaultSandboxState.history ?? []
-  },
-  prices: { ...latestSeededPrices },
-  priceHistory: seededPriceHistory,
-  portfolioHistory: seededPortfolioHistory,
-  chartTimeframes: { portfolio: defaultTimeframe, asset: defaultTimeframe },
-  chartZoom: { portfolio: 1, asset: 1 },
-  activeAsset: assetSymbols[0] ?? 'BTC',
-  sandboxMode: 'live',
-  sandboxTab: 'portfolio',
-  replay: { active: false, timer: null, index: 0, series: [] },
-  marketReplay: { active: false, scenarioId: '', step: 0 },
-  bulletin: { bucket: null, items: [] },
-  activeBulletinArticleId: null,
-  ui: { showAllAssets: false }
-};
 
 const elements = {};
 
@@ -273,28 +234,6 @@ function showToast(message, type = 'info') {
   }`;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3200);
-}
-
-function hydrateCache() {
-  try {
-    const raw = localStorage.getItem(cacheKey);
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    state.progress = parsed.progress ?? {};
-    state.quizScores = parsed.quizScores ?? {};
-    state.topicScores = parsed.topicScores ?? {};
-    state.quizLog = (parsed.quizLog ?? []).map((entry) => ({
-      ...entry,
-      passed: entry.passed ?? (entry.score != null && entry.score >= passingScoreThreshold)
-    }));
-    state.selectedQuizTopicId = parsed.selectedQuizTopicId ?? state.selectedQuizTopicId;
-    state.sandbox = parsed.sandbox ?? { ...deepClone(defaultSandboxState) };
-    state.sandbox.balance = Number(state.sandbox.balance ?? defaultSandboxState.balance);
-    state.sandbox.holdings = normalizeHoldings(state.sandbox.holdings);
-    state.sandbox.history = state.sandbox.history ?? [];
-  } catch (err) {
-    console.warn('Failed to hydrate cache', err);
-  }
 }
 
 function seedDemoStateIfEmpty() {
@@ -362,23 +301,7 @@ function seedDemoStateIfEmpty() {
 
   state.portfolioHistory = seedPortfolioSeries(22000);
 
-  persistCache();
-}
-
-function persistCache() {
-  try {
-    const payload = {
-      progress: state.progress,
-      quizScores: state.quizScores,
-      topicScores: state.topicScores,
-      quizLog: state.quizLog,
-      sandbox: state.sandbox,
-      selectedQuizTopicId: state.selectedQuizTopicId
-    };
-    localStorage.setItem(cacheKey, JSON.stringify(payload));
-  } catch (err) {
-    console.warn('Failed to persist cache', err);
-  }
+  persistStateToCache();
 }
 
 function resetHistorySnapshots() {
@@ -801,7 +724,7 @@ function setCurriculumTab(tab) {
 function setQuizTopic(topicId) {
   if (!topicId || topicId === state.selectedQuizTopicId) return;
   state.selectedQuizTopicId = topicId;
-  persistCache();
+  persistStateToCache();
   renderQuiz();
   renderQuizTopics();
 }
@@ -1739,7 +1662,7 @@ async function handleMarkComplete() {
     quiz_score: state.quizScores[lesson.id] ?? null,
     updated_at: new Date().toISOString()
   };
-  persistCache();
+  persistStateToCache();
   renderLessonDetail();
   renderCurriculumSummary();
   renderDashboard();
@@ -1805,7 +1728,7 @@ async function handleQuizSubmit(event) {
     ts: now
   });
   state.quizLog = state.quizLog.slice(-40);
-  persistCache();
+  persistStateToCache();
   renderQuiz();
   renderQuizTopics();
   renderCurriculumSummary();
@@ -1902,7 +1825,7 @@ function renderAssetSelects() {
 
 async function syncSandbox() {
   state.sandbox.holdings = normalizeHoldings(state.sandbox.holdings);
-  persistCache();
+  persistStateToCache();
   recordPortfolioSnapshot();
   renderSandbox();
   renderDashboard();
@@ -2215,7 +2138,7 @@ async function bootstrapUser() {
     await fetchProgress();
     await fetchQuizLog();
     await fetchSandbox();
-    persistCache();
+    persistStateToCache();
     state.previewMode = false;
     enterAppShell();
     renderCurriculumSummary();
@@ -2239,7 +2162,7 @@ function initAuthListener() {
       await fetchProgress();
       await fetchQuizLog();
       await fetchSandbox();
-      persistCache();
+      persistStateToCache();
       enterAppShell();
     } else {
       $('#logout-btn').classList.add('hidden');
@@ -2261,7 +2184,7 @@ function initAuthListener() {
 function init() {
   showSkeleton();
   setProfileName('Guest');
-  hydrateCache();
+  hydrateStateFromCache();
   seedDemoStateIfEmpty();
   if (!supabaseClient || FORCE_DEMO_MODE) {
     handleDemoEntry(true);
