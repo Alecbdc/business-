@@ -9,6 +9,19 @@ import {
   FORCE_DEMO_MODE
 } from './config.js';
 
+function $(selector) {
+  return document.querySelector(selector);
+}
+
+function bind(selector, event, handler) {
+  const el = $(selector);
+  if (!el) {
+    console.warn(`Missing element for selector: ${selector}`);
+    return;
+  }
+  el.addEventListener(event, handler);
+}
+
 const {
   courses,
   defaultSandboxState,
