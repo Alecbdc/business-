@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "serve ."
+    "start": "serve .",
+    "lint": "eslint \"assets/**/*.js\""
   },
   "devDependencies": {
+    "eslint": "^8.57.1",
+    "prettier": "^3.2.5",
     "serve": "^14.0.0"
   }
 }
