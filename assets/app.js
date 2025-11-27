@@ -1946,8 +1946,15 @@ function renderMarketLab() {
   setText($('#lab-balance'), formatCurrency(state.marketLab.balance));
   setText($('#lab-portfolio-value'), formatCurrency(portfolioValue));
 
-  const allowed = new Set(segmentSymbols(state.labMarketSegment));
-  const prices = Object.fromEntries(Object.entries(state.marketLab.prices).filter(([symbol]) => allowed.has(symbol)));
+  const allowedSymbols = segmentSymbols(state.labMarketSegment) || [];
+  const allowed = new Set(allowedSymbols);
+  if (!state.marketLab.prices) state.marketLab.prices = {};
+  const prices = allowedSymbols.reduce((acc, symbol) => {
+    const price = state.marketLab.prices?.[symbol] ?? initialPrices[symbol] ?? 0;
+    state.marketLab.prices[symbol] = price;
+    acc[symbol] = price;
+    return acc;
+  }, {});
   const holdings = Object.fromEntries(Object.entries(state.marketLab.holdings).filter(([symbol]) => allowed.has(symbol)));
 
   const holdingsContainer = $('#lab-holdings');
@@ -2008,7 +2015,6 @@ function renderMarketLab() {
 
   renderMarketLabInsights();
 
-  const allowedSymbols = [...allowed];
   const activeAsset = prices[state.marketLab.selectedAsset] != null
     ? state.marketLab.selectedAsset
     : allowedSymbols[0];
@@ -2034,7 +2040,7 @@ function renderMarketLab() {
 
   const stripContainer = $('#lab-asset-strip');
   if (stripContainer) {
-    const entries = Object.entries(state.marketLab.prices).filter(([symbol]) => allowed.has(symbol));
+    const entries = allowedSymbols.map((symbol) => [symbol, state.marketLab.prices[symbol]]);
     const visible = state.ui?.labShowAllAssets ? entries : entries.slice(0, 5);
     stripContainer.innerHTML = visible
       .map(([symbol, price]) => {
