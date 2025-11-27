@@ -17,7 +17,7 @@ export const timeframeOptions = [
   { key: 'ALL', label: 'All', ms: null }
 ];
 
-function filterSeriesByTimeframe(series, timeframeKey) {
+export function filterSeriesByTimeframe(series, timeframeKey) {
   const selected = timeframeOptions.find((opt) => opt.key === timeframeKey) ?? timeframeOptions[0];
   if (selected.key === 'ALL') return series;
   if (selected.key === 'YTD') {
@@ -265,4 +265,3 @@ function calculatePortfolioValue() {
   );
 }
 
-export { filterSeriesByTimeframe, renderLineChart, timeframeOptions };
