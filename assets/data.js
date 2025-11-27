@@ -513,12 +513,6 @@ export const sandboxBulletins = [
     assets: ['TSLA', 'RIVN', 'GM', 'F'],
     impact: 'Autos may see wider spreads until clarity emerges.',
     projection: 'Comparable recalls shaved 6-12% from EV names before stabilizing on firm guidance.',
-    articleBody: [
-      'Satirical inspector Vladimir Protein joked that regulators "don't like surprise self-driving donuts".',
-      'TSLA, RIVN, and legacy peers GM and F outlined over-the-air patch timelines to soothe investors.',
-      'Options desks at Morgan Stan-d Up report elevated put skew across autos.',
-      'Historically, delivery beats in subsequent months helped reverse the drawdown once fixes rolled out.'
-    ],
     drift: -0.015
   },
   {
