@@ -38,6 +38,7 @@ const {
   assetFundamentals,
   quizTopics,
   sandboxBulletins,
+  cryptoBulletins,
   marketLabBulletins,
   marketScenarioLevels,
   leaderboardPeers
@@ -392,10 +393,16 @@ function currentActiveAsset() {
   return state.activeAsset;
 }
 
-function refreshBulletins() {
+function bulletinPoolForSegment(segment, source = 'live') {
+  if (segment === 'crypto') return cryptoBulletins.slice();
+  if (source === 'lab') return marketLabBulletins.slice();
+  return sandboxBulletins.slice();
+}
+
+function refreshBulletins(segment = state.liveMarketSegment) {
   const bucket = currentBulletinBucket();
-  if (state.bulletin.bucket === bucket && state.bulletin.items.length) return;
-  const pool = sandboxBulletins.slice();
+  if (state.bulletin.bucket === bucket && state.bulletin.items.length && state.bulletin.segment === segment) return;
+  const pool = bulletinPoolForSegment(segment, 'live');
   const items = [];
   const count = Math.min(maxBulletins, pool.length);
   for (let i = 0; i < count; i++) {
@@ -405,13 +412,18 @@ function refreshBulletins() {
     const ts = Date.now() - hourOffset * 60 * 60 * 1000;
     items.push({ ...base, ts });
   }
-  state.bulletin = { bucket, items };
+  state.bulletin = { bucket, items, segment };
 }
 
-function refreshLabBulletins() {
+function refreshLabBulletins(segment = state.labMarketSegment) {
   const bucket = currentBulletinBucket();
-  if (state.marketLab.bulletin.bucket === bucket && state.marketLab.bulletin.items.length) return;
-  const pool = marketLabBulletins.slice();
+  if (
+    state.marketLab.bulletin.bucket === bucket &&
+    state.marketLab.bulletin.items.length &&
+    state.marketLab.bulletin.segment === segment
+  )
+    return;
+  const pool = bulletinPoolForSegment(segment, 'lab');
   const items = [];
   const count = Math.min(maxBulletins, pool.length);
   for (let i = 0; i < count; i++) {
@@ -421,7 +433,7 @@ function refreshLabBulletins() {
     const ts = Date.now() - hourOffset * 60 * 60 * 1000;
     items.push({ ...base, ts });
   }
-  state.marketLab.bulletin = { bucket, items };
+  state.marketLab.bulletin = { bucket, items, segment };
 }
 
 function buildBulletinDriftMap(items = state.bulletin.items ?? []) {
@@ -1084,6 +1096,8 @@ function setLiveMarketSegment(segment) {
   document.querySelectorAll('[data-market-segment]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.marketSegment === state.liveMarketSegment);
   });
+  state.bulletin = { bucket: null, items: [], segment: state.liveMarketSegment };
+  refreshBulletins(state.liveMarketSegment);
   renderAssetSelects();
   renderSandbox();
   requestAnimationFrame(renderSandboxCharts);
@@ -1094,6 +1108,8 @@ function setLabMarketSegment(segment) {
   document.querySelectorAll('[data-lab-segment]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.labSegment === state.labMarketSegment);
   });
+  state.marketLab.bulletin = { bucket: null, items: [], segment: state.labMarketSegment };
+  refreshLabBulletins(state.labMarketSegment);
   renderLabAssetSelects();
   renderMarketLab();
   requestAnimationFrame(renderMarketLabCharts);
@@ -1187,12 +1203,13 @@ function renderBulletinBoard() {
   const container = $('#sandbox-bulletin');
   if (!container) return;
   const source = state.activeBulletinSource;
+  const segment = source === 'lab' ? state.labMarketSegment : state.liveMarketSegment;
   if (source === 'scenario') {
     advanceScenarioBulletins();
   } else if (source === 'lab') {
-    refreshLabBulletins();
+    refreshLabBulletins(segment);
   } else {
-    refreshBulletins();
+    refreshBulletins(segment);
   }
   const refreshLabel = $('#bulletin-refresh-label');
   if (refreshLabel) {
@@ -1247,7 +1264,8 @@ function renderBulletinBoard() {
 function renderLabBulletinBoard() {
   const container = $('#lab-bulletin');
   if (!container) return;
-  refreshLabBulletins();
+  const segment = state.labMarketSegment;
+  refreshLabBulletins(segment);
   const refreshLabel = $('#lab-bulletin-refresh-label');
   if (refreshLabel) {
     const hours = Math.round(bulletinRefreshMs / (1000 * 60 * 60));
@@ -1296,11 +1314,15 @@ function renderLabBulletinBoard() {
 
 function resolveBulletinArticle(id, source = state.activeBulletinSource || 'live') {
   if (!id) return null;
+  const segment = source === 'lab' ? state.marketLab.bulletin.segment : state.bulletin.segment;
+  const livePool = segment === 'crypto' ? cryptoBulletins : sandboxBulletins;
+  const labPool = segment === 'crypto' ? cryptoBulletins : marketLabBulletins;
+  if (source === 'scenario') {
+    return state.marketScenario.bulletin.items.find((item) => item.id === id) || null;
+  }
   return (
-    state.bulletin.items.find((item) => item.id === id) ||
-    (source === 'lab' ? state.marketLab.bulletin.items.find((item) => item.id === id) : null) ||
-    (source === 'lab' ? marketLabBulletins.find((item) => item.id === id) : null) ||
-    sandboxBulletins.find((item) => item.id === id) ||
+    (source === 'lab' ? state.marketLab.bulletin.items : state.bulletin.items).find((item) => item.id === id) ||
+    (source === 'lab' ? labPool.find((item) => item.id === id) : livePool.find((item) => item.id === id)) ||
     null
   );
 }
@@ -1611,9 +1633,10 @@ function renderSandbox() {
 
   // TODO: Refactor trade history rendering to build DOM nodes instead of concatenated HTML strings.
   const historyEntries = (marketState.history || []).filter((entry) => {
-    const assetAllowed = entry.asset ? allowed.has(entry.asset) : true;
-    if (entry.segment) return entry.segment === segment && assetAllowed;
-    return assetAllowed;
+    const derivedSegment = entry.segment || (entry.asset ? segmentForAsset(entry.asset) : null);
+    if (segment && derivedSegment && derivedSegment !== segment) return false;
+    if (entry.asset) return allowed.has(entry.asset);
+    return !segment || derivedSegment === segment;
   });
   const historyMarkup = historyEntries
     .slice(-10)
@@ -1951,9 +1974,10 @@ function renderMarketLab() {
   const historyContainer = $('#lab-history');
   if (historyContainer) {
     const allowedHistory = (state.marketLab.history || []).filter((entry) => {
-      const assetAllowed = entry.asset ? allowed.has(entry.asset) : true;
-      if (entry.segment) return entry.segment === state.labMarketSegment && assetAllowed;
-      return assetAllowed;
+      const derivedSegment = entry.segment || (entry.asset ? segmentForAsset(entry.asset) : null);
+      if (derivedSegment && derivedSegment !== state.labMarketSegment) return false;
+      if (entry.asset) return allowed.has(entry.asset);
+      return true;
     });
     const historyMarkup = allowedHistory
       ?.slice(-10)

@@ -663,6 +663,89 @@ export const sandboxBulletins = [
   }
 ];
 
+export const cryptoBulletins = [
+  {
+    id: 'bitcoin-etf',
+    title: 'Spot bitcoin ETF inflows accelerate',
+    summary: 'New inflows lift BTC and blue-chip chains as allocators size up digital assets.',
+    sentiment: 'bullish',
+    assets: ['BTC', 'ETH', 'SOL'],
+    impact: 'Majors may extend momentum while alts follow with beta.',
+    projection: 'Past ETF catalysts lifted BTC 8-20% with ETH/SOL outperformance.',
+    articleBody: [
+      'The Economost jokes that Tonald Drump called it "digital gold with ticker tape".',
+      'Custodians report record creations, mirroring early-2024 ETF ramps.',
+      'Desk chatter notes basis tightening across CME futures as spot demand builds.',
+      'Historically, first-wave inflows spill into ETH and L2 ecosystems as liquidity rises.'
+    ],
+    drift: 0.018
+  },
+  {
+    id: 'exchange-glitch',
+    title: 'Major exchange halt sparks liquidity scare',
+    summary: 'Temporary outage fuels volatility; spreads widen until trading resumes.',
+    sentiment: 'bearish',
+    assets: ['BTC', 'ETH', 'ALT_BASKET'],
+    impact: 'Short-term drawdown risk as liquidity providers pull quotes.',
+    projection: 'Comparable incidents clipped majors 6-12% intraday before partial recovery.',
+    articleBody: [
+      'Satirical regulator Vladimir Protein quips that servers were "mining downtime".',
+      'OTC desks report wider spreads while on-chain volumes spike.',
+      'Market makers reduce size until stability returns, deepening wick potential.',
+      'Prior halts often reverse once status pages stabilize and funding normalizes.'
+    ],
+    drift: -0.014
+  },
+  {
+    id: 'defi-burst',
+    title: 'DeFi TVL climbs on new yield program',
+    summary: 'Stakers chase emissions; governance tokens jump as liquidity rotates on-chain.',
+    sentiment: 'bullish',
+    assets: ['ETH', 'SOL', 'AVAX', 'ALT_BASKET'],
+    impact: 'Layer-1s and DeFi majors could catch a bid from on-chain demand.',
+    projection: 'Similar incentive waves delivered 10-22% pops across smart-contract platforms.',
+    articleBody: [
+      'Yield farmers in The Economost brag about “APY season 3: return of the ponzi”.',
+      'Bridges light up as users migrate stablecoins to chase incentives.',
+      'Options skews flip positive on ETH as staking demand tightens float.',
+      'Earlier TVL spikes bled into L2 ecosystems before normalizing as emissions decayed.'
+    ],
+    drift: 0.016
+  },
+  {
+    id: 'stablecoin-scare',
+    title: 'Stablecoin reserve questions emerge',
+    summary: 'Rumors about backing mix rattle markets; traders rotate to majors and stables with audits.',
+    sentiment: 'bearish',
+    assets: ['USDT', 'USDC', 'BTC', 'ETH'],
+    impact: 'De-pegging fears can spark flight to quality and short-lived dislocations.',
+    projection: 'Historical scares trimmed 3-9% from majors intraday with quick mean reversion.',
+    articleBody: [
+      'Tonald Drump tweets “show me the coins”, sending CT into a frenzy.',
+      'Arbitrageurs monitor on-chain liquidity pools for peg drift.',
+      'Desk notes say BTC often benefits as traders rotate from stables during stress.',
+      'Prior scares normalized within days once attestations landed.'
+    ],
+    drift: -0.01
+  },
+  {
+    id: 'layer2-boom',
+    title: 'Layer-2 throughput hits record highs',
+    summary: 'Scaling solutions post new highs in transactions; fees drop as adoption broadens.',
+    sentiment: 'bullish',
+    assets: ['ETH', 'MNT', 'ALT_BASKET'],
+    impact: 'L2 momentum can lift ETH while selective alt L2s outperform.',
+    projection: 'Past throughput spikes preceded 6-15% moves in ETH and leading L2 tokens.',
+    articleBody: [
+      'Developers joke that gas fees finally fit in The Economost classifieds.',
+      'Bridges report sustained inflows as users chase cheaper swaps.',
+      'Sequencer revenues surprise to the upside, hinting at durable demand.',
+      'Historic L2 growth phases often preceded broader smart-contract rallies.'
+    ],
+    drift: 0.012
+  }
+];
+
 export const marketLabBulletins = [
   {
     id: 'lab-housing',
