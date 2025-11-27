@@ -2,7 +2,8 @@ import { courses, defaultSandboxState, initialPrices, quizTopics } from '../data
 import { featureToggles } from '../config.js';
 
 const cacheKey = 'aether-cache-v2';
-const historyLimit = 1200;
+const historyLimit = 600;
+const quizLogLimit = 20;
 const assetSymbols = Object.keys(initialPrices);
 const defaultTimeframe = '3M';
 const passingScoreThreshold = Number(featureToggles.passingScore ?? 70);
@@ -259,10 +260,16 @@ export function hydrateStateFromCache() {
 export function persistStateToCache() {
   try {
     const trimHistory = (history = []) => history.slice(-Math.floor(historyLimit / 2));
+    const trimHoldings = (holdings = {}) =>
+      Object.fromEntries(
+        Object.entries(holdings)
+          .map(([k, v]) => [k, Number(v)])
+          .filter(([, v]) => v)
+      );
 
     const compactSandbox = {
       balance: state.sandbox.balance,
-      holdings: state.sandbox.holdings,
+      holdings: trimHoldings(state.sandbox.holdings),
       history: trimHistory(state.sandbox.history)
     };
 
@@ -273,7 +280,7 @@ export function persistStateToCache() {
       virtualTimeIndex: state.marketLab.virtualTimeIndex,
       balance: state.marketLab.balance,
       portfolioValue: state.marketLab.portfolioValue,
-      holdings: state.marketLab.holdings,
+      holdings: trimHoldings(state.marketLab.holdings),
       history: trimHistory(state.marketLab.history),
       selectedAsset: state.marketLab.selectedAsset,
       prices: state.marketLab.prices,
@@ -291,7 +298,7 @@ export function persistStateToCache() {
       startBalance: state.marketScenario.startBalance,
       balance: state.marketScenario.balance,
       portfolioValue: state.marketScenario.portfolioValue,
-      holdings: state.marketScenario.holdings,
+      holdings: trimHoldings(state.marketScenario.holdings),
       history: trimHistory(state.marketScenario.history),
       bulletin: state.marketScenario.bulletin,
       events: state.marketScenario.events,
@@ -303,7 +310,7 @@ export function persistStateToCache() {
       progress: state.progress,
       quizScores: state.quizScores,
       topicScores: state.topicScores,
-      quizLog: state.quizLog,
+      quizLog: (state.quizLog ?? []).slice(-quizLogLimit),
       sandbox: compactSandbox,
       marketLab: compactLab,
       marketScenario: compactScenario,
