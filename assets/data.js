@@ -62,7 +62,48 @@ const stockCompanies = [
   { symbol: 'NET', name: 'Cloudflare', sector: 'Networking & Security', country: 'USA', size: 'mid', price: 109.6 }
 ];
 
-export const initialPrices = Object.fromEntries(stockCompanies.map((company) => [company.symbol, company.price]));
+const cryptoAssets = [
+  { symbol: 'BTC', name: 'Bitcoin', sector: 'Digital Gold', country: 'Global', size: 'mega', price: 68000 },
+  { symbol: 'ETH', name: 'Ethereum', sector: 'Smart Contracts', country: 'Global', size: 'mega', price: 3400 },
+  { symbol: 'SOL', name: 'Solana', sector: 'High-Speed Layer 1', country: 'Global', size: 'large', price: 180 },
+  { symbol: 'BNB', name: 'Binance Coin', sector: 'Exchange Token', country: 'Global', size: 'large', price: 600 },
+  { symbol: 'ADA', name: 'Cardano', sector: 'Layer 1', country: 'Global', size: 'large', price: 0.48 },
+  { symbol: 'XRP', name: 'XRP', sector: 'Payments', country: 'Global', size: 'large', price: 0.62 },
+  { symbol: 'DOGE', name: 'Dogecoin', sector: 'Memes', country: 'Global', size: 'mid', price: 0.18 },
+  { symbol: 'DOT', name: 'Polkadot', sector: 'Interoperability', country: 'Global', size: 'mid', price: 8.2 },
+  { symbol: 'AVAX', name: 'Avalanche', sector: 'Layer 1', country: 'Global', size: 'mid', price: 45.5 },
+  { symbol: 'MATIC', name: 'Polygon', sector: 'Scaling', country: 'Global', size: 'mid', price: 1.1 },
+  { symbol: 'ATOM', name: 'Cosmos', sector: 'Interchain', country: 'Global', size: 'mid', price: 12.4 },
+  { symbol: 'LINK', name: 'Chainlink', sector: 'Oracles', country: 'Global', size: 'mid', price: 19.6 },
+  { symbol: 'ARB', name: 'Arbitrum', sector: 'Layer 2', country: 'Global', size: 'mid', price: 1.9 },
+  { symbol: 'OP', name: 'Optimism', sector: 'Layer 2', country: 'Global', size: 'mid', price: 2.1 },
+  { symbol: 'ETC', name: 'Ethereum Classic', sector: 'Legacy Layer 1', country: 'Global', size: 'mid', price: 28.3 },
+  { symbol: 'LTC', name: 'Litecoin', sector: 'Payments', country: 'Global', size: 'mid', price: 89.4 },
+  { symbol: 'XLM', name: 'Stellar', sector: 'Payments', country: 'Global', size: 'mid', price: 0.16 },
+  { symbol: 'FIL', name: 'Filecoin', sector: 'Storage', country: 'Global', size: 'mid', price: 9.8 },
+  { symbol: 'APT', name: 'Aptos', sector: 'Layer 1', country: 'Global', size: 'mid', price: 12.7 },
+  { symbol: 'PEPE', name: 'Pepe', sector: 'Memes', country: 'Global', size: 'small', price: 0.000012 },
+  { symbol: 'SUI', name: 'Sui', sector: 'Layer 1', country: 'Global', size: 'small', price: 1.3 },
+  { symbol: 'NEAR', name: 'Near', sector: 'Layer 1', country: 'Global', size: 'small', price: 6.4 },
+  { symbol: 'ICP', name: 'Internet Computer', sector: 'Layer 1', country: 'Global', size: 'small', price: 14.1 },
+  { symbol: 'AAVE', name: 'Aave', sector: 'DeFi', country: 'Global', size: 'small', price: 102.5 },
+  { symbol: 'UNI', name: 'Uniswap', sector: 'DEX', country: 'Global', size: 'small', price: 8.6 },
+  { symbol: 'PYTH', name: 'Pyth Network', sector: 'Oracles', country: 'Global', size: 'small', price: 0.65 },
+  { symbol: 'TIA', name: 'Celestia', sector: 'Modular', country: 'Global', size: 'small', price: 14.9 },
+  { symbol: 'RON', name: 'Ronin', sector: 'Gaming', country: 'Global', size: 'small', price: 3.5 },
+  { symbol: 'WLD', name: 'Worldcoin', sector: 'ID', country: 'Global', size: 'small', price: 5.2 },
+  { symbol: 'BONK', name: 'Bonk', sector: 'Memes', country: 'Global', size: 'small', price: 0.00003 }
+];
+
+const stockPrices = Object.fromEntries(stockCompanies.map((company) => [company.symbol, company.price]));
+const cryptoPrices = Object.fromEntries(cryptoAssets.map((asset) => [asset.symbol, asset.price]));
+
+export const assetSegments = {
+  stocks: stockCompanies.map((c) => c.symbol),
+  crypto: cryptoAssets.map((c) => c.symbol)
+};
+
+export const initialPrices = { ...stockPrices, ...cryptoPrices };
 
 function baseCap(size) {
   if (size === 'mega') return 500;
@@ -154,6 +195,38 @@ export const stockFundamentals = Object.fromEntries(
     ];
   })
 );
+
+const cryptoFundamentals = Object.fromEntries(
+  cryptoAssets.map((asset, idx) => {
+    const cap = 40 + idx * 6;
+    const yieldPct = idx % 3 === 0 ? 4 + idx * 0.2 : 0;
+    return [
+      asset.symbol,
+      {
+        ...asset,
+        summary: `${asset.name} is a ${asset.sector.toLowerCase()} network serving global users.`,
+        metrics: {
+          marketCap: Number(cap.toFixed(1)),
+          pe: null,
+          eps: null,
+          dividendYield: Number(yieldPct.toFixed(2))
+        },
+        events: [
+          { title: `${asset.name} upgrade`, date: makeFutureDate(10 + (idx % 10)), description: 'Protocol roadmap milestone.' },
+          { title: `${asset.name} ecosystem drop`, date: makeFutureDate(25 + (idx % 12)), description: 'Community incentive or partnership.' }
+        ],
+        earnings: { annual: [], quarterly: [] },
+        performance: { annual: [], quarterly: [] },
+        news: [
+          { title: `${asset.name} adoption grows`, summary: `${asset.symbol} sees rising active addresses.`, sentiment: 'positive' },
+          { title: `${asset.name} faces volatility`, summary: `${asset.symbol} reacts to macro shifts.`, sentiment: 'neutral' }
+        ]
+      }
+    ];
+  })
+);
+
+export const assetFundamentals = { ...stockFundamentals, ...cryptoFundamentals };
 
 export const defaultSandboxState = {
   balance: 10000,
