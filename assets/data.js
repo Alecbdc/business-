@@ -744,6 +744,109 @@ export const sandboxBulletins = [
   }
 ];
 
+export const marketLabBulletins = [
+  {
+    id: 'lab-vol-surge',
+    title: 'Vol desk notes gamma grab in synthetic session',
+    summary:
+      'Paper traders at "Mock Street" pile into weekly calls after a surprise rally in the personal lab tape, lifting majors.',
+    sentiment: 'bullish',
+    assets: ['BTC', 'ETH', 'SOL'],
+    impact: 'Accelerated upside in lab mode as paper flow chases momentum.',
+    projection: 'Past lab sessions with fast-moving options skews saw BTC tack on 12-18% before cooling.',
+    articleBody: [
+      'The Wall Street Jest (lab edition) quipped that armchair dealers are testing their reflexes with fast gamma grabs.',
+      'Analysts at faux firm "Voltaire Capital" think brisk upside hedging can force an intraday squeeze on majors.',
+      'CoinFlip Weekly reminds readers that synthetic surges often mean sharper givebacks—perfect fodder for practice.',
+      'Lab-only signals hint at a brisker tape so learners can stress-test sizing and risk caps.'
+    ],
+    drift: 0.014
+  },
+  {
+    id: 'lab-reg-rumor',
+    title: 'Imaginary regulator floats sandbox-only stablecoin cap',
+    summary:
+      'A mock memo from the "Bureau of Hypotheticals" hints at capping lab stablecoin flows to force rotation.',
+    sentiment: 'bearish',
+    assets: ['USDT', 'USDC', 'DAI', 'PYUSD'],
+    impact: 'Tighter synthetic liquidity can weigh on majors short term.',
+    projection: 'Similar drills knocked 6-10% off majors in prior lab sprints before mean reversion.',
+    articleBody: [
+      'Satirical regulators love stress testing imaginary markets; today’s note targets stablecoin drift.',
+      'Mock desks at "ReguLARP" predict temporary pressure on BTC and ETH as cash parks on the sidelines.',
+      'Learners can watch how constrained inflows change bid/ask texture in a safe environment.',
+      'Historically, lab stables squeezes resolve in a week once the cap rumor “expires.”'
+    ],
+    drift: -0.011
+  },
+  {
+    id: 'lab-dev-upgrade',
+    title: 'Fictional L2 ships upgrade early in lab run',
+    summary: 'Developers at "LayerCake" push a surprise throughput patch into the personal market feed.',
+    sentiment: 'bullish',
+    assets: ['ARB', 'MNT', 'POL'],
+    impact: 'Scalability pop favors beta assets in the lab tape.',
+    projection: 'Past lab rollouts lifted L2 tokens 8-14% over a handful of accelerated ticks.',
+    articleBody: [
+      'The Economost Lab Edition notes LayerCake validators are “baking blocks” 2x faster post-patch.',
+      'Speculators in the simulated pit rotate into L2 beta hoping to front-run adoption memes.',
+      'Trainers suggest journaling reactions to sudden infra wins while timers run faster than live.',
+      'Watch how quick momentum fades once the novelty headline scrolls off the board.'
+    ],
+    drift: 0.012
+  },
+  {
+    id: 'lab-hack-drill',
+    title: 'Red-team drill spooks synthetic exchange',
+    summary:
+      'A planned “hack rehearsal” at the fictional BittleX venue sparks a risk-off move inside Market Lab only.',
+    sentiment: 'bearish',
+    assets: ['BTC', 'ETH', 'ALT_BASKET'],
+    impact: 'Temporary distrust knocks majors before rebounding post-drill.',
+    projection: 'Prior drills shaved 10-15% intraday in the lab before liquidity normalized.',
+    articleBody: [
+      'BittleX staged a controlled breach, and the Wall Street Jest Lab feed live-blogged the drama.',
+      'Traders dumped beta until the drill wrapped, then bargain hunters tested the rebound.',
+      'Use the scenario to practice scaling orders and tracking slippage when spreads widen.',
+      'Remember: this only hits the personal tape—live market stays unchanged.'
+    ],
+    drift: -0.02
+  },
+  {
+    id: 'lab-influencer',
+    title: 'Streamer “CryptoKoala” endorses micro-caps (in sim only)',
+    summary: 'A parody influencer pumps niche tokens, juicing volatility in the lab’s alt basket.',
+    sentiment: 'speculative',
+    assets: ['PEPE', 'M', 'ENA', 'DOGE'],
+    impact: 'Expect whipsaws on meme-heavy names during the segment.',
+    projection: 'Lab-only hype cycles often swing ±15% across a few fast ticks.',
+    articleBody: [
+      'CryptoKoala’s livestream is sponsored by "Totally Not Financial Advice Corp."',
+      'Viewers spam rocket emojis while bots chase thin liquidity in the sim.',
+      'Trainers recommend testing stop placement and size discipline during meme surges.',
+      'Volatility cools once the stream ends—perfect for practicing de-risking.'
+    ],
+    drift: 0.009
+  },
+  {
+    id: 'lab-eco-shock',
+    title: 'Surprise mock GDP miss hits lab macro tape',
+    summary:
+      'The imaginary “Bureau of Made-Up Numbers” posts a GDP stumble, pushing risk-off sentiment in Market Lab.',
+    sentiment: 'bearish',
+    assets: ['BTC', 'ETH', 'SOL', 'ALT_BASKET'],
+    impact: 'Macro gloom can weigh on majors during accelerated runs.',
+    projection: 'Expect 7-12% softening across the curve before stabilization in the lab.',
+    articleBody: [
+      'The Economost Lab supplement jokes that the GDP figure was “calculated on a napkin.”',
+      'Macro bears in the simulation trim longs, while contrarians plan staggered bids.',
+      'Use the moment to rehearse patience—accelerated ticks can amplify overreactions.',
+      'Once sentiment resets, watch for mean reversion and journal the process.'
+    ],
+    drift: -0.013
+  }
+];
+
 export const quizTopics = [
   {
     id: 'topic-bitcoin',

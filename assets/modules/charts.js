@@ -2,7 +2,7 @@ import { state } from './state.js';
 import { $, showToast, formatCurrency } from './ui.js';
 import { replayScenarios } from '../data.js';
 
-const timeframeOptions = [
+export const timeframeOptions = [
   { key: '1D', label: '1D', ms: 1000 * 60 * 60 * 24 },
   { key: '3D', label: '3D', ms: 1000 * 60 * 60 * 24 * 3 },
   { key: '5D', label: '5D', ms: 1000 * 60 * 60 * 24 * 5 },
