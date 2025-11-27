@@ -29,7 +29,7 @@ function filterSeriesByTimeframe(series, timeframeKey) {
   return series.filter((point) => point.ts >= cutoff);
 }
 
-function drawLineChart(canvas, series, color, zoom = 1, inspector) {
+export function renderLineChart(canvas, series, color, zoom = 1, inspector) {
   if (!canvas) return;
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
@@ -165,11 +165,11 @@ function getPortfolioChartSeries() {
 
 export function renderSandboxCharts() {
   const portfolioSeries = getPortfolioChartSeries();
-  drawLineChart($('#portfolio-chart'), portfolioSeries, '#34d399', state.chartZoom.portfolio, $('#portfolio-inspect'));
+  renderLineChart($('#portfolio-chart'), portfolioSeries, '#34d399', state.chartZoom.portfolio, $('#portfolio-inspect'));
   bindChartHover($('#portfolio-chart'), portfolioSeries, $('#portfolio-inspect'));
 
   const assetSeries = filterSeriesByTimeframe(state.priceHistory[state.activeAsset] ?? [], state.chartTimeframes.asset);
-  drawLineChart($('#asset-chart'), assetSeries, '#60a5fa', state.chartZoom.asset, $('#asset-inspect'));
+  renderLineChart($('#asset-chart'), assetSeries, '#60a5fa', state.chartZoom.asset, $('#asset-inspect'));
   bindChartHover($('#asset-chart'), assetSeries, $('#asset-inspect'));
 }
 
@@ -179,7 +179,7 @@ export function renderReplayView() {
   if (!valueEl || !chartEl) return;
   valueEl.textContent = formatCurrency(state.sandbox.balance + calculatePortfolioValue() - state.sandbox.balance);
   const series = filterSeriesByTimeframe(state.portfolioHistory, state.chartTimeframes.portfolio);
-  drawLineChart(chartEl, series, '#a78bfa', state.chartZoom.portfolio, $('#replay-inspect'));
+  renderLineChart(chartEl, series, '#a78bfa', state.chartZoom.portfolio, $('#replay-inspect'));
   bindChartHover(chartEl, series, $('#replay-inspect'));
   const desc = $('#replay-description');
   const scenario = replayScenarios.find((s) => s.id === state.marketReplay.scenarioId);

@@ -19,7 +19,8 @@ import {
   startPortfolioReplay,
   stopPortfolioReplay,
   updateReplayBadge,
-  filterSeriesByTimeframe
+  filterSeriesByTimeframe,
+  renderLineChart
 } from './modules/charts.js';
 import { updateBackendStatus, initBackendSettingsPanel } from './modules/backendPanel.js';
 
@@ -1034,7 +1035,7 @@ function setSandboxMode(mode) {
   updateReplayBadge();
   startPriceLoop();
   renderSandbox();
-  if (isLab) renderMarketLabPanel();
+  if (isLab) renderMarketLabUI();
   requestAnimationFrame(renderSandboxCharts);
   renderReplayView();
 }
@@ -1306,61 +1307,82 @@ function renderSandbox() {
     }
   }
 
+  renderMarketLabUI();
   renderBulletinBoard();
 
   requestAnimationFrame(renderSandboxCharts);
   renderReplayView();
 }
 
-function renderMarketLabPanel() {
+function renderMarketLabHoldingsHtml(holdings = {}, prices = {}) {
+  return Object.entries(holdings)
+    .filter(([, units]) => units > 0)
+    .map(([symbol, units]) => {
+      const price = prices[symbol] ?? state.prices[symbol] ?? 0;
+      const value = units * price;
+      return `
+        <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
+          <div>
+            <p class="font-semibold">${symbol}</p>
+            <p class="text-xs text-slate-400">${units.toFixed(4)} units</p>
+          </div>
+          <p class="text-sm font-semibold">${formatCurrency(value)}</p>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+function renderMarketLabEventsHtml(marketLab) {
+  const events = Array.isArray(marketLab?.history) ? marketLab.history : [];
+  const markup = events
+    .slice(-6)
+    .reverse()
+    .map((entry, idx) => {
+      const label = entry?.detail || entry?.type || `Event ${idx + 1}`;
+      const ts = entry?.ts ? formatRelativeTime(new Date(entry.ts).getTime()) : 'Recently';
+      return `
+        <div class="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 flex items-center justify-between">
+          <span class="text-slate-100">${label}</span>
+          <span class="text-[11px] text-slate-400">${ts}</span>
+        </div>
+      `;
+    })
+    .join('');
+  return (
+    markup || '<p class="text-slate-400 text-sm">Simulation paused. Start to generate events.</p>'
+  );
+}
+
+function renderMarketLabUI() {
+  const { marketLab } = state;
   const balanceEl = $('#lab-balance');
-  if (balanceEl) balanceEl.textContent = formatCurrency(state.marketLab.balance ?? 0);
+  if (balanceEl) balanceEl.textContent = formatCurrency(marketLab.balance ?? 0);
+
   const holdingsEl = $('#lab-holdings');
   if (holdingsEl) {
-    const holdingsMarkup = Object.entries(state.marketLab.holdings ?? {})
-      .filter(([, units]) => units > 0)
-      .map(([symbol, units]) => {
-        const price = state.marketLab.prices?.[symbol] ?? state.prices[symbol] ?? 0;
-        const value = units * price;
-        return `
-          <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
-            <div>
-              <p class="font-semibold">${symbol}</p>
-              <p class="text-xs text-slate-400">${units.toFixed(4)} units</p>
-            </div>
-            <p class="text-sm font-semibold">${formatCurrency(value)}</p>
-          </div>
-        `;
-      })
-      .join('');
+    const holdingsMarkup = renderMarketLabHoldingsHtml(marketLab.holdings ?? {}, marketLab.prices ?? {});
     holdingsEl.innerHTML =
       holdingsMarkup || '<p class="text-slate-400 text-sm">No holdings yet. Start the lab to populate positions.</p>';
   }
+
   const eventsEl = $('#lab-events');
   if (eventsEl) {
-    const events = Array.isArray(state.marketLab.history) ? state.marketLab.history : [];
-    const eventsMarkup = events
-      .slice(-6)
-      .reverse()
-      .map((entry, idx) => {
-        const label = entry?.detail || entry?.type || `Event ${idx + 1}`;
-        const ts = entry?.ts ? formatRelativeTime(new Date(entry.ts).getTime()) : 'Recently';
-        return `
-          <div class="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 flex items-center justify-between">
-            <span class="text-slate-100">${label}</span>
-            <span class="text-[11px] text-slate-400">${ts}</span>
-          </div>
-        `;
-      })
-      .join('');
-    eventsEl.innerHTML =
-      eventsMarkup || '<p class="text-slate-400 text-sm">Simulation paused. Start to generate events.</p>';
+    eventsEl.innerHTML = renderMarketLabEventsHtml(marketLab);
   }
+
   document.querySelectorAll('.lab-speed-btn').forEach((btn) => {
     const speed = Number(btn.dataset.speed);
-    btn.classList.toggle('active', speed === Number(state.marketLab.speed ?? 1));
+    btn.classList.toggle('active', speed === Number(marketLab.speed ?? 1));
   });
-  renderMarketLabChart();
+
+  const labCanvas = $('#lab-portfolio-chart');
+  if (labCanvas) {
+    const series = marketLab.portfolioHistory?.length
+      ? marketLab.portfolioHistory
+      : [{ ts: Date.now(), value: marketLab.portfolioValue ?? 0 }];
+    renderLineChart(labCanvas, series, '#34d399', 1);
+  }
 }
 
 async function handleSignup(event) {
@@ -1581,7 +1603,7 @@ function setMarketLabSpeed(speed) {
   if (state.marketLab.isRunning) {
     spawnMarketLabLoop();
   }
-  renderMarketLabPanel();
+  renderMarketLabUI();
 }
 
 function spawnMarketLabLoop() {
@@ -1616,8 +1638,7 @@ function advanceMarketLabOneTick() {
     stepMarketLabSimulation();
   }
   updateMarketLabDerivedState();
-  renderMarketLabPanel();
-  renderMarketLabChart();
+  renderMarketLabUI();
   persistStateToCache();
 }
 
@@ -1653,36 +1674,6 @@ function updateMarketLabDerivedState() {
   }
   state.marketLab.portfolioHistory.push({ ts: Date.now(), value: state.marketLab.portfolioValue });
   state.marketLab.portfolioHistory = state.marketLab.portfolioHistory.slice(-historyLimit);
-}
-
-function renderMarketLabChart() {
-  const canvas = $('#lab-portfolio-chart');
-  if (!canvas) return;
-  const series = state.marketLab.portfolioHistory ?? [];
-  const points = series.length ? series : [{ ts: Date.now(), value: state.marketLab.portfolioValue ?? 0 }];
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-  if (!width || !height) return;
-  const dpr = window.devicePixelRatio ?? 1;
-  canvas.width = width * dpr;
-  canvas.height = height * dpr;
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, width, height);
-  const values = points.map((p) => p.value);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
-  ctx.strokeStyle = '#34d399';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  points.forEach((point, idx) => {
-    const x = (idx / (points.length - 1 || 1)) * width;
-    const y = height - ((point.value - min) / range) * height;
-    if (idx === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  });
-  ctx.stroke();
 }
 
 function startPriceLoop() {
