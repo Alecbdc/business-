@@ -1349,9 +1349,20 @@ function renderScenarioSelection() {
       const levelId = row.dataset.level;
       const scenarioId = row.dataset.scenario;
       openScenarioModal(levelId, scenarioId);
-      startScenarioSession(levelId, scenarioId, { autoStart: false, hideModal: false });
     });
   });
+}
+
+function resetScenarioSelection() {
+  pauseScenarioLoop();
+  state.marketScenario.active = false;
+  state.marketScenario.isRunning = false;
+  state.marketScenario.levelId = '';
+  state.marketScenario.scenarioId = '';
+  state.marketScenario.tick = 0;
+  const modal = $('#scenario-modal');
+  if (modal) modal.classList.add('hidden');
+  renderScenarioSelection();
 }
 
 function openScenarioModal(levelId, scenarioId) {
@@ -2500,19 +2511,12 @@ function bindNavigation() {
 
   document.querySelectorAll('[data-sandbox-mode]').forEach((btn) => {
     btn.addEventListener('click', () => {
+      if (btn.dataset.sandboxMode === 'scenario') {
+        resetScenarioSelection();
+      }
       setView('sandbox');
       setSandboxMode(btn.dataset.sandboxMode);
     });
-  });
-
-  bind('#sandbox-tab-live', 'click', () => {
-    setView('sandbox');
-    setSandboxMode('live');
-  });
-
-  bind('#sandbox-tab-lab', 'click', () => {
-    setView('sandbox');
-    setSandboxMode('lab');
   });
 
   document.querySelectorAll('.lab-speed-btn').forEach((btn) => {
