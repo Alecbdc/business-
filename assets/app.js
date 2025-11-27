@@ -35,16 +35,8 @@ function hideSkeleton() {
   if (el) el.classList.add('hidden');
 }
 
-const {
-  courses,
-  defaultSandboxState,
-  initialPrices,
-  quizTopics,
-  sandboxBulletins,
-  marketLabBulletins,
-  replayScenarios,
-  leaderboardPeers
-} = data;
+const { courses, defaultSandboxState, initialPrices, quizTopics, sandboxBulletins, replayScenarios, leaderboardPeers } =
+  data;
 
 const historyLimit = 1200;
 const assetSymbols = Object.keys(initialPrices);
@@ -58,7 +50,6 @@ const priceTickMs = featureToggles.sandboxPriceUpdateMs ?? 8000;
 const maxBulletins = 12;
 let activeTickMs = priceTickMs;
 let priceLoopId = null;
-let marketLabLoopId = null;
 
 if (FORCE_DEMO_MODE) {
   clearSupabaseOverrides();
@@ -267,16 +258,6 @@ function calculatePortfolioValue() {
   );
 }
 
-function calculateLabPortfolioValue() {
-  return (
-    Number(state.marketLab.balance) +
-    Object.entries(state.marketLab.holdings).reduce(
-      (total, [symbol, units]) => total + units * (state.marketLab.prices?.[symbol] ?? state.prices[symbol] ?? 0),
-      0
-    )
-  );
-}
-
 function standardDeviation(values = []) {
   if (!values.length) return 0;
   const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
@@ -330,15 +311,6 @@ function computePortfolioInsights() {
   return computeInsightsFrom(state.sandbox.holdings, state.prices, state.portfolioHistory, state.sandbox.balance);
 }
 
-function computeMarketLabInsights() {
-  return computeInsightsFrom(
-    state.marketLab.holdings,
-    state.marketLab.prices,
-    state.marketLab.portfolioHistory,
-    state.marketLab.balance
-  );
-}
-
 function currentBulletinBucket() {
   return Math.floor(Date.now() / bulletinRefreshMs);
 }
@@ -366,22 +338,6 @@ function refreshBulletins() {
     items.push({ ...base, ts });
   }
   state.bulletin = { bucket, items };
-}
-
-function refreshLabBulletins() {
-  const bucket = currentBulletinBucket();
-  if (state.marketLab?.bulletin?.bucket === bucket && state.marketLab.bulletin.items.length) return;
-  const pool = marketLabBulletins.slice();
-  const items = [];
-  const count = Math.min(maxBulletins, pool.length);
-  for (let i = 0; i < count; i++) {
-    const idx = Math.floor(seededRandom(bucket + i * 2) * pool.length);
-    const base = pool.splice(idx, 1)[0];
-    const hourOffset = Math.floor(seededRandom(bucket * (i + 3)) * 6);
-    const ts = Date.now() - hourOffset * 60 * 60 * 1000;
-    items.push({ ...base, ts });
-  }
-  state.marketLab.bulletin = { bucket, items };
 }
 
 function buildBulletinDriftMap(items = state.bulletin.items ?? []) {
@@ -1017,13 +973,8 @@ function setSandboxTab(tab) {
   });
   const portfolioSection = $('#sandbox-portfolio-section');
   const tradeSection = $('#sandbox-trade-section');
-  const labPortfolio = $('#lab-portfolio-section');
-  const labTrade = $('#lab-trade-section');
-  const showingLab = state.sandboxMode === 'lab';
-  if (portfolioSection) portfolioSection.classList.toggle('hidden', tab !== 'portfolio' || showingLab);
-  if (tradeSection) tradeSection.classList.toggle('hidden', tab !== 'trade' || showingLab);
-  if (labPortfolio) labPortfolio.classList.toggle('hidden', !(showingLab && tab === 'portfolio'));
-  if (labTrade) labTrade.classList.toggle('hidden', !(showingLab && tab === 'trade'));
+  if (portfolioSection) portfolioSection.classList.toggle('hidden', tab !== 'portfolio');
+  if (tradeSection) tradeSection.classList.toggle('hidden', tab !== 'trade');
 }
 
 function updateCurriculumSidebarVisibility(view) {
@@ -1041,36 +992,23 @@ function updateSandboxSidebarVisibility(view) {
 }
 
 function setSandboxMode(mode) {
-  state.sandboxMode = mode || 'live';
+  state.sandboxMode = mode === 'replay' ? 'replay' : 'live';
   const isReplay = state.sandboxMode === 'replay';
-  const isLab = state.sandboxMode === 'lab';
   document.querySelectorAll('[data-sandbox-mode]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.sandboxMode === state.sandboxMode);
   });
   const liveSection = $('#sandbox-live-container');
-  const labSection = $('#sandbox-lab-container');
   const replaySection = $('#sandbox-replay');
   const marketLabel = $('#sandbox-market-label');
   const marketNote = $('#sandbox-market-note');
-  if (liveSection) liveSection.classList.toggle('hidden', isReplay || isLab);
-  if (labSection) labSection.classList.toggle('hidden', !isLab);
+  if (liveSection) liveSection.classList.toggle('hidden', isReplay);
   if (replaySection) replaySection.classList.toggle('hidden', !isReplay);
   const liveTab = $('#sandbox-tab-live');
-  const labTab = $('#sandbox-tab-lab');
   if (liveTab) liveTab.classList.toggle('active', state.sandboxMode === 'live');
-  if (labTab) labTab.classList.toggle('active', isLab);
-  if (marketLabel) marketLabel.textContent = isReplay ? 'Replay market' : isLab ? 'Market lab' : 'Live market';
+  if (marketLabel) marketLabel.textContent = isReplay ? 'Replay market' : 'Live market';
   if (marketNote)
-    marketNote.textContent = isReplay
-      ? 'Synthetic scenarios for practice.'
-      : isLab
-      ? 'Personal accelerated simulation.'
-      : 'Synchronized demo feed.';
-  state.marketLab.isActive = isLab;
-  if (!isLab) {
-    pauseMarketLab();
-  }
-  if (state.sandboxMode === 'live' || state.sandboxMode === 'lab') {
+    marketNote.textContent = isReplay ? 'Synthetic scenarios for practice.' : 'Synchronized demo feed.';
+  if (state.sandboxMode === 'live') {
     state.marketReplay = { active: false, scenarioId: '', step: 0 };
     const select = $('#replay-select');
     if (select) select.value = '';
@@ -1080,7 +1018,6 @@ function setSandboxMode(mode) {
   updateReplayBadge();
   startPriceLoop();
   renderSandbox();
-  if (isLab) renderMarketLabUI();
   requestAnimationFrame(renderSandboxCharts);
   renderReplayView();
 }
@@ -1162,69 +1099,11 @@ function renderBulletinBoard() {
   });
 }
 
-function renderMarketLabBulletinBoard() {
-  const container = $('#sandbox-lab-bulletin');
-  if (!container) return;
-  refreshLabBulletins();
-  const refreshLabel = $('#lab-bulletin-refresh');
-  if (refreshLabel) {
-    const hours = Math.round(bulletinRefreshMs / (1000 * 60 * 60));
-    refreshLabel.textContent = `Auto-updates ~${hours}h`;
-  }
-  const items = state.marketLab?.bulletin?.items ?? [];
-  container.innerHTML =
-    items
-      .map((item) => {
-        const toneClass =
-          item.sentiment === 'bullish'
-            ? 'bg-emerald-500/20 text-emerald-100'
-            : item.sentiment === 'bearish'
-            ? 'bg-rose-500/20 text-rose-100'
-            : item.sentiment === 'speculative'
-            ? 'bg-amber-500/20 text-amber-100'
-            : 'bg-sky-500/20 text-sky-100';
-        const focusAssets = item.assets?.slice(0, 5).join(', ') ?? 'Market-wide';
-        const driftLabel = item.drift
-          ? `${item.drift > 0 ? '↗︎ +' : '↘︎ '}${(item.drift * 100).toFixed(1)}% tilt`
-          : 'Neutral drift';
-        return `
-          <article data-article-id="${item.id}" class="rounded-2xl border border-white/10 bg-white/5 p-3 space-y-2 cursor-pointer hover:border-white/30 transition">
-            <div class="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-slate-400">
-              <span class="badge ${toneClass}">${item.sentiment}</span>
-              <span>${formatRelativeTime(item.ts)}</span>
-            </div>
-            <p class="text-sm font-semibold">${item.title}</p>
-            <p class="text-xs text-slate-300 leading-relaxed">${item.summary}</p>
-            <div class="flex flex-wrap gap-2 text-[11px] text-slate-300">
-              <span class="mini-badge">Focus: ${focusAssets}</span>
-              <span class="mini-badge">Cue: ${item.impact}</span>
-              <span class="mini-badge">Bias: ${driftLabel}</span>
-            </div>
-            <p class="text-[11px] text-sky-200">Open full brief →</p>
-          </article>
-        `;
-      })
-      .join('') || '<p class="text-slate-400 text-sm">Lab bulletins will refresh shortly.</p>';
-
-  container.querySelectorAll('[data-article-id]').forEach((card) => {
-    card.addEventListener('click', () => openBulletinArticle(card.dataset.articleId, 'lab'));
-  });
-}
-
 function resolveBulletinArticle(id, source = state.activeBulletinSource || 'live') {
   if (!id) return null;
-  if (source === 'lab') {
-    return (
-      state.marketLab?.bulletin?.items.find((item) => item.id === id) ||
-      marketLabBulletins.find((item) => item.id === id) ||
-      sandboxBulletins.find((item) => item.id === id) ||
-      null
-    );
-  }
   return (
     state.bulletin.items.find((item) => item.id === id) ||
     sandboxBulletins.find((item) => item.id === id) ||
-    state.marketLab?.bulletin?.items.find((item) => item.id === id) ||
     null
   );
 }
@@ -1415,307 +1294,10 @@ function renderSandbox() {
     }
   }
 
-  renderMarketLabUI();
   renderBulletinBoard();
 
   requestAnimationFrame(renderSandboxCharts);
   renderReplayView();
-}
-
-function renderMarketLabHoldingsHtml(holdings = {}, prices = {}) {
-  return Object.entries(holdings)
-    .filter(([, units]) => units > 0)
-    .map(([symbol, units]) => {
-      const price = prices[symbol] ?? state.prices[symbol] ?? 0;
-      const value = units * price;
-      return `
-        <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
-          <div>
-            <p class="font-semibold">${symbol}</p>
-            <p class="text-xs text-slate-400">${units.toFixed(4)} units</p>
-          </div>
-          <p class="text-sm font-semibold">${formatCurrency(value)}</p>
-        </div>
-      `;
-    })
-    .join('');
-}
-
-function renderMarketLabEventsHtml(marketLab) {
-  const events = Array.isArray(marketLab?.history) ? marketLab.history : [];
-  const markup = events
-    .slice(-6)
-    .reverse()
-    .map((entry, idx) => {
-      const label = entry?.detail || entry?.type || `Event ${idx + 1}`;
-      const ts = entry?.ts ? formatRelativeTime(new Date(entry.ts).getTime()) : 'Recently';
-      return `
-        <div class="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 flex items-center justify-between">
-          <span class="text-slate-100">${label}</span>
-          <span class="text-[11px] text-slate-400">${ts}</span>
-        </div>
-      `;
-    })
-    .join('');
-  return (
-    markup || '<p class="text-slate-400 text-sm">Simulation paused. Start to generate events.</p>'
-  );
-}
-
-function renderMarketLabUI() {
-  const { marketLab } = state;
-  const portfolioValue = calculateLabPortfolioValue();
-  setText($('#lab-balance'), formatCurrency(marketLab.balance ?? 0));
-  setText($('#lab-portfolio-value'), formatCurrency(portfolioValue));
-
-  const holdingsEl = $('#lab-holdings');
-  if (holdingsEl) {
-    const holdingsMarkup = renderMarketLabHoldingsHtml(marketLab.holdings ?? {}, marketLab.prices ?? {});
-    holdingsEl.innerHTML =
-      holdingsMarkup || '<p class="text-slate-400 text-sm">No holdings yet. Start the lab to populate positions.</p>';
-  }
-
-  const insights = computeMarketLabInsights();
-  setText($('#lab-insight-risk'), insights.risk);
-  setText($('#lab-insight-concentration'), insights.concentration);
-  setText($('#lab-insight-volatility'), insights.volatility);
-
-  const historyEl = $('#lab-history');
-  if (historyEl) {
-    const entries = (marketLab.history ?? []).slice(-12).reverse();
-    const markup = entries
-      .map((entry) => {
-        const toneClass =
-          (entry.type || '').toLowerCase() === 'buy'
-            ? 'bg-emerald-500/20 text-emerald-100'
-            : (entry.type || '').toLowerCase() === 'sell'
-            ? 'bg-rose-500/20 text-rose-100'
-            : 'bg-sky-500/20 text-sky-100';
-        const timeLabel = entry.ts ? formatRelativeTime(new Date(entry.ts).getTime()) : 'Recently';
-        return `
-          <div class="flex items-start justify-between rounded-2xl border border-white/5 bg-white/5 px-3 py-2">
-            <div class="space-y-1">
-              <div class="flex items-center gap-2 text-xs">
-                <span class="badge ${toneClass} capitalize">${entry.type || 'event'}</span>
-                <span class="text-slate-400">${timeLabel}</span>
-              </div>
-              <p class="text-sm text-slate-100 leading-snug">${entry.detail || 'Simulation update'}</p>
-            </div>
-          </div>`;
-      })
-      .join('');
-    historyEl.innerHTML = markup || '<p class="text-slate-400 text-sm">No trades yet in Market Lab.</p>';
-  }
-
-  document.querySelectorAll('.lab-speed-btn').forEach((btn) => {
-    const speed = Number(btn.dataset.speed);
-    btn.classList.toggle('active', speed === Number(marketLab.speed ?? 1));
-  });
-
-  const buildLabTimeframeControls = (containerId, chartKey) => {
-    const container = $(`#${containerId}`);
-    if (!container) return;
-    if (!container.dataset.bound) {
-      container.innerHTML = timeframeOptions
-        .map(
-          (option) => `
-            <button
-              type="button"
-              class="px-3 py-1 rounded-full border border-white/15 text-xs text-slate-200 hover:border-white/40"
-              data-lab-chart="${chartKey}"
-              data-lab-timeframe="${option.key}"
-            >
-              ${option.label}
-            </button>
-          `
-        )
-        .join('');
-      container.querySelectorAll('button[data-lab-timeframe]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          state.chartTimeframes[chartKey] = btn.dataset.labTimeframe;
-          renderMarketLabCharts();
-        });
-      });
-      container.dataset.bound = 'true';
-    }
-    container.querySelectorAll('button[data-lab-timeframe]').forEach((btn) => {
-      const isActive = btn.dataset.labTimeframe === state.chartTimeframes[chartKey];
-      btn.classList.toggle('bg-white/10', isActive);
-      btn.classList.toggle('border-white/40', isActive);
-    });
-  };
-
-  const buildLabZoomControls = (containerId, chartKey) => {
-    const container = $(`#${containerId}`);
-    if (!container) return;
-    if (!container.dataset.bound) {
-      container.querySelectorAll('[data-lab-zoom], [data-lab-asset-zoom]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const mode = btn.dataset.labZoom || btn.dataset.labAssetZoom;
-          if (mode === 'in') state.chartZoom[chartKey] = Math.min(6, state.chartZoom[chartKey] + 0.5);
-          if (mode === 'out') state.chartZoom[chartKey] = Math.max(1, state.chartZoom[chartKey] - 0.5);
-          if (mode === 'reset') state.chartZoom[chartKey] = 1;
-          renderMarketLabCharts();
-        });
-      });
-      container.dataset.bound = 'true';
-    }
-  };
-
-  buildLabTimeframeControls('lab-portfolio-timeframe-controls', 'portfolio');
-  buildLabTimeframeControls('lab-asset-timeframe-controls', 'asset');
-  buildLabZoomControls('lab-portfolio-zoom-controls', 'portfolio');
-  buildLabZoomControls('lab-asset-zoom-controls', 'asset');
-
-  const activeAsset = marketLab.prices?.[marketLab.selectedAsset] != null ? marketLab.selectedAsset : assetSymbols[0];
-  state.marketLab.selectedAsset = activeAsset;
-  const activeHistory = state.marketLab.priceHistory[activeAsset] ?? [];
-  const activePrice = state.marketLab.prices?.[activeAsset] ?? 0;
-  const activePrev = activeHistory.length > 1 ? activeHistory[activeHistory.length - 2]?.value : activePrice;
-  const activeChange = activePrev ? ((activePrice - activePrev) / activePrev) * 100 : 0;
-  const activeUnits = state.marketLab.holdings[activeAsset] ?? 0;
-  const activeValueShare = portfolioValue ? (activeUnits * activePrice / portfolioValue) * 100 : 0;
-  setText($('#lab-active-asset-label'), activeAsset);
-  setText($('#lab-active-asset-price'), formatCurrency(activePrice));
-  const changeBadge = $('#lab-active-asset-change');
-  if (changeBadge) {
-    changeBadge.textContent = `${activeChange >= 0 ? '+' : ''}${activeChange.toFixed(2)}%`;
-    changeBadge.className = `badge ${
-      activeChange >= 0 ? 'bg-emerald-500/20 text-emerald-100' : 'bg-rose-500/20 text-rose-100'
-    }`;
-  }
-  setText($('#lab-active-asset-units'), activeUnits.toFixed(4));
-  setText($('#lab-active-asset-share'), `${activeValueShare.toFixed(2)}%`);
-
-  const stripContainer = $('#lab-asset-strip');
-  if (stripContainer) {
-    const entries = Object.entries(state.marketLab.prices ?? state.prices);
-    const visible = state.ui?.labShowAllAssets ? entries : entries.slice(0, 5);
-    stripContainer.innerHTML = visible
-      .map(([symbol, price]) => {
-        const history = state.marketLab.priceHistory[symbol] ?? [];
-        const prev = history.length > 1 ? history[history.length - 2]?.value : price;
-        const changePct = prev ? ((price - prev) / prev) * 100 : 0;
-        const initial = symbol[0] ?? '?';
-        return `
-          <button data-lab-asset="${symbol}" class="min-w-[120px] flex-1 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-left hover:border-white/40">
-            <div class="flex items-center gap-2">
-              <span class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-semibold">${initial}</span>
-              <div>
-                <p class="font-semibold">${symbol}</p>
-                <p class="text-xs text-slate-400">${formatCurrency(price)}</p>
-              </div>
-            </div>
-            <p class="text-xs mt-1 ${changePct >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${
-              changePct >= 0 ? '+' : ''
-            }${changePct.toFixed(2)}%</p>
-          </button>
-        `;
-      })
-      .join('');
-
-    stripContainer.querySelectorAll('button[data-lab-asset]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        state.marketLab.selectedAsset = btn.dataset.labAsset;
-        setSandboxTab('trade');
-        renderMarketLabUI();
-      });
-    });
-
-    const toggleBtn = $('#lab-asset-strip-toggle');
-    if (toggleBtn) {
-      toggleBtn.textContent = state.ui?.labShowAllAssets ? 'Show less' : 'See all';
-      toggleBtn.onclick = () => {
-        state.ui.labShowAllAssets = !state.ui.labShowAllAssets;
-        renderMarketLabUI();
-      };
-    }
-  }
-
-  renderLabAssetSelects();
-  renderMarketLabCharts();
-  renderMarketLabBulletinBoard();
-}
-
-function renderMarketLabCharts() {
-  const portfolioSeriesRaw = state.marketLab.portfolioHistory?.length
-    ? state.marketLab.portfolioHistory
-    : [{ ts: Date.now(), value: calculateLabPortfolioValue() }];
-  const portfolioSeries = filterSeriesByTimeframe(portfolioSeriesRaw, state.chartTimeframes.portfolio);
-  renderLineChart($('#lab-portfolio-chart'), portfolioSeries, '#34d399', state.chartZoom.portfolio, $('#lab-portfolio-inspect'));
-
-  const activeAsset = state.marketLab.selectedAsset ?? assetSymbols[0];
-  const assetSeriesRaw = state.marketLab.priceHistory[activeAsset] ?? [];
-  const assetSeries = filterSeriesByTimeframe(assetSeriesRaw, state.chartTimeframes.asset);
-  renderLineChart($('#lab-asset-chart'), assetSeries, '#60a5fa', state.chartZoom.asset, $('#lab-asset-inspect'));
-}
-
-function renderLabAssetSelects() {
-  const options = assetSymbols.map((symbol) => `<option value="${symbol}">${symbol}</option>`).join('');
-  ['lab-buy-asset', 'lab-sell-asset'].forEach((id) => {
-    const select = $(`#${id}`);
-    if (select) {
-      select.innerHTML = options;
-      select.value = state.marketLab.selectedAsset ?? assetSymbols[0];
-    }
-  });
-}
-
-function recordLabTrade(entry) {
-  state.marketLab.history.push({ ...entry, ts: new Date().toISOString() });
-  state.marketLab.history = state.marketLab.history.slice(-50);
-}
-
-async function handleLabBuy(event) {
-  event.preventDefault();
-  const amount = Number($('#lab-buy-amount').value);
-  const asset = $('#lab-buy-asset').value;
-  if (!state.marketLab.prices?.[asset]) {
-    showToast('Select a supported asset', 'error');
-    return;
-  }
-  if (amount <= 0 || amount > state.marketLab.balance) {
-    showToast('Insufficient balance', 'error');
-    return;
-  }
-  const price = state.marketLab.prices[asset];
-  const units = amount / price;
-  state.marketLab.balance -= amount;
-  state.marketLab.holdings[asset] = (state.marketLab.holdings[asset] ?? 0) + units;
-  recordLabTrade({ type: 'BUY', detail: `${asset} @ ${price.toFixed(2)} (${units.toFixed(4)} units)` });
-  updateMarketLabDerivedState();
-  persistStateToCache();
-  renderMarketLabUI();
-  $('#lab-buy-form')?.reset();
-  showToast('Lab purchase executed', 'success');
-}
-
-async function handleLabSell(event) {
-  event.preventDefault();
-  const units = Number($('#lab-sell-amount').value);
-  const asset = $('#lab-sell-asset').value;
-  if (!state.marketLab.prices?.[asset]) {
-    showToast('Select a supported asset', 'error');
-    return;
-  }
-  if (!state.marketLab.holdings[asset]) {
-    showToast('No holdings for this asset', 'error');
-    return;
-  }
-  if (units <= 0 || units > state.marketLab.holdings[asset]) {
-    showToast('Not enough units to sell', 'error');
-    return;
-  }
-  const price = state.marketLab.prices[asset];
-  const amount = units * price;
-  state.marketLab.balance += amount;
-  state.marketLab.holdings[asset] = Math.max(0, (state.marketLab.holdings[asset] ?? 0) - units);
-  recordLabTrade({ type: 'SELL', detail: `${asset} @ ${price.toFixed(2)} (${units.toFixed(4)} units)` });
-  updateMarketLabDerivedState();
-  persistStateToCache();
-  renderMarketLabUI();
-  $('#lab-sell-form')?.reset();
-  showToast('Lab sale executed', 'success');
 }
 
 async function handleSignup(event) {
@@ -1928,86 +1510,6 @@ function tickPrices() {
   recordPortfolioSnapshot();
   renderSandbox();
   renderDashboard();
-}
-
-function setMarketLabSpeed(speed) {
-  const next = Number(speed) || 1;
-  state.marketLab.speed = Math.max(1, Math.min(10, next));
-  if (state.marketLab.isRunning) {
-    spawnMarketLabLoop();
-  }
-  renderMarketLabUI();
-}
-
-function spawnMarketLabLoop() {
-  const baseInterval = featureToggles?.sandboxPriceUpdateMs ?? 8000;
-  if (marketLabLoopId) {
-    clearInterval(marketLabLoopId);
-    marketLabLoopId = null;
-  }
-  marketLabLoopId = setInterval(() => {
-    if (!state.marketLab.isRunning) return;
-    advanceMarketLabOneTick();
-  }, baseInterval);
-}
-
-function startMarketLab() {
-  state.marketLab.isRunning = true;
-  spawnMarketLabLoop();
-  advanceMarketLabOneTick();
-}
-
-function pauseMarketLab() {
-  state.marketLab.isRunning = false;
-  if (marketLabLoopId) {
-    clearInterval(marketLabLoopId);
-    marketLabLoopId = null;
-  }
-}
-
-function advanceMarketLabOneTick() {
-  const speed = Number(state.marketLab.speed ?? 1);
-  for (let i = 0; i < speed; i++) {
-    stepMarketLabSimulation();
-  }
-  updateMarketLabDerivedState();
-  renderMarketLabUI();
-  persistStateToCache();
-}
-
-function stepMarketLabSimulation() {
-  refreshLabBulletins();
-  const driftMap = { ...buildBulletinDriftMap(state.marketLab.bulletin?.items ?? []) };
-  const seedBase = currentTickStep() + state.marketLab.virtualTimeIndex;
-  state.marketLab.virtualTimeIndex += 1;
-  const prices = state.marketLab.prices ?? {};
-  assetSymbols.forEach((symbol) => {
-    const drift = driftMap[symbol] ?? 0;
-    const current = prices[symbol] ?? state.prices[symbol] ?? initialPrices[symbol] ?? 0;
-    const next = randomizePrice(current, drift, seedBase + symbol.charCodeAt(0));
-    prices[symbol] = next;
-    if (!state.marketLab.priceHistory[symbol]) state.marketLab.priceHistory[symbol] = [];
-    state.marketLab.priceHistory[symbol].push({ ts: Date.now(), value: next });
-    state.marketLab.priceHistory[symbol] = state.marketLab.priceHistory[symbol].slice(-historyLimit);
-  });
-  state.marketLab.prices = prices;
-  state.marketLab.history.push({ type: 'tick', detail: 'Simulation advanced', ts: new Date().toISOString() });
-  state.marketLab.history = state.marketLab.history.slice(-50);
-}
-
-function updateMarketLabDerivedState() {
-  const prices = state.marketLab.prices ?? {};
-  let holdingsValue = 0;
-  assetSymbols.forEach((symbol) => {
-    const units = state.marketLab.holdings[symbol] ?? 0;
-    holdingsValue += units * (prices[symbol] ?? 0);
-  });
-  state.marketLab.portfolioValue = state.marketLab.balance + holdingsValue;
-  if (!Array.isArray(state.marketLab.portfolioHistory)) {
-    state.marketLab.portfolioHistory = [];
-  }
-  state.marketLab.portfolioHistory.push({ ts: Date.now(), value: state.marketLab.portfolioValue });
-  state.marketLab.portfolioHistory = state.marketLab.portfolioHistory.slice(-historyLimit);
 }
 
 function startPriceLoop() {
@@ -2396,5 +1898,4 @@ function init() {
 window.addEventListener('DOMContentLoaded', init);
 window.addEventListener('beforeunload', () => {
   if (priceLoopId) clearInterval(priceLoopId);
-  if (marketLabLoopId) clearInterval(marketLabLoopId);
 });
