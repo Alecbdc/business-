@@ -109,7 +109,7 @@ export const state = {
   user: null,
   profile: null,
   previewMode: false,
-  currentView: 'home',
+  currentView: 'dashboard',
   previousView: 'dashboard',
   selectedLessonId: courses[0]?.lessons[0]?.id ?? null,
   selectedQuizTopicId: quizTopics[0]?.id ?? null,

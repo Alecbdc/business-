@@ -2892,8 +2892,6 @@ function bindEvents() {
     startScenarioLoop();
   });
   bind('#scenario-pause', 'click', pauseScenarioLoop);
-  bind('#home-crypto-btn', 'click', () => setView('dashboard'));
-  bind('#home-stocks-btn', 'click', () => setView('dashboard'));
   document.querySelectorAll('[data-scenario-speed]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const speed = Number(btn.dataset.scenarioSpeed || '1');
