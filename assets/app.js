@@ -1349,6 +1349,7 @@ function renderScenarioSelection() {
       const levelId = row.dataset.level;
       const scenarioId = row.dataset.scenario;
       openScenarioModal(levelId, scenarioId);
+      startScenarioSession(levelId, scenarioId, { autoStart: false, hideModal: false });
     });
   });
 }
@@ -1372,16 +1373,18 @@ function openScenarioModal(levelId, scenarioId) {
   $('#scenario-begin')?.setAttribute('data-scenario', scenario.id);
 }
 
-function startScenarioSession(levelId, scenarioId) {
+function startScenarioSession(levelId, scenarioId, options = {}) {
   const { level, scenario } = findScenario(levelId, scenarioId);
   if (!scenario) return;
+  const autoStart = options.autoStart !== undefined ? options.autoStart : true;
+  const hideModal = options.hideModal !== false;
   applyView(state, 'sandbox');
   state.marketScenario = {
     ...state.marketScenario,
     active: true,
     levelId: level.id,
     scenarioId: scenario.id,
-    isRunning: true,
+    isRunning: autoStart,
     speed: 1,
     tick: 0,
     startBalance: defaultSandboxState.balance,
@@ -1400,13 +1403,26 @@ function startScenarioSession(levelId, scenarioId) {
   state.sandboxMode = 'scenario';
   setSandboxTab('portfolio');
   setSandboxMode('scenario');
+  if (autoStart) startScenarioLoop();
   const modal = $('#scenario-modal');
-  if (modal) modal.classList.add('hidden');
+  if (modal && hideModal) modal.classList.add('hidden');
 }
 
 function beginScenario(levelId, scenarioId) {
   const { level, scenario } = findScenario(levelId, scenarioId);
   if (!scenario) return;
+  const isPrepared =
+    state.marketScenario.active &&
+    state.marketScenario.levelId === level.id &&
+    state.marketScenario.scenarioId === scenario.id &&
+    !state.marketScenario.isRunning;
+  if (isPrepared) {
+    state.marketScenario.isRunning = true;
+    setSandboxMode('scenario');
+    startScenarioLoop();
+    $('#scenario-modal')?.classList.add('hidden');
+    return;
+  }
   startScenarioSession(level.id, scenario.id);
 }
 
