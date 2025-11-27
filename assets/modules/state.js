@@ -122,6 +122,17 @@ export const state = {
     holdings: normalizeHoldings(defaultSandboxState.holdings),
     history: defaultSandboxState.history ?? []
   },
+  marketLab: {
+    isActive: false,
+    isRunning: false,
+    speed: 1,
+    virtualTimeIndex: 0,
+    balance: defaultSandboxState.balance,
+    portfolioValue: defaultSandboxState.balance,
+    holdings: normalizeHoldings(defaultSandboxState.holdings),
+    history: defaultSandboxState.history ?? [],
+    selectedAsset: assetSymbols[0] ?? 'BTC'
+  },
   prices: { ...latestSeededPrices },
   priceHistory: seededPriceHistory,
   portfolioHistory: seededPortfolioHistory,
@@ -154,6 +165,23 @@ export function hydrateStateFromCache() {
     state.sandbox.balance = Number(state.sandbox.balance ?? defaultSandboxState.balance);
     state.sandbox.holdings = normalizeHoldings(state.sandbox.holdings);
     state.sandbox.history = state.sandbox.history ?? [];
+    state.marketLab = parsed.marketLab ?? {
+      isActive: false,
+      isRunning: false,
+      speed: 1,
+      virtualTimeIndex: 0,
+      balance: defaultSandboxState.balance,
+      portfolioValue: defaultSandboxState.balance,
+      holdings: normalizeHoldings(defaultSandboxState.holdings),
+      history: defaultSandboxState.history ?? [],
+      selectedAsset: assetSymbols[0] ?? 'BTC'
+    };
+    state.marketLab.balance = Number(state.marketLab.balance ?? defaultSandboxState.balance);
+    state.marketLab.portfolioValue = Number(
+      state.marketLab.portfolioValue ?? state.marketLab.balance ?? defaultSandboxState.balance
+    );
+    state.marketLab.holdings = normalizeHoldings(state.marketLab.holdings);
+    state.marketLab.history = state.marketLab.history ?? [];
   } catch (err) {
     console.warn('Failed to hydrate cache', err);
   }
@@ -167,6 +195,7 @@ export function persistStateToCache() {
       topicScores: state.topicScores,
       quizLog: state.quizLog,
       sandbox: state.sandbox,
+      marketLab: state.marketLab,
       selectedQuizTopicId: state.selectedQuizTopicId
     };
     localStorage.setItem(cacheKey, JSON.stringify(payload));
