@@ -131,7 +131,10 @@ export const state = {
     portfolioValue: defaultSandboxState.balance,
     holdings: normalizeHoldings(defaultSandboxState.holdings),
     history: defaultSandboxState.history ?? [],
-    selectedAsset: assetSymbols[0] ?? 'BTC'
+    selectedAsset: assetSymbols[0] ?? 'BTC',
+    prices: { ...latestSeededPrices },
+    priceHistory: seedPriceHistoryMap(initialPrices),
+    portfolioHistory: seedPortfolioSeries(defaultSandboxState.balance)
   },
   prices: { ...latestSeededPrices },
   priceHistory: seededPriceHistory,
@@ -174,7 +177,10 @@ export function hydrateStateFromCache() {
       portfolioValue: defaultSandboxState.balance,
       holdings: normalizeHoldings(defaultSandboxState.holdings),
       history: defaultSandboxState.history ?? [],
-      selectedAsset: assetSymbols[0] ?? 'BTC'
+      selectedAsset: assetSymbols[0] ?? 'BTC',
+      prices: { ...latestSeededPrices },
+      priceHistory: seedPriceHistoryMap(initialPrices),
+      portfolioHistory: seedPortfolioSeries(defaultSandboxState.balance)
     };
     state.marketLab.balance = Number(state.marketLab.balance ?? defaultSandboxState.balance);
     state.marketLab.portfolioValue = Number(
@@ -182,6 +188,9 @@ export function hydrateStateFromCache() {
     );
     state.marketLab.holdings = normalizeHoldings(state.marketLab.holdings);
     state.marketLab.history = state.marketLab.history ?? [];
+    state.marketLab.prices = state.marketLab.prices ?? { ...latestSeededPrices };
+    state.marketLab.priceHistory = state.marketLab.priceHistory ?? seedPriceHistoryMap(initialPrices);
+    state.marketLab.portfolioHistory = state.marketLab.portfolioHistory ?? seedPortfolioSeries(defaultSandboxState.balance);
   } catch (err) {
     console.warn('Failed to hydrate cache', err);
   }

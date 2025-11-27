@@ -55,6 +55,7 @@ const priceTickMs = featureToggles.sandboxPriceUpdateMs ?? 8000;
 const maxBulletins = 12;
 let activeTickMs = priceTickMs;
 let priceLoopId = null;
+let marketLabLoopId = null;
 
 if (FORCE_DEMO_MODE) {
   clearSupabaseOverrides();
@@ -1020,6 +1021,9 @@ function setSandboxMode(mode) {
       ? 'Personal accelerated simulation.'
       : 'Synchronized demo feed.';
   state.marketLab.isActive = isLab;
+  if (!isLab) {
+    pauseMarketLab();
+  }
   if (state.sandboxMode === 'live' || state.sandboxMode === 'lab') {
     state.marketReplay = { active: false, scenarioId: '', step: 0 };
     const select = $('#replay-select');
@@ -1316,7 +1320,7 @@ function renderMarketLabPanel() {
     const holdingsMarkup = Object.entries(state.marketLab.holdings ?? {})
       .filter(([, units]) => units > 0)
       .map(([symbol, units]) => {
-        const price = state.prices[symbol] ?? 0;
+        const price = state.marketLab.prices?.[symbol] ?? state.prices[symbol] ?? 0;
         const value = units * price;
         return `
           <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
@@ -1356,6 +1360,7 @@ function renderMarketLabPanel() {
     const speed = Number(btn.dataset.speed);
     btn.classList.toggle('active', speed === Number(state.marketLab.speed ?? 1));
   });
+  renderMarketLabChart();
 }
 
 async function handleSignup(event) {
@@ -1568,6 +1573,116 @@ function tickPrices() {
   recordPortfolioSnapshot();
   renderSandbox();
   renderDashboard();
+}
+
+function setMarketLabSpeed(speed) {
+  const next = Number(speed) || 1;
+  state.marketLab.speed = Math.max(1, Math.min(10, next));
+  if (state.marketLab.isRunning) {
+    spawnMarketLabLoop();
+  }
+  renderMarketLabPanel();
+}
+
+function spawnMarketLabLoop() {
+  const baseInterval = featureToggles?.sandboxPriceUpdateMs ?? 8000;
+  if (marketLabLoopId) {
+    clearInterval(marketLabLoopId);
+    marketLabLoopId = null;
+  }
+  marketLabLoopId = setInterval(() => {
+    if (!state.marketLab.isRunning) return;
+    advanceMarketLabOneTick();
+  }, baseInterval);
+}
+
+function startMarketLab() {
+  state.marketLab.isRunning = true;
+  spawnMarketLabLoop();
+  advanceMarketLabOneTick();
+}
+
+function pauseMarketLab() {
+  state.marketLab.isRunning = false;
+  if (marketLabLoopId) {
+    clearInterval(marketLabLoopId);
+    marketLabLoopId = null;
+  }
+}
+
+function advanceMarketLabOneTick() {
+  const speed = Number(state.marketLab.speed ?? 1);
+  for (let i = 0; i < speed; i++) {
+    stepMarketLabSimulation();
+  }
+  updateMarketLabDerivedState();
+  renderMarketLabPanel();
+  renderMarketLabChart();
+  persistStateToCache();
+}
+
+function stepMarketLabSimulation() {
+  const driftMap = { ...buildBulletinDriftMap() };
+  const seedBase = currentTickStep() + state.marketLab.virtualTimeIndex;
+  state.marketLab.virtualTimeIndex += 1;
+  const prices = state.marketLab.prices ?? {};
+  assetSymbols.forEach((symbol) => {
+    const drift = driftMap[symbol] ?? 0;
+    const current = prices[symbol] ?? state.prices[symbol] ?? initialPrices[symbol] ?? 0;
+    const next = randomizePrice(current, drift, seedBase + symbol.charCodeAt(0));
+    prices[symbol] = next;
+    if (!state.marketLab.priceHistory[symbol]) state.marketLab.priceHistory[symbol] = [];
+    state.marketLab.priceHistory[symbol].push({ ts: Date.now(), value: next });
+    state.marketLab.priceHistory[symbol] = state.marketLab.priceHistory[symbol].slice(-historyLimit);
+  });
+  state.marketLab.prices = prices;
+  state.marketLab.history.push({ type: 'tick', detail: 'Simulation advanced', ts: new Date().toISOString() });
+  state.marketLab.history = state.marketLab.history.slice(-50);
+}
+
+function updateMarketLabDerivedState() {
+  const prices = state.marketLab.prices ?? {};
+  let holdingsValue = 0;
+  assetSymbols.forEach((symbol) => {
+    const units = state.marketLab.holdings[symbol] ?? 0;
+    holdingsValue += units * (prices[symbol] ?? 0);
+  });
+  state.marketLab.portfolioValue = state.marketLab.balance + holdingsValue;
+  if (!Array.isArray(state.marketLab.portfolioHistory)) {
+    state.marketLab.portfolioHistory = [];
+  }
+  state.marketLab.portfolioHistory.push({ ts: Date.now(), value: state.marketLab.portfolioValue });
+  state.marketLab.portfolioHistory = state.marketLab.portfolioHistory.slice(-historyLimit);
+}
+
+function renderMarketLabChart() {
+  const canvas = $('#lab-portfolio-chart');
+  if (!canvas) return;
+  const series = state.marketLab.portfolioHistory ?? [];
+  const points = series.length ? series : [{ ts: Date.now(), value: state.marketLab.portfolioValue ?? 0 }];
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  if (!width || !height) return;
+  const dpr = window.devicePixelRatio ?? 1;
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  const values = points.map((p) => p.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  ctx.strokeStyle = '#34d399';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  points.forEach((point, idx) => {
+    const x = (idx / (points.length - 1 || 1)) * width;
+    const y = height - ((point.value - min) / range) * height;
+    if (idx === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
 }
 
 function startPriceLoop() {
@@ -1855,10 +1970,17 @@ function bindEvents() {
   bind('#sell-form', 'submit', handleSell);
   bind('#replay-start', 'click', startPortfolioReplay);
   bind('#replay-stop', 'click', () => stopPortfolioReplay());
+  bind('#lab-start', 'click', () => startMarketLab());
+  bind('#lab-pause', 'click', () => pauseMarketLab());
   bind('#refresh-courses', 'click', renderCourses);
   bind('#enter-demo', 'click', handleDemoEntry);
   bind('#bulletin-article-back', 'click', () => setView(state.previousView || 'sandbox'));
   bindNavigation();
+  document.querySelectorAll('.lab-speed-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setMarketLabSpeed(btn.dataset.speed);
+    });
+  });
 }
 
 async function bootstrapUser() {
@@ -1950,4 +2072,5 @@ function init() {
 window.addEventListener('DOMContentLoaded', init);
 window.addEventListener('beforeunload', () => {
   if (priceLoopId) clearInterval(priceLoopId);
+  if (marketLabLoopId) clearInterval(marketLabLoopId);
 });
