@@ -1051,7 +1051,7 @@ function setSandboxMode(mode) {
   const showSelection = isScenario && !state.marketScenario.active;
   if (liveSection) liveSection.classList.toggle('hidden', isLab || showSelection);
   if (labSection) labSection.classList.toggle('hidden', !isLab);
-  if (scenarioSection) scenarioSection.classList.toggle('hidden', !isScenario);
+  if (scenarioSection) scenarioSection.classList.toggle('hidden', !isScenario || !showSelection);
   const liveTab = $('#sandbox-tab-live');
   if (liveTab) liveTab.classList.toggle('active', state.sandboxMode === 'live');
   if (marketLabel)
@@ -1365,7 +1365,6 @@ function openScenarioModal(levelId, scenarioId) {
 function startScenarioSession(levelId, scenarioId) {
   const { level, scenario } = findScenario(levelId, scenarioId);
   if (!scenario) return;
-  state.currentView = 'sandbox';
   applyView(state, 'sandbox');
   state.marketScenario = {
     ...state.marketScenario,
@@ -1389,12 +1388,8 @@ function startScenarioSession(levelId, scenarioId) {
     starsEarned: 0
   };
   state.sandboxMode = 'scenario';
-  renderScenarioHud();
-  renderSandbox();
-  renderScenarioSelection();
-  pauseMarketLabLoop();
-  state.marketLab.isActive = false;
-  startScenarioLoop();
+  setSandboxTab('portfolio');
+  setSandboxMode('scenario');
   const modal = $('#scenario-modal');
   if (modal) modal.classList.add('hidden');
 }
@@ -1402,17 +1397,7 @@ function startScenarioSession(levelId, scenarioId) {
 function beginScenario(levelId, scenarioId) {
   const { level, scenario } = findScenario(levelId, scenarioId);
   if (!scenario) return;
-  const payload = { levelId: level.id, scenarioId: scenario.id, ts: Date.now() };
-  try {
-    localStorage.setItem(pendingScenarioKey, JSON.stringify(payload));
-    sessionStorage.setItem(suppressScenarioAutoStartKey, 'true');
-  } catch (err) {
-    console.warn('Unable to cache scenario launch', err);
-  }
-  const modal = $('#scenario-modal');
-  if (modal) modal.classList.add('hidden');
-  const targetUrl = `${window.location.origin}${window.location.pathname}`;
-  window.open(targetUrl, '_blank', 'noopener');
+  startScenarioSession(level.id, scenario.id);
 }
 
 function tryLaunchPendingScenario() {
@@ -1432,6 +1417,22 @@ function tryLaunchPendingScenario() {
 
 function renderScenarioHud() {
   const hud = $('#scenario-hud');
+  const liveContainer = $('#sandbox-live-container');
+  const headerCard = liveContainer?.querySelector(':scope > .card-glass:not(#scenario-hud)');
+  if (liveContainer && headerCard && hud) {
+    if (state.sandboxMode === 'scenario') {
+      if (liveContainer.firstElementChild !== hud) {
+        liveContainer.insertBefore(hud, headerCard);
+      }
+    } else {
+      if (liveContainer.firstElementChild !== headerCard) {
+        liveContainer.insertBefore(headerCard, liveContainer.firstElementChild);
+      }
+      if (headerCard.nextElementSibling !== hud) {
+        liveContainer.insertBefore(hud, headerCard.nextElementSibling);
+      }
+    }
+  }
   if (!hud) return;
   const show = state.sandboxMode === 'scenario' && state.marketScenario.active;
   hud.classList.toggle('hidden', !show);
