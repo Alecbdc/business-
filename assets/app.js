@@ -2293,21 +2293,12 @@ function bindEvents() {
   bind('#submit-quiz', 'click', handleQuizSubmit);
   bind('#buy-form', 'submit', handleBuy);
   bind('#sell-form', 'submit', handleSell);
-  bind('#lab-buy-form', 'submit', handleLabBuy);
-  bind('#lab-sell-form', 'submit', handleLabSell);
   bind('#replay-start', 'click', startPortfolioReplay);
   bind('#replay-stop', 'click', () => stopPortfolioReplay());
-  bind('#lab-start', 'click', () => startMarketLab());
-  bind('#lab-pause', 'click', () => pauseMarketLab());
   bind('#refresh-courses', 'click', renderCourses);
   bind('#enter-demo', 'click', handleDemoEntry);
   bind('#bulletin-article-back', 'click', () => setView(state.previousView || 'sandbox'));
   bindNavigation();
-  document.querySelectorAll('.lab-speed-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      setMarketLabSpeed(btn.dataset.speed);
-    });
-  });
 }
 
 async function bootstrapUser() {
@@ -2362,6 +2353,12 @@ function initAuthListener() {
     renderDashboard();
   });
 }
+
+// Market Lab UI rendering and bulletin hooks are disabled after rolling back step 4 wiring.
+function renderMarketLabUI() {}
+function renderMarketLabCharts() {}
+function renderLabAssetSelects() {}
+function renderMarketLabBulletinBoard() {}
 
 function init() {
   showSkeleton();
