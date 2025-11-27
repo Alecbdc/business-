@@ -286,6 +286,50 @@ export const marketScenarioLevels = [
             atDay: 32
           }
         ]
+      },
+      {
+        id: 'meme-lite',
+        title: 'Meme Mania Lite',
+        teaser: 'Retail chatters squeeze mid-caps while mega-caps drift.',
+        difficulty: 1,
+        durationDays: 45,
+        bias: 0.0015,
+        volatility: 0.09,
+        starTargets: [0.15, 0.25, 0.4],
+        xpRewards: [100, 200, 300],
+        description:
+          'Echoes the 2021 meme surges: pockets of euphoria in select tickers while the index grinds sideways.',
+        tips: [
+          'Take profits on parabolic moves and mind position sizes on high-beta names.',
+          'Diversify across sectors so squeezes do not dominate your P&L.',
+          'Keep cash ready for volatility spikes around social-media headlines.'
+        ],
+        news: [
+          {
+            id: 'forum-buzz',
+            title: 'Forums target EV newcomers for next squeeze',
+            summary: 'Retail order flow piles into RIVN and PLTR as chatter peaks.',
+            drift: 0.14,
+            assets: ['RIVN', 'PLTR', 'ABNB'],
+            atDay: 6
+          },
+          {
+            id: 'broker-limits',
+            title: 'Some brokers tighten risk limits on speculative names',
+            summary: 'Position caps cool momentum; staples catch a bid.',
+            drift: -0.07,
+            assets: ['RIVN', 'PLTR', 'WMT', 'KO'],
+            atDay: 18
+          },
+          {
+            id: 'earnings-reality',
+            title: 'Earnings season tempers hype; quality outperforms',
+            summary: 'Mega-caps regain leadership as meme tickers fade.',
+            drift: 0.05,
+            assets: ['AAPL', 'MSFT', 'AMZN'],
+            atDay: 32
+          }
+        ]
       }
     ]
   },
@@ -337,6 +381,50 @@ export const marketScenarioLevels = [
             atDay: 38
           }
         ]
+      },
+      {
+        id: 'supply-snapback',
+        title: 'Supply Snarl Snapback',
+        teaser: 'Logistics ease while input prices wobble; autos whip around.',
+        difficulty: 2,
+        durationDays: 55,
+        bias: -0.0015,
+        volatility: 0.09,
+        starTargets: [0.15, 0.25, 0.4],
+        xpRewards: [100, 200, 300],
+        description:
+          'Modeled after the 2021–2022 supply-chain swings where shipping, autos, and industrials lurched on headlines.',
+        tips: [
+          'Watch rotation between importers and exporters as freight costs change.',
+          'Scale into winners gradually; avoid chasing vertical moves after headlines.',
+          'Pair trades across sectors to reduce single-factor shocks.'
+        ],
+        news: [
+          {
+            id: 'port-relief',
+            title: 'Ports clear backlog; freight rates fall sharply',
+            summary: 'Logistics names ease while autos cheer better supply.',
+            drift: 0.09,
+            assets: ['UPS', 'TM', 'HMC'],
+            atDay: 7
+          },
+          {
+            id: 'input-shock',
+            title: 'Commodity spike reignites cost worries for manufacturers',
+            summary: 'Industrial margins compress; defensives hold up.',
+            drift: -0.11,
+            assets: ['CAT', 'HON', 'PG'],
+            atDay: 19
+          },
+          {
+            id: 'rebate-push',
+            title: 'Governments float auto rebates to stimulate demand',
+            summary: 'Select OEMs jump as incentives return; suppliers lag.',
+            drift: 0.08,
+            assets: ['TSLA', 'GM', 'F'],
+            atDay: 35
+          }
+        ]
       }
     ]
   },
@@ -386,6 +474,50 @@ export const marketScenarioLevels = [
             drift: -0.18,
             assets: ['AMD', 'SHOP', 'RIVN', 'ALT_BASKET'],
             atDay: 41
+          }
+        ]
+      },
+      {
+        id: 'tantrum-redux',
+        title: 'Taper Tantrum Redux',
+        teaser: 'Bond yields spike; growth re-prices while banks cheer.',
+        difficulty: 3,
+        durationDays: 60,
+        bias: -0.0035,
+        volatility: 0.12,
+        starTargets: [0.15, 0.25, 0.4],
+        xpRewards: [100, 200, 300],
+        description:
+          'Channels 2013 and 2022 taper scares: sudden yield jumps, tech volatility, and financials resilience.',
+        tips: [
+          'Trim high-duration names on rate spikes; rotate to cash-rich winners.',
+          'Expect sharp squeezes—size positions for reversals.',
+          'Consider staggered entries to avoid catching intraday knives.'
+        ],
+        news: [
+          {
+            id: 'yield-surge',
+            title: '10-year yield rips higher on hawkish minutes',
+            summary: 'High-duration tech tumbles; banks catch a bid.',
+            drift: -0.14,
+            assets: ['NVDA', 'AAPL', 'MSFT', 'JPM'],
+            atDay: 9
+          },
+          {
+            id: 'value-bid',
+            title: 'Value rally as dividend names attract inflows',
+            summary: 'Staples and defensives firm while momentum cools.',
+            drift: 0.07,
+            assets: ['KO', 'PEP', 'PG'],
+            atDay: 21
+          },
+          {
+            id: 'growth-relief',
+            title: 'Inflation cools; growth stocks stage relief rally',
+            summary: 'Investors tiptoe back into software and semis.',
+            drift: 0.1,
+            assets: ['MSFT', 'NVDA', 'AMD'],
+            atDay: 44
           }
         ]
       }
