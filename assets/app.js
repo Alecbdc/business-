@@ -41,6 +41,9 @@ const {
   leaderboardPeers
 } = data;
 
+const pendingScenarioKey = 'aetherPendingScenarioStart';
+const suppressScenarioAutoStartKey = 'aetherSuppressScenarioAutoStart';
+
 const historyLimit = 1200;
 const assetSymbols = Object.keys(initialPrices);
 const totalQuizQuestions = quizTopics.reduce((acc, topic) => acc + topic.questions.length, 0);
@@ -1359,9 +1362,11 @@ function openScenarioModal(levelId, scenarioId) {
   $('#scenario-begin')?.setAttribute('data-scenario', scenario.id);
 }
 
-function beginScenario(levelId, scenarioId) {
+function startScenarioSession(levelId, scenarioId) {
   const { level, scenario } = findScenario(levelId, scenarioId);
   if (!scenario) return;
+  state.currentView = 'sandbox';
+  applyView(state, 'sandbox');
   state.marketScenario = {
     ...state.marketScenario,
     active: true,
@@ -1392,6 +1397,37 @@ function beginScenario(levelId, scenarioId) {
   startScenarioLoop();
   const modal = $('#scenario-modal');
   if (modal) modal.classList.add('hidden');
+}
+
+function beginScenario(levelId, scenarioId) {
+  const { level, scenario } = findScenario(levelId, scenarioId);
+  if (!scenario) return;
+  const payload = { levelId: level.id, scenarioId: scenario.id, ts: Date.now() };
+  try {
+    localStorage.setItem(pendingScenarioKey, JSON.stringify(payload));
+    sessionStorage.setItem(suppressScenarioAutoStartKey, 'true');
+  } catch (err) {
+    console.warn('Unable to cache scenario launch', err);
+  }
+  const modal = $('#scenario-modal');
+  if (modal) modal.classList.add('hidden');
+  const targetUrl = `${window.location.origin}${window.location.pathname}`;
+  window.open(targetUrl, '_blank', 'noopener');
+}
+
+function tryLaunchPendingScenario() {
+  if (sessionStorage.getItem(suppressScenarioAutoStartKey) === 'true') return;
+  const raw = localStorage.getItem(pendingScenarioKey);
+  if (!raw) return;
+  try {
+    const payload = JSON.parse(raw);
+    localStorage.removeItem(pendingScenarioKey);
+    if (payload?.levelId && payload?.scenarioId) {
+      startScenarioSession(payload.levelId, payload.scenarioId);
+    }
+  } catch (err) {
+    console.warn('Failed to parse pending scenario', err);
+  }
 }
 
 function renderScenarioHud() {
@@ -2582,6 +2618,7 @@ function init() {
     handleDemoEntry(true);
   }
   resetHistorySnapshots();
+  tryLaunchPendingScenario();
   renderCourses();
   renderCurriculumSummary();
   renderLessonDetail();
