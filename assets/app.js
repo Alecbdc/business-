@@ -2305,12 +2305,6 @@ function initAuthListener() {
   });
 }
 
-// Market Lab UI rendering and bulletin hooks are disabled after rolling back step 4 wiring.
-function renderMarketLabUI() {}
-function renderMarketLabCharts() {}
-function renderLabAssetSelects() {}
-function renderMarketLabBulletinBoard() {}
-
 function init() {
   showSkeleton();
   setProfileName('Guest');
