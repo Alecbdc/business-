@@ -265,4 +265,4 @@ function calculatePortfolioValue() {
   );
 }
 
-export { filterSeriesByTimeframe, renderLineChart };
+export { filterSeriesByTimeframe, renderLineChart, timeframeOptions };
