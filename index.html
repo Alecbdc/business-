@@ -471,6 +471,10 @@
                       <button data-sandbox-tab="portfolio" class="nav-link">Portfolio</button>
                       <button data-sandbox-tab="trade" class="nav-link">Trade</button>
                     </div>
+                    <div class="flex gap-2">
+                      <button data-market-segment="stocks" class="tab-button">Stocks</button>
+                      <button data-market-segment="crypto" class="tab-button">Crypto</button>
+                    </div>
                   </div>
                 </div>
 
@@ -777,20 +781,24 @@
                 </div>
               </div>
 
-              <div id="sandbox-lab-container" class="space-y-8 hidden">
-                <div class="card-glass rounded-3xl p-6 flex flex-wrap items-center justify-between gap-3">
-                  <div class="space-y-1">
-                    <p class="text-sm text-slate-400">Market labs</p>
-                    <h3 class="text-xl font-semibold">Personal portfolio & trading</h3>
-                    <p class="text-xs text-slate-500">Run your own accelerated feed with unique bulletins.</p>
-                  </div>
-                  <div class="flex flex-col sm:items-end gap-3 w-full sm:w-auto">
-                    <div class="flex gap-2 self-start sm:self-end">
-                      <button data-lab-tab="portfolio" class="nav-link">Portfolio</button>
-                      <button data-lab-tab="trade" class="nav-link">Trade</button>
+                <div id="sandbox-lab-container" class="space-y-8 hidden">
+                  <div class="card-glass rounded-3xl p-6 flex flex-wrap items-center justify-between gap-3">
+                    <div class="space-y-1">
+                      <p class="text-sm text-slate-400">Market labs</p>
+                      <h3 class="text-xl font-semibold">Personal portfolio & trading</h3>
+                      <p class="text-xs text-slate-500">Run your own accelerated feed with unique bulletins.</p>
                     </div>
-                    <div class="flex flex-wrap gap-2">
-                      <button class="lab-speed-btn px-3 py-1 rounded-full border border-white/15 text-xs" data-speed="1">1x</button>
+                    <div class="flex flex-col sm:items-end gap-3 w-full sm:w-auto">
+                      <div class="flex gap-2 self-start sm:self-end">
+                        <button data-lab-tab="portfolio" class="nav-link">Portfolio</button>
+                        <button data-lab-tab="trade" class="nav-link">Trade</button>
+                      </div>
+                      <div class="flex gap-2 self-start sm:self-end">
+                        <button data-lab-segment="stocks" class="tab-button">Stocks</button>
+                        <button data-lab-segment="crypto" class="tab-button">Crypto</button>
+                      </div>
+                      <div class="flex flex-wrap gap-2">
+                        <button class="lab-speed-btn px-3 py-1 rounded-full border border-white/15 text-xs" data-speed="1">1x</button>
                       <button class="lab-speed-btn px-3 py-1 rounded-full border border-white/15 text-xs" data-speed="2">2x</button>
                       <button class="lab-speed-btn px-3 py-1 rounded-full border border-white/15 text-xs" data-speed="3">3x</button>
                       <button class="lab-speed-btn px-3 py-1 rounded-full border border-white/15 text-xs" data-speed="5">5x</button>

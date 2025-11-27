@@ -34,12 +34,13 @@ const {
   courses,
   defaultSandboxState,
   initialPrices,
+  assetSegments,
+  assetFundamentals,
   quizTopics,
   sandboxBulletins,
   marketLabBulletins,
   marketScenarioLevels,
-  leaderboardPeers,
-  stockFundamentals
+  leaderboardPeers
 } = data;
 
 const pendingScenarioKey = 'aetherPendingScenarioStart';
@@ -56,6 +57,8 @@ const bulletinRefreshMs = featureToggles.newsRefreshMs ?? 1000 * 60 * 60 * 2;
 const priceTickMs = featureToggles.sandboxPriceUpdateMs ?? 8000;
 const maxBulletins = 12;
 let activeTickMs = priceTickMs;
+
+const segmentSymbols = (segment) => assetSegments[segment] ?? assetSymbols;
 let priceLoopId = null;
 let marketLabLoopId = null;
 let scenarioLoopId = null;
@@ -1036,6 +1039,26 @@ function setSandboxTab(tab) {
   if (tradeSection) tradeSection.classList.toggle('hidden', tab !== 'trade');
 }
 
+function setLiveMarketSegment(segment) {
+  state.liveMarketSegment = segment === 'crypto' ? 'crypto' : 'stocks';
+  document.querySelectorAll('[data-market-segment]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.marketSegment === state.liveMarketSegment);
+  });
+  renderAssetSelects();
+  renderSandbox();
+  requestAnimationFrame(renderSandboxCharts);
+}
+
+function setLabMarketSegment(segment) {
+  state.labMarketSegment = segment === 'crypto' ? 'crypto' : 'stocks';
+  document.querySelectorAll('[data-lab-segment]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.labSegment === state.labMarketSegment);
+  });
+  renderLabAssetSelects();
+  renderMarketLab();
+  requestAnimationFrame(renderMarketLabCharts);
+}
+
 function updateCurriculumSidebarVisibility(view) {
   const subnav = $('#curriculum-subnav');
   if (subnav) {
@@ -1513,14 +1536,22 @@ function renderScenarioHud() {
 function renderSandbox() {
   const isScenario = state.sandboxMode === 'scenario';
   const marketState = isScenario ? state.marketScenario : state.sandbox;
-  const prices = isScenario ? state.marketScenario.prices : state.prices;
+  const basePrices = isScenario ? state.marketScenario.prices : state.prices;
   const holdings = marketState.holdings ?? {};
+  const segment = isScenario
+    ? 'stocks'
+    : state.sandboxMode === 'lab'
+    ? state.labMarketSegment
+    : state.liveMarketSegment;
+  const allowed = new Set(segmentSymbols(segment));
+  const prices = Object.fromEntries(Object.entries(basePrices).filter(([symbol]) => allowed.has(symbol)));
+  const filteredHoldings = Object.fromEntries(Object.entries(holdings).filter(([symbol]) => allowed.has(symbol)));
   const portfolioValue = isScenario ? calculateScenarioPortfolioValue() : calculatePortfolioValue();
   $('#sandbox-balance').textContent = formatCurrency(marketState.balance);
   $('#sandbox-portfolio-value').textContent = formatCurrency(portfolioValue);
   const holdingsContainer = $('#sandbox-holdings');
   const historyContainer = $('#sandbox-history');
-  const holdingsEntries = Object.entries(holdings)
+  const holdingsEntries = Object.entries(filteredHoldings)
     .filter(([, units]) => units > 0)
     .map(([symbol, units]) => {
       const price = prices[symbol];
@@ -1566,11 +1597,12 @@ function renderSandbox() {
     historyMarkup || '<p class="text-slate-400 text-sm">No trades yet. Your fills will appear here.</p>';
 
   renderPortfolioInsights();
+  const allowedSymbols = [...allowed];
   const activeAsset = prices[isScenario ? marketState.selectedAsset : state.activeAsset] != null
     ? isScenario
       ? marketState.selectedAsset
       : state.activeAsset
-    : assetSymbols[0];
+    : allowedSymbols[0];
   if (isScenario) {
     state.marketScenario.selectedAsset = activeAsset;
   } else {
@@ -1653,7 +1685,7 @@ function renderSandbox() {
 function renderStockDetails(symbol) {
   const nameEl = $('#stock-profile-name');
   if (!nameEl) return; // cards not present in current view
-  const detail = stockFundamentals[symbol];
+  const detail = assetFundamentals[symbol];
   if (!detail) {
     setText(nameEl, `${symbol}`);
     setText($('#stock-profile-meta'), '');
@@ -1793,12 +1825,16 @@ function renderMarketLab() {
   setText($('#lab-balance'), formatCurrency(state.marketLab.balance));
   setText($('#lab-portfolio-value'), formatCurrency(portfolioValue));
 
+  const allowed = new Set(segmentSymbols(state.labMarketSegment));
+  const prices = Object.fromEntries(Object.entries(state.marketLab.prices).filter(([symbol]) => allowed.has(symbol)));
+  const holdings = Object.fromEntries(Object.entries(state.marketLab.holdings).filter(([symbol]) => allowed.has(symbol)));
+
   const holdingsContainer = $('#lab-holdings');
   if (holdingsContainer) {
-    const holdingsEntries = Object.entries(state.marketLab.holdings)
+    const holdingsEntries = Object.entries(holdings)
       .filter(([, units]) => units > 0)
       .map(([symbol, units]) => {
-        const price = state.marketLab.prices[symbol];
+        const price = prices[symbol];
         const value = units * price;
         return `
           <div class="flex items-center justify-between border border-white/5 rounded-2xl px-3 py-2">
@@ -1845,12 +1881,13 @@ function renderMarketLab() {
 
   renderMarketLabInsights();
 
-  const activeAsset = state.marketLab.prices[state.marketLab.selectedAsset] != null
+  const allowedSymbols = [...allowed];
+  const activeAsset = prices[state.marketLab.selectedAsset] != null
     ? state.marketLab.selectedAsset
-    : assetSymbols[0];
+    : allowedSymbols[0];
   state.marketLab.selectedAsset = activeAsset;
   const activeHistory = state.marketLab.priceHistory[activeAsset] ?? [];
-  const activePrice = state.marketLab.prices[activeAsset];
+  const activePrice = prices[activeAsset];
   const activePrev = activeHistory.length > 1 ? activeHistory[activeHistory.length - 2]?.value : activePrice;
   const activeChange = activePrev ? ((activePrice - activePrev) / activePrev) * 100 : 0;
   const activeUnits = state.marketLab.holdings[activeAsset] ?? 0;
@@ -2362,7 +2399,8 @@ function recordTrade(entry) {
 }
 
 function renderAssetSelects() {
-  const options = assetSymbols.map((symbol) => `<option value="${symbol}">${symbol}</option>`).join('');
+  const symbols = segmentSymbols(state.liveMarketSegment);
+  const options = symbols.map((symbol) => `<option value="${symbol}">${symbol}</option>`).join('');
   ['buy-asset', 'sell-asset'].forEach((id) => {
     const select = $(`#${id}`);
     if (select) {
@@ -2372,7 +2410,8 @@ function renderAssetSelects() {
 }
 
 function renderLabAssetSelects() {
-  const options = assetSymbols.map((symbol) => `<option value="${symbol}">${symbol}</option>`).join('');
+  const symbols = segmentSymbols(state.labMarketSegment);
+  const options = symbols.map((symbol) => `<option value="${symbol}">${symbol}</option>`).join('');
   ['lab-buy-asset', 'lab-sell-asset'].forEach((id) => {
     const select = $(`#${id}`);
     if (select) {
@@ -2636,6 +2675,12 @@ function bindNavigation() {
   document.querySelectorAll('[data-sandbox-tab]').forEach((btn) => {
     btn.addEventListener('click', () => setSandboxTab(btn.dataset.sandboxTab));
   });
+  document.querySelectorAll('[data-market-segment]').forEach((btn) => {
+    btn.addEventListener('click', () => setLiveMarketSegment(btn.dataset.marketSegment));
+  });
+  document.querySelectorAll('[data-lab-segment]').forEach((btn) => {
+    btn.addEventListener('click', () => setLabMarketSegment(btn.dataset.labSegment));
+  });
 
   document.querySelectorAll('[data-lab-tab]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -2807,6 +2852,8 @@ function init() {
   renderQuiz();
   renderQuizThresholdHint();
   setCurriculumTab(state.curriculumTab);
+  setLiveMarketSegment(state.liveMarketSegment || 'stocks');
+  setLabMarketSegment(state.labMarketSegment || 'stocks');
   renderAssetSelects();
   renderLabAssetSelects();
   renderScenarioSelection();

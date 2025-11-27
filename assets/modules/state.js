@@ -149,8 +149,10 @@ export const state = {
   },
   chartZoom: { portfolio: 1, asset: 1, labPortfolio: 1, labAsset: 1 },
   activeAsset: assetSymbols[0] ?? 'AAPL',
+  liveMarketSegment: 'stocks',
   sandboxMode: 'live',
   sandboxTab: 'portfolio',
+  labMarketSegment: 'stocks',
   marketScenario: {
     active: false,
     levelId: '',
@@ -195,6 +197,8 @@ export function hydrateStateFromCache() {
     state.ui.labShowAllAssets = !!state.ui.labShowAllAssets;
     state.ui.epsPeriod = parsed.ui?.epsPeriod ?? state.ui.epsPeriod ?? 'annual';
     state.ui.finPeriod = parsed.ui?.finPeriod ?? state.ui.finPeriod ?? 'annual';
+    state.liveMarketSegment = parsed.liveMarketSegment ?? state.liveMarketSegment ?? 'stocks';
+    state.labMarketSegment = parsed.labMarketSegment ?? state.labMarketSegment ?? 'stocks';
     state.selectedQuizTopicId = parsed.selectedQuizTopicId ?? state.selectedQuizTopicId;
     state.sandbox = parsed.sandbox ?? { ...deepClone(defaultSandboxState) };
     state.sandbox.balance = Number(state.sandbox.balance ?? defaultSandboxState.balance);
@@ -316,6 +320,8 @@ export function persistStateToCache() {
       quizScores: state.quizScores,
       topicScores: state.topicScores,
       quizLog: (state.quizLog ?? []).slice(-quizLogLimit),
+      liveMarketSegment: state.liveMarketSegment,
+      labMarketSegment: state.labMarketSegment,
       sandbox: compactSandbox,
       marketLab: compactLab,
       marketScenario: compactScenario,
