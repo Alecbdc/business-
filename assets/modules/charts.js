@@ -121,7 +121,11 @@ function bindTimeframeControls(containerId, chartKey) {
     btn.addEventListener('click', () => {
       state.chartTimeframes[chartKey] = btn.dataset.timeframe;
       updateTimeframeSelection(chartKey);
-      renderSandboxCharts();
+      if (chartKey.startsWith('lab')) {
+        renderMarketLabCharts();
+      } else {
+        renderSandboxCharts();
+      }
     });
   });
   updateTimeframeSelection(chartKey);
@@ -133,7 +137,11 @@ function bindZoomControls(containerId, chartKey) {
   const adjustZoom = (delta) => {
     const next = Math.min(6, Math.max(1, state.chartZoom[chartKey] + delta));
     state.chartZoom[chartKey] = next;
-    renderSandboxCharts();
+    if (chartKey.startsWith('lab')) {
+      renderMarketLabCharts();
+    } else {
+      renderSandboxCharts();
+    }
   };
   container.querySelectorAll('[data-zoom]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -142,7 +150,11 @@ function bindZoomControls(containerId, chartKey) {
       if (mode === 'out') adjustZoom(-0.5);
       if (mode === 'reset') {
         state.chartZoom[chartKey] = 1;
-        renderSandboxCharts();
+        if (chartKey.startsWith('lab')) {
+          renderMarketLabCharts();
+        } else {
+          renderSandboxCharts();
+        }
       }
     });
   });
@@ -151,8 +163,12 @@ function bindZoomControls(containerId, chartKey) {
 export function initChartControls() {
   bindTimeframeControls('portfolio-timeframe-controls', 'portfolio');
   bindTimeframeControls('asset-timeframe-controls', 'asset');
+  bindTimeframeControls('lab-portfolio-timeframe-controls', 'labPortfolio');
+  bindTimeframeControls('lab-asset-timeframe-controls', 'labAsset');
   bindZoomControls('portfolio-zoom-controls', 'portfolio');
   bindZoomControls('asset-zoom-controls', 'asset');
+  bindZoomControls('lab-portfolio-zoom-controls', 'labPortfolio');
+  bindZoomControls('lab-asset-zoom-controls', 'labAsset');
 }
 
 function getPortfolioChartSeries() {
@@ -171,6 +187,23 @@ export function renderSandboxCharts() {
   const assetSeries = filterSeriesByTimeframe(state.priceHistory[state.activeAsset] ?? [], state.chartTimeframes.asset);
   renderLineChart($('#asset-chart'), assetSeries, '#60a5fa', state.chartZoom.asset, $('#asset-inspect'));
   bindChartHover($('#asset-chart'), assetSeries, $('#asset-inspect'));
+}
+
+function getLabPortfolioSeries() {
+  return filterSeriesByTimeframe(state.marketLab.portfolioHistory ?? [], state.chartTimeframes.labPortfolio);
+}
+
+export function renderMarketLabCharts() {
+  const series = getLabPortfolioSeries();
+  renderLineChart($('#lab-portfolio-chart'), series, '#a5b4fc', state.chartZoom.labPortfolio, $('#lab-portfolio-inspect'));
+  bindChartHover($('#lab-portfolio-chart'), series, $('#lab-portfolio-inspect'));
+
+  const assetSeries = filterSeriesByTimeframe(
+    state.marketLab.priceHistory?.[state.marketLab.selectedAsset] ?? [],
+    state.chartTimeframes.labAsset
+  );
+  renderLineChart($('#lab-asset-chart'), assetSeries, '#60a5fa', state.chartZoom.labAsset, $('#lab-asset-inspect'));
+  bindChartHover($('#lab-asset-chart'), assetSeries, $('#lab-asset-inspect'));
 }
 
 export function renderReplayView() {

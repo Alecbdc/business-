@@ -235,6 +235,7 @@
               <button class="nav-link" data-view="sandbox" id="nav-sandbox">Sandbox</button>
               <div id="sandbox-subnav" class="hidden pl-3 space-y-2">
                 <button class="nav-link text-sm" data-sandbox-mode="live">Live market</button>
+                <button class="nav-link text-sm" data-sandbox-mode="lab">Market labs</button>
                 <button class="nav-link text-sm" data-sandbox-mode="replay">Market replay</button>
               </div>
             </div>
@@ -631,6 +632,177 @@
                       <span id="bulletin-refresh-label" class="badge">Auto-updates</span>
                     </div>
                     <div id="sandbox-bulletin" class="space-y-3 text-sm"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="sandbox-lab-container" class="space-y-8 hidden">
+                <div class="card-glass rounded-3xl p-6 flex flex-wrap items-center justify-between gap-3">
+                  <div class="space-y-1">
+                    <p class="text-sm text-slate-400">Market labs</p>
+                    <h3 class="text-xl font-semibold">Personal portfolio & trading</h3>
+                    <p class="text-xs text-slate-500">Run your own accelerated feed with unique bulletins.</p>
+                  </div>
+                  <div class="flex flex-col sm:items-end gap-3 w-full sm:w-auto">
+                    <div class="flex gap-2 self-start sm:self-end">
+                      <button data-lab-tab="portfolio" class="nav-link">Portfolio</button>
+                      <button data-lab-tab="trade" class="nav-link">Trade</button>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                      <button class="lab-speed-btn px-3 py-1 rounded-full border border-white/15 text-xs" data-speed="1">1x</button>
+                      <button class="lab-speed-btn px-3 py-1 rounded-full border border-white/15 text-xs" data-speed="2">2x</button>
+                      <button class="lab-speed-btn px-3 py-1 rounded-full border border-white/15 text-xs" data-speed="3">3x</button>
+                      <button class="lab-speed-btn px-3 py-1 rounded-full border border-white/15 text-xs" data-speed="5">5x</button>
+                      <button class="lab-speed-btn px-3 py-1 rounded-full border border-white/15 text-xs" data-speed="10">10x</button>
+                    </div>
+                    <div class="flex gap-2">
+                      <button id="lab-start" class="px-4 py-2 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-950 font-semibold">Start</button>
+                      <button id="lab-pause" class="px-4 py-2 rounded-2xl border border-white/20">Pause</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="sandbox-lab-portfolio" class="grid gap-6">
+                  <div class="card-glass rounded-3xl p-8 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div>
+                        <p class="text-sm text-slate-400">Portfolio value</p>
+                        <p id="lab-portfolio-value" class="text-3xl font-semibold">€0</p>
+                      </div>
+                      <div class="text-sm text-slate-400 text-right">
+                        <p>Cash balance</p>
+                        <p id="lab-balance" class="text-xl text-emerald-300 font-semibold">€0</p>
+                      </div>
+                    </div>
+                    <div>
+                      <p class="text-sm text-slate-400">Total performance</p>
+                      <div class="flex flex-col gap-2 mt-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-400">
+                          <div id="lab-portfolio-timeframe-controls" class="flex flex-wrap gap-2"></div>
+                          <div id="lab-portfolio-zoom-controls" class="flex items-center gap-2">
+                            <button data-zoom="out" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">−</button>
+                            <button data-zoom="reset" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">Reset</button>
+                            <button data-zoom="in" class="px-3 py-1 rounded-full border border-white/15 hover-border-white/40">+</button>
+                          </div>
+                        </div>
+                        <canvas id="lab-portfolio-chart" class="w-full h-72 md:h-[28rem]"></canvas>
+                        <p id="lab-portfolio-inspect" class="text-xs text-slate-300"></p>
+                      </div>
+                    </div>
+                    <div>
+                      <p class="text-sm text-slate-400 mb-2">Holdings</p>
+                      <div id="lab-holdings" class="space-y-3 text-sm"></div>
+                    </div>
+                    <div class="card-glass rounded-3xl p-6 space-y-3" id="lab-portfolio-insights">
+                      <div class="flex items-center justify-between">
+                        <p class="text-sm text-slate-400">Portfolio insights</p>
+                      </div>
+                      <div class="space-y-2 text-sm text-slate-300">
+                        <div class="flex items-center justify-between">
+                          <span>Risk profile</span>
+                          <span id="lab-insight-risk">Moderate</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                          <span>Concentration</span>
+                          <span id="lab-insight-concentration">0%</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                          <span>Volatility</span>
+                          <span id="lab-insight-volatility">Low</span>
+                        </div>
+                      </div>
+                      <p class="text-xs text-slate-400">Insights are based on your accelerated personal sim.</p>
+                    </div>
+                    <div class="card-glass rounded-3xl p-6 space-y-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <p class="text-sm text-slate-400">Trade log</p>
+                          <p class="text-xs text-slate-500">Personal simulated fills</p>
+                        </div>
+                        <span class="badge bg-white/10 text-slate-100">Personal feed</span>
+                      </div>
+                      <div id="lab-history" class="max-h-64 overflow-y-auto space-y-2 text-sm"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="sandbox-lab-trade" class="space-y-6 hidden">
+                  <div class="card-glass rounded-3xl p-8 space-y-6">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-sm text-slate-400">Focus asset</p>
+                        <h3 id="lab-active-asset-label" class="text-2xl font-semibold">BTC</h3>
+                      </div>
+                      <span id="lab-active-asset-change" class="badge">0.00%</span>
+                    </div>
+                    <p class="text-sm text-slate-400">
+                      Personal price:
+                      <span id="lab-active-asset-price" class="font-semibold text-white">€0.00</span>
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p class="text-xs text-slate-400">Units held</p>
+                        <p id="lab-active-asset-units" class="text-lg font-semibold">0.0000</p>
+                      </div>
+                      <div>
+                        <p class="text-xs text-slate-400">Portfolio share</p>
+                        <p id="lab-active-asset-share" class="text-lg font-semibold">0%</p>
+                      </div>
+                    </div>
+                    <div>
+                      <p class="text-sm text-slate-400">Asset trend</p>
+                      <div class="flex flex-col gap-2 mt-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-400">
+                          <div id="lab-asset-timeframe-controls" class="flex flex-wrap gap-2"></div>
+                          <div id="lab-asset-zoom-controls" class="flex items-center gap-2">
+                            <button data-zoom="out" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">−</button>
+                            <button data-zoom="reset" class="px-3 py-1 rounded-full border border-white/15 hover:border-white/40">Reset</button>
+                            <button data-zoom="in" class="px-3 py-1 rounded-full border border-white/15 hover-border-white/40">+</button>
+                          </div>
+                        </div>
+                        <canvas id="lab-asset-chart" class="w-full h-72 md:h-[28rem]"></canvas>
+                        <p id="lab-asset-inspect" class="text-xs text-slate-300"></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card-glass rounded-3xl p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-sm text-slate-400">Quick picks</p>
+                        <h3 class="text-xl font-semibold">Tap an asset</h3>
+                      </div>
+                      <button id="lab-asset-strip-toggle" type="button" class="text-sm px-3 py-1 rounded-full border border-white/15 hover:border-white/40">See all</button>
+                    </div>
+                    <div id="lab-asset-strip" class="flex gap-3 overflow-x-auto"></div>
+                  </div>
+
+                  <div class="card-glass rounded-3xl p-6 space-y-4">
+                    <div class="grid gap-6 md:grid-cols-2">
+                      <form id="lab-buy-form" class="space-y-3">
+                        <p class="text-sm text-slate-400">Buy crypto</p>
+                        <select id="lab-buy-asset" class="w-full rounded-2xl border border-white/10 px-4 py-2"></select>
+                        <input id="lab-buy-amount" type="number" min="10" step="10" placeholder="Amount in €" class="w-full rounded-2xl border border-white/10 px-4 py-2" required />
+                        <button type="submit" class="w-full py-2 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-950 font-semibold">Buy</button>
+                      </form>
+                      <form id="lab-sell-form" class="space-y-3">
+                        <p class="text-sm text-slate-400">Sell crypto</p>
+                        <select id="lab-sell-asset" class="w-full rounded-2xl border border-white/10 px-4 py-2"></select>
+                        <input id="lab-sell-amount" type="number" min="0.0001" step="0.0001" placeholder="Units to sell" class="w-full rounded-2xl border border-white/10 px-4 py-2" required />
+                        <button type="submit" class="w-full py-2 rounded-2xl bg-rose-500/80 hover:bg-rose-400 text-slate-950 font-semibold">Sell</button>
+                      </form>
+                    </div>
+                  </div>
+
+                  <div class="card-glass rounded-3xl p-8 space-y-4">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-sm text-slate-400">Signals</p>
+                        <h3 class="text-lg font-semibold">Lab news board</h3>
+                      </div>
+                      <span id="lab-bulletin-refresh-label" class="badge">Auto-updates</span>
+                    </div>
+                    <div id="lab-bulletin" class="space-y-3 text-sm"></div>
                   </div>
                 </div>
               </div>

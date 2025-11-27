@@ -140,8 +140,13 @@ export const state = {
   prices: { ...latestSeededPrices },
   priceHistory: seededPriceHistory,
   portfolioHistory: seededPortfolioHistory,
-  chartTimeframes: { portfolio: defaultTimeframe, asset: defaultTimeframe },
-  chartZoom: { portfolio: 1, asset: 1 },
+  chartTimeframes: {
+    portfolio: defaultTimeframe,
+    asset: defaultTimeframe,
+    labPortfolio: defaultTimeframe,
+    labAsset: defaultTimeframe
+  },
+  chartZoom: { portfolio: 1, asset: 1, labPortfolio: 1, labAsset: 1 },
   activeAsset: assetSymbols[0] ?? 'BTC',
   sandboxMode: 'live',
   sandboxTab: 'portfolio',

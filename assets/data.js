@@ -744,7 +744,72 @@ export const sandboxBulletins = [
   }
 ];
 
-export const marketLabBulletins = [];
+export const marketLabBulletins = [
+  {
+    id: 'lab-halving-drill',
+    title: 'Personal halving drill sends miners scrambling',
+    summary: 'Your simulated miners rehearse a halving and hashpower jitters ripple across BTC and WBTC.',
+    sentiment: 'bullish',
+    assets: ['BTC', 'WBTC'],
+    impact: 'Hash supply squeeze often lifts majors.',
+    projection: 'Previous drills in the lab boosted BTC 8–15% over a few accelerated sessions.',
+    articleBody: [
+      'In this solo sandbox scenario, the make-believe miners on “Bitgrind” stage a halving rehearsal.',
+      'Hashpower dips, difficulty reacts, and speculators on the fictional desk “Giga Sachs Jr.” lean into majors.',
+      'A tongue-in-cheek columnist from The Wall Street Jest claims the rehearsal “always” sparks fear of missing out.',
+      'Historically, tightening supply during lab tests has nudged BTC and WBTC higher inside your accelerated timeline.'
+    ],
+    drift: 0.012
+  },
+  {
+    id: 'lab-reg-crunch',
+    title: 'Local regulator hints at sudden fee cap',
+    summary: 'The imaginary “Bureau of Benevolent Fees” floats caps on exchange charges, rattling alt liquidity.',
+    sentiment: 'bearish',
+    assets: ['ALT_BASKET', 'SOL', 'ADA', 'MNT'],
+    impact: 'Tighter fees can thin liquidity on frontier chains.',
+    projection: 'In past lab drills, similar chatter clipped high-beta alts 6–12% before stabilising.',
+    articleBody: [
+      'Reporters at The Economost quote Director Janet “No-Fee” Yellow, who prefers cheap swaps over volatility.',
+      'Desk jokester Tonald Drump says the cap might “flatten the meme curve,” at least in your personal sim.',
+      'Liquidity-makers on fantasy venue “Spreadly” widen quotes, sending some alt pairs wobbling.',
+      'When the rumour fades, spreads usually normalise, but the first shock often dents frontier assets.'
+    ],
+    drift: -0.01
+  },
+  {
+    id: 'lab-stable-surge',
+    title: 'Stable surge triggers rotation whispers',
+    summary: 'USDC and DAI issuers in the lab mint aggressively, hinting at risk-on rotation.',
+    sentiment: 'bullish',
+    assets: ['USDC', 'DAI', 'PYUSD', 'ETH', 'BTC'],
+    impact: 'Fresh dry powder frequently precedes majors legging up.',
+    projection: 'Backtests in your lab show 5–9% bumps for BTC/ETH following big synthetic mint waves.',
+    articleBody: [
+      'Fictional treasurer Vladimir Protein brags about “printing responsibly” while eyeing the majors.',
+      'Analysts at “Decimal Research” note that sidelined cash rarely stays parked when charts start to slope up.',
+      'The Wall Street Jest reminds readers this lab is for practice only—but patterns still rhyme.',
+      'If momentum persists, majors usually lead before spillover to alts in the accelerated tape.'
+    ],
+    drift: 0.007
+  },
+  {
+    id: 'lab-hardware-glitch',
+    title: 'Validator firmware glitch sparks brief chaos',
+    summary: 'A buggy update on the fictional “TurboNet” chain slows blocks and spooks infra-sensitive tokens.',
+    sentiment: 'bearish',
+    assets: ['AVAX', 'NEAR', 'SUI', 'ATOM'],
+    impact: 'Reliability scares often pressure high-throughput names.',
+    projection: 'Earlier lab faults shaved 7–10% off throughput tokens before a patch calmed nerves.',
+    articleBody: [
+      'Engineers at “Patchsmith Labs” rush a hotfix while validators rollback.',
+      'The Economost’s satire desk compares it to someone “unplugging the router” mid-rally.',
+      'Spreads widen across AVAX, NEAR, SUI, and ATOM until confidence returns.',
+      'Once stability resumes, bargain hunters sometimes fade the move inside the accelerated sim.'
+    ],
+    drift: -0.011
+  }
+];
 
 
 export const quizTopics = [
