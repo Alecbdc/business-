@@ -258,19 +258,69 @@ export function hydrateStateFromCache() {
 
 export function persistStateToCache() {
   try {
+    const trimHistory = (history = []) => history.slice(-Math.floor(historyLimit / 2));
+
+    const compactSandbox = {
+      balance: state.sandbox.balance,
+      holdings: state.sandbox.holdings,
+      history: trimHistory(state.sandbox.history)
+    };
+
+    const compactLab = {
+      isActive: state.marketLab.isActive,
+      isRunning: state.marketLab.isRunning,
+      speed: state.marketLab.speed,
+      virtualTimeIndex: state.marketLab.virtualTimeIndex,
+      balance: state.marketLab.balance,
+      portfolioValue: state.marketLab.portfolioValue,
+      holdings: state.marketLab.holdings,
+      history: trimHistory(state.marketLab.history),
+      selectedAsset: state.marketLab.selectedAsset,
+      prices: state.marketLab.prices,
+      bulletin: state.marketLab.bulletin
+    };
+
+    const compactScenario = {
+      active: state.marketScenario.active,
+      levelId: state.marketScenario.levelId,
+      scenarioId: state.marketScenario.scenarioId,
+      isRunning: state.marketScenario.isRunning,
+      speed: state.marketScenario.speed,
+      tick: state.marketScenario.tick,
+      maxTicks: state.marketScenario.maxTicks,
+      startBalance: state.marketScenario.startBalance,
+      balance: state.marketScenario.balance,
+      portfolioValue: state.marketScenario.portfolioValue,
+      holdings: state.marketScenario.holdings,
+      history: trimHistory(state.marketScenario.history),
+      bulletin: state.marketScenario.bulletin,
+      events: state.marketScenario.events,
+      selectedAsset: state.marketScenario.selectedAsset,
+      starsEarned: state.marketScenario.starsEarned
+    };
+
     const payload = {
       progress: state.progress,
       quizScores: state.quizScores,
       topicScores: state.topicScores,
       quizLog: state.quizLog,
-      sandbox: state.sandbox,
-      marketLab: state.marketLab,
-      marketScenario: state.marketScenario,
+      sandbox: compactSandbox,
+      marketLab: compactLab,
+      marketScenario: compactScenario,
       selectedQuizTopicId: state.selectedQuizTopicId
     };
+
     localStorage.setItem(cacheKey, JSON.stringify(payload));
   } catch (err) {
     console.warn('Failed to persist cache', err);
+    if (err?.name === 'QuotaExceededError') {
+      try {
+        localStorage.removeItem(cacheKey);
+        console.warn('Cleared cache due to quota limits');
+      } catch (cleanupErr) {
+        console.warn('Failed to clear cache after quota issue', cleanupErr);
+      }
+    }
   }
 }
 
