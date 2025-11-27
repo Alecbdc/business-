@@ -235,6 +235,7 @@
               <button class="nav-link" data-view="sandbox" id="nav-sandbox">Sandbox</button>
               <div id="sandbox-subnav" class="hidden pl-3 space-y-2">
                 <button class="nav-link text-sm" data-sandbox-mode="live">Live market</button>
+                <button class="nav-link text-sm" data-sandbox-mode="lab">Market lab</button>
                 <button class="nav-link text-sm" data-sandbox-mode="replay">Market replay</button>
               </div>
             </div>
@@ -419,7 +420,16 @@
             </section>
 
             <section id="view-sandbox" class="app-view hidden space-y-8">
-              <div id="sandbox-live" class="space-y-8">
+              <div class="flex gap-2 mb-4">
+                <button id="sandbox-tab-live" class="tab-button active" data-sandbox-mode="live" type="button">
+                  Live Market
+                </button>
+                <button id="sandbox-tab-lab" class="tab-button" data-sandbox-mode="lab" type="button">
+                  Market Lab
+                </button>
+              </div>
+
+              <div id="sandbox-live-container" class="space-y-8">
                 <div class="card-glass rounded-3xl p-6 flex flex-wrap items-center justify-between gap-3">
                   <div class="space-y-1">
                     <p id="sandbox-market-label" class="text-sm text-slate-400">Live market</p>
@@ -630,6 +640,55 @@
                       <span id="bulletin-refresh-label" class="badge">Auto-updates</span>
                     </div>
                     <div id="sandbox-bulletin" class="space-y-3 text-sm"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="sandbox-lab-container" class="hidden space-y-4">
+                <div class="card-glass p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <h3 class="text-sm font-semibold text-slate-100">Market Lab</h3>
+                    <p class="text-xs text-slate-400">
+                      Run your own accelerated market simulation with independent balance and holdings.
+                    </p>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <button class="lab-speed-btn tab-button" data-speed="1" type="button">1x</button>
+                    <button class="lab-speed-btn tab-button" data-speed="2" type="button">2x</button>
+                    <button class="lab-speed-btn tab-button" data-speed="3" type="button">3x</button>
+                    <button class="lab-speed-btn tab-button" data-speed="5" type="button">5x</button>
+                    <button class="lab-speed-btn tab-button" data-speed="10" type="button">10x</button>
+                  </div>
+                </div>
+
+                <div class="card-glass p-4 flex items-center justify-between">
+                  <div>
+                    <div class="text-xs text-slate-400">Virtual balance</div>
+                    <div id="lab-balance" class="text-lg font-semibold text-slate-50">€10,000</div>
+                  </div>
+                  <div class="flex gap-2">
+                    <button id="lab-start" class="px-4 py-2 rounded-2xl bg-emerald-500/80 text-slate-950 font-semibold" type="button">
+                      Start
+                    </button>
+                    <button id="lab-pause" class="px-4 py-2 rounded-2xl border border-white/15 text-sm" type="button">
+                      Pause
+                    </button>
+                  </div>
+                </div>
+
+                <div class="card-glass p-4 space-y-3">
+                  <h4 class="text-sm font-semibold text-slate-100">Portfolio performance</h4>
+                  <canvas id="lab-portfolio-chart" class="w-full h-40"></canvas>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div class="card-glass p-4">
+                    <h4 class="text-sm font-semibold text-slate-100 mb-2">Holdings</h4>
+                    <div id="lab-holdings" class="space-y-2 text-xs"></div>
+                  </div>
+                  <div class="card-glass p-4">
+                    <h4 class="text-sm font-semibold text-slate-100 mb-2">Simulation events</h4>
+                    <div id="lab-events" class="space-y-2 text-xs text-slate-400"></div>
                   </div>
                 </div>
               </div>

@@ -995,22 +995,32 @@ function updateSandboxSidebarVisibility(view) {
 
 function setSandboxMode(mode) {
   state.sandboxMode = mode || 'live';
+  const isReplay = state.sandboxMode === 'replay';
+  const isLab = state.sandboxMode === 'lab';
   document.querySelectorAll('[data-sandbox-mode]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.sandboxMode === state.sandboxMode);
   });
-  const liveSection = $('#sandbox-live');
+  const liveSection = $('#sandbox-live-container');
+  const labSection = $('#sandbox-lab-container');
   const replaySection = $('#sandbox-replay');
-  const isReplay = state.sandboxMode === 'replay';
   const marketLabel = $('#sandbox-market-label');
   const marketNote = $('#sandbox-market-note');
-  if (liveSection) liveSection.classList.toggle('hidden', isReplay);
+  if (liveSection) liveSection.classList.toggle('hidden', isReplay || isLab);
+  if (labSection) labSection.classList.toggle('hidden', !isLab);
   if (replaySection) replaySection.classList.toggle('hidden', !isReplay);
-  if (marketLabel) marketLabel.textContent = isReplay ? 'Replay market' : 'Live market';
+  const liveTab = $('#sandbox-tab-live');
+  const labTab = $('#sandbox-tab-lab');
+  if (liveTab) liveTab.classList.toggle('active', state.sandboxMode === 'live');
+  if (labTab) labTab.classList.toggle('active', isLab);
+  if (marketLabel) marketLabel.textContent = isReplay ? 'Replay market' : isLab ? 'Market lab' : 'Live market';
   if (marketNote)
     marketNote.textContent = isReplay
       ? 'Synthetic scenarios for practice.'
+      : isLab
+      ? 'Personal accelerated simulation.'
       : 'Synchronized demo feed.';
-  if (state.sandboxMode === 'live') {
+  state.marketLab.isActive = isLab;
+  if (state.sandboxMode === 'live' || state.sandboxMode === 'lab') {
     state.marketReplay = { active: false, scenarioId: '', step: 0 };
     const select = $('#replay-select');
     if (select) select.value = '';
@@ -1020,6 +1030,7 @@ function setSandboxMode(mode) {
   updateReplayBadge();
   startPriceLoop();
   renderSandbox();
+  if (isLab) renderMarketLabPanel();
   requestAnimationFrame(renderSandboxCharts);
   renderReplayView();
 }
@@ -1295,6 +1306,56 @@ function renderSandbox() {
 
   requestAnimationFrame(renderSandboxCharts);
   renderReplayView();
+}
+
+function renderMarketLabPanel() {
+  const balanceEl = $('#lab-balance');
+  if (balanceEl) balanceEl.textContent = formatCurrency(state.marketLab.balance ?? 0);
+  const holdingsEl = $('#lab-holdings');
+  if (holdingsEl) {
+    const holdingsMarkup = Object.entries(state.marketLab.holdings ?? {})
+      .filter(([, units]) => units > 0)
+      .map(([symbol, units]) => {
+        const price = state.prices[symbol] ?? 0;
+        const value = units * price;
+        return `
+          <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
+            <div>
+              <p class="font-semibold">${symbol}</p>
+              <p class="text-xs text-slate-400">${units.toFixed(4)} units</p>
+            </div>
+            <p class="text-sm font-semibold">${formatCurrency(value)}</p>
+          </div>
+        `;
+      })
+      .join('');
+    holdingsEl.innerHTML =
+      holdingsMarkup || '<p class="text-slate-400 text-sm">No holdings yet. Start the lab to populate positions.</p>';
+  }
+  const eventsEl = $('#lab-events');
+  if (eventsEl) {
+    const events = Array.isArray(state.marketLab.history) ? state.marketLab.history : [];
+    const eventsMarkup = events
+      .slice(-6)
+      .reverse()
+      .map((entry, idx) => {
+        const label = entry?.detail || entry?.type || `Event ${idx + 1}`;
+        const ts = entry?.ts ? formatRelativeTime(new Date(entry.ts).getTime()) : 'Recently';
+        return `
+          <div class="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 flex items-center justify-between">
+            <span class="text-slate-100">${label}</span>
+            <span class="text-[11px] text-slate-400">${ts}</span>
+          </div>
+        `;
+      })
+      .join('');
+    eventsEl.innerHTML =
+      eventsMarkup || '<p class="text-slate-400 text-sm">Simulation paused. Start to generate events.</p>';
+  }
+  document.querySelectorAll('.lab-speed-btn').forEach((btn) => {
+    const speed = Number(btn.dataset.speed);
+    btn.classList.toggle('active', speed === Number(state.marketLab.speed ?? 1));
+  });
 }
 
 async function handleSignup(event) {
@@ -1742,6 +1803,16 @@ function bindNavigation() {
       setView('sandbox');
       setSandboxMode(btn.dataset.sandboxMode);
     });
+  });
+
+  bind('#sandbox-tab-live', 'click', () => {
+    setView('sandbox');
+    setSandboxMode('live');
+  });
+
+  bind('#sandbox-tab-lab', 'click', () => {
+    setView('sandbox');
+    setSandboxMode('lab');
   });
 
   bind('#replay-select', 'change', (event) => {
