@@ -81,6 +81,12 @@ export function setView(state, view, hooks = {}) {
     btn.classList.toggle('active', isActive);
   });
 
+  const sidebar = $('#sidebar');
+  const isHome = view === 'home';
+  if (sidebar) {
+    sidebar.classList.toggle('hidden', isHome);
+  }
+
   if (view === 'sandbox' && typeof onEnterSandbox === 'function') {
     onEnterSandbox();
   }
