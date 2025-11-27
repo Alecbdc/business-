@@ -1305,37 +1305,47 @@ function renderScenarioSelection() {
       const scenarios = level.scenarios
         .map(
           (scenario) => `
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-3 flex flex-col gap-2 scenario-row" data-level="${
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4 flex flex-col gap-3 scenario-row" data-level="${
               level.id
             }" data-scenario="${scenario.id}">
-              <div class="flex items-center justify-between">
-                <div>
+              <div class="flex items-start justify-between gap-3">
+                <div class="space-y-1">
                   <p class="text-sm font-semibold">${scenario.title}</p>
                   <p class="text-xs text-slate-400">${scenario.teaser}</p>
+                  <p class="text-[11px] text-slate-500">★ 15% • ★★ 25% • ★★★ 40%</p>
                 </div>
-                <span class="mini-badge">★ 15% ★★ 25% ★★★ 40%</span>
+                <span class="mini-badge">${level.name}</span>
               </div>
+              <button
+                class="scenario-continue w-full py-2 rounded-2xl border border-white/15 hover:border-white/40 text-sm"
+                type="button"
+              >
+                Continue
+              </button>
             </div>
           `
         )
         .join('');
       return `
-        <div class="card-glass rounded-3xl p-4 space-y-3">
+        <div class="card-glass rounded-3xl p-5 space-y-3">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm text-slate-400">${level.name}</p>
               <p class="text-xs text-slate-400">${level.tagline}</p>
             </div>
-            <span class="badge">${level.scenarios.length} scenarios</span>
+            <span class="badge">${level.scenarios.length} scenario${level.scenarios.length === 1 ? '' : 's'}</span>
           </div>
-          <div class="space-y-2">${scenarios}</div>
+          <div class="grid md:grid-cols-3 gap-3">${scenarios}</div>
         </div>
       `;
     })
     .join('');
 
-  container.querySelectorAll('.scenario-row').forEach((row) => {
-    row.addEventListener('click', () => {
+  container.querySelectorAll('.scenario-continue').forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const row = event.currentTarget.closest('.scenario-row');
+      if (!row) return;
       const levelId = row.dataset.level;
       const scenarioId = row.dataset.scenario;
       openScenarioModal(levelId, scenarioId);
