@@ -241,53 +241,8 @@ export const marketScenarioLevels = [
   {
     id: 'beginner',
     name: 'Beginner',
-    tagline: 'First storms in equities with mild policy jitters.',
+    tagline: 'First storms in crypto with mild policy jitters.',
     scenarios: [
-      {
-        id: 'slow-squeeze',
-        title: 'Gentle Downtrend: The Slow Squeeze',
-        teaser: 'Indices drift lower on soft-landing doubts and mixed earnings.',
-        difficulty: 1,
-        segment: 'stocks',
-        durationDays: 45,
-        bias: -0.002,
-        volatility: 0.05,
-        starTargets: [0.15, 0.25, 0.4],
-        xpRewards: [100, 200, 300],
-        description:
-          'Inspired by pre-recession drifts where equities leak lower for weeks while guidance softens and liquidity tightens.',
-        tips: [
-          'Trim exposure into strength and keep dry powder for bounces.',
-          'Favor quality large caps over speculative names during slow fades.',
-          'Watch for rotation: defensives can cushion drawdowns.'
-        ],
-        news: [
-          {
-            id: 'slow-gdp',
-            title: 'Growth outlook trimmed; industrials guide lower',
-            summary: 'Survey data cools while retailers flag softer traffic.',
-            drift: -0.06,
-            assets: ['WMT', 'HD', 'CAT', 'ALT_BASKET'],
-            atDay: 5
-          },
-          {
-            id: 'earnings-drift',
-            title: 'Mega-caps tighten spend; cloud growth moderates',
-            summary: 'Platform giants rein in capex; investors rotate to staples.',
-            drift: -0.08,
-            assets: ['AMZN', 'MSFT', 'GOOGL'],
-            atDay: 18
-          },
-          {
-            id: 'relief-rumor',
-            title: 'Stimulus chatter sparks short-covering rally',
-            summary: 'Policy hints lift large caps; cyclicals lag.',
-            drift: 0.05,
-            assets: ['AAPL', 'MSFT', 'ALT_BASKET'],
-            atDay: 32
-          }
-        ]
-      },
       {
         id: 'altseason',
         title: 'Altseason Sparks',
@@ -338,53 +293,8 @@ export const marketScenarioLevels = [
   {
     id: 'intermediate',
     name: 'Intermediate',
-    tagline: 'Policy whiplash, regulation waves, and sector rotations.',
+    tagline: 'Policy whiplash, regulation waves, and rotations across crypto.',
     scenarios: [
-      {
-        id: 'clampdownistan',
-        title: 'Clampdownistan: Ministry of No-Stock',
-        teaser: 'Regulators float tighter rules; fintech and ad-tech wobble.',
-        difficulty: 2,
-        segment: 'stocks',
-        durationDays: 55,
-        bias: -0.0035,
-        volatility: 0.08,
-        starTargets: [0.15, 0.25, 0.4],
-        xpRewards: [100, 200, 300],
-        description:
-          'Mirrors historic crackdown cycles: sudden investigations, advertising curbs, and payments scrutiny pressure growth names.',
-        tips: [
-          'Fade sharp rips in the most targeted sectors.',
-          'Favor diversified incumbents over single-line challengers.',
-          'Hold cash for headline gaps in both directions.'
-        ],
-        news: [
-          {
-            id: 'ad-curb',
-            title: 'Ad-tracking rules tighten; social apps slide',
-            summary: 'New privacy proposals weigh on META and streaming peers.',
-            drift: -0.12,
-            assets: ['META', 'NFLX', 'DIS'],
-            atDay: 8
-          },
-          {
-            id: 'fintech-review',
-            title: 'Payments oversight widens to peer-to-peer leaders',
-            summary: 'Fintech names flag higher compliance spend.',
-            drift: -0.09,
-            assets: ['PYPL', 'SQ', 'V', 'MA'],
-            atDay: 18
-          },
-          {
-            id: 'policy-pause',
-            title: 'Officials hint at review pause—shorts trim risk',
-            summary: 'Relief bid lifts diversified tech majors.',
-            drift: 0.07,
-            assets: ['AAPL', 'MSFT', 'GOOGL'],
-            atDay: 38
-          }
-        ]
-      },
       {
         id: 'stable-stress',
         title: 'Stablecoin Stress Test',
@@ -435,53 +345,8 @@ export const marketScenarioLevels = [
   {
     id: 'advanced',
     name: 'Advanced',
-    tagline: 'Tightening cycles, flash drops, and liquidity crunches.',
+    tagline: 'Tightening cycles, flash drops, and liquidity crunches across crypto.',
     scenarios: [
-      {
-        id: 'fedzilla',
-        title: 'Fedzilla Awakens',
-        teaser: 'Aggressive hikes shake growth stocks and leveraged trades.',
-        difficulty: 3,
-        segment: 'stocks',
-        durationDays: 60,
-        bias: -0.004,
-        volatility: 0.11,
-        starTargets: [0.15, 0.25, 0.4],
-        xpRewards: [100, 200, 300],
-        description:
-          'Mirrors aggressive tightening cycles: jumbo hikes, hawkish pressers, and balance-sheet roll-off rattling high-beta names.',
-        tips: [
-          'Respect downside momentum after back-to-back hikes.',
-          'Use relief rallies to reduce beta exposure.',
-          'Favor cash-rich leaders over speculative stories.'
-        ],
-        news: [
-          {
-            id: 'jumbo-hike',
-            title: 'Fedzilla drops jumbo hike—equities wobble first',
-            summary: 'Hawkish tone; liquidity pulls back.',
-            drift: -0.16,
-            assets: ['TSLA', 'NVDA', 'AMZN', 'ALT_BASKET'],
-            atDay: 6
-          },
-          {
-            id: 'taper-rumor',
-            title: 'Taper rumors cool fear—brief tech squeeze',
-            summary: 'Quality tech rebounds; small caps lag.',
-            drift: 0.08,
-            assets: ['MSFT', 'AAPL', 'AMD'],
-            atDay: 22
-          },
-          {
-            id: 'flash-crunch',
-            title: 'Flash crash in thin liquidity session',
-            summary: 'Macro funds de-risk; dips bought by value hunters.',
-            drift: -0.18,
-            assets: ['AMD', 'SHOP', 'RIVN', 'ALT_BASKET'],
-            atDay: 41
-          }
-        ]
-      },
       {
         id: 'exchange-stress',
         title: 'Exchange Stress Test',
