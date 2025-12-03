@@ -157,7 +157,7 @@ export const state = {
     active: false,
     levelId: '',
     scenarioId: '',
-    segment: 'stocks',
+    segment: 'crypto',
     isRunning: false,
     speed: 1,
     tick: 0,
@@ -249,14 +249,15 @@ export function hydrateStateFromCache() {
       bulletin: { bucket: null, items: [] },
       events: [],
       selectedAsset: assetSymbols[0] ?? 'AAPL',
-      starsEarned: 0
+      starsEarned: 0,
+      segment: 'crypto'
     };
     state.marketScenario.balance = Number(state.marketScenario.balance ?? defaultSandboxState.balance);
     state.marketScenario.portfolioValue = Number(
       state.marketScenario.portfolioValue ?? state.marketScenario.balance ?? defaultSandboxState.balance
     );
     state.marketScenario.holdings = normalizeHoldings(state.marketScenario.holdings);
-    state.marketScenario.segment = state.marketScenario.segment || 'stocks';
+    state.marketScenario.segment = state.marketScenario.segment || 'crypto';
     state.marketScenario.history = state.marketScenario.history ?? [];
     state.marketScenario.prices = state.marketScenario.prices ?? { ...latestSeededPrices };
     state.marketScenario.priceHistory = state.marketScenario.priceHistory ?? seedPriceHistoryMap(initialPrices);

@@ -1098,7 +1098,7 @@ function setLiveMarketSegment(segment) {
   });
   state.bulletin = { bucket: null, items: [], segment: state.liveMarketSegment };
   refreshBulletins(state.liveMarketSegment);
-  renderAssetSelects();
+  renderAssetSelects(state.liveMarketSegment);
   renderSandbox();
   updateMarketSegmentButtons();
   requestAnimationFrame(renderSandboxCharts);
@@ -1190,7 +1190,7 @@ function setSandboxMode(mode) {
 }
 
 function scenarioSegment() {
-  return state.marketScenario.segment || 'stocks';
+  return state.marketScenario.segment || 'crypto';
 }
 
 function updateMarketSegmentButtons() {
@@ -1198,8 +1198,12 @@ function updateMarketSegmentButtons() {
   const target = isScenario ? scenarioSegment() : state.liveMarketSegment;
   document.querySelectorAll('[data-market-segment]').forEach((btn) => {
     const seg = btn.dataset.marketSegment;
-    btn.classList.toggle('active', seg === target);
-    btn.classList.remove('hidden');
+    const hide = isScenario && seg !== target;
+    btn.classList.toggle('active', seg === target && !hide);
+    btn.classList.toggle('hidden', !!hide);
+    if (!isScenario) {
+      btn.classList.remove('hidden');
+    }
   });
 }
 
@@ -1520,7 +1524,7 @@ function startScenarioSession(levelId, scenarioId, options = {}) {
   if (!scenario) return;
   const autoStart = options.autoStart !== undefined ? options.autoStart : true;
   const hideModal = options.hideModal !== false;
-  const segment = scenario.segment || 'stocks';
+  const segment = scenario.segment || 'crypto';
   const allowed = new Set(segmentSymbols(segment));
   const filteredHoldings = Object.fromEntries(
     Object.entries(normalizeHoldings(defaultSandboxState.holdings)).filter(([symbol]) => allowed.has(symbol))
@@ -1648,6 +1652,7 @@ function renderSandbox() {
     : state.sandboxMode === 'lab'
     ? state.labMarketSegment
     : state.liveMarketSegment;
+  renderAssetSelects(segment);
   const allowed = new Set(segmentSymbols(segment));
   const prices = Object.fromEntries(Object.entries(basePrices).filter(([symbol]) => allowed.has(symbol)));
   const filteredHoldings = Object.fromEntries(Object.entries(holdings).filter(([symbol]) => allowed.has(symbol)));
@@ -2584,8 +2589,8 @@ function recordTrade(entry) {
   state.sandbox.history = state.sandbox.history.slice(-50);
 }
 
-function renderAssetSelects() {
-  const symbols = segmentSymbols(state.liveMarketSegment);
+function renderAssetSelects(segmentOverride) {
+  const symbols = segmentSymbols(segmentOverride || state.liveMarketSegment);
   const options = symbols.map((symbol) => `<option value="${symbol}">${symbol}</option>`).join('');
   ['buy-asset', 'sell-asset'].forEach((id) => {
     const select = $(`#${id}`);
@@ -3046,7 +3051,7 @@ function init() {
   setCurriculumTab(state.curriculumTab);
   setLiveMarketSegment(state.liveMarketSegment || 'stocks');
   setLabMarketSegment(state.labMarketSegment || 'stocks');
-  renderAssetSelects();
+  renderAssetSelects(state.liveMarketSegment || 'stocks');
   renderLabAssetSelects();
   renderScenarioSelection();
   initChartControls();
